@@ -5,7 +5,7 @@ built to deploy as a static folder on Hostinger shared hosting.
 
 ```bash
 npm install
-npm run images   # one-time: build web renditions from ../Images
+npm run images   # one-time: build web renditions from ./images
 npm run dev
 ```
 
@@ -20,17 +20,19 @@ npm run dev
 
 ## Images
 
-`scripts/optimize-images.mjs` reads the untouched originals in `../Images`
+`scripts/optimize-images.mjs` reads the untouched originals in `./images`
 (6000×4000, ~20 MB each) and writes WebP renditions at 480/960/1440/2000/2600 px
 into `public/photos/<category>/`, plus a typed manifest at
 `src/data/photos.generated.ts` holding dimensions, average colour and a 20 px
 inline blur placeholder for each frame.
 
 Category comes from the source folder name — see the `CATEGORIES` map in the
-script. Drop a new shoot folder into `../Images`, add it to the map, re-run
+script. Drop a new shoot folder into `./images`, add it to the map, re-run
 `npm run images`, and reference the new ids from `src/data/site.ts`.
 
-Never upload the originals; only `public/photos` ships.
+The runtime site serves only the optimized files under `public/photos` (copied
+into `dist/photos` on build). Raw `images/` is gitignored — never push those
+originals to GitHub or Hostinger.
 
 ## Pages
 
@@ -56,7 +58,7 @@ resets to the top on navigation and honours `/#section` links (used by the
 ## Shoots
 
 The portfolio is organised by **shoot**, not by loose photograph. Each source
-folder in `../Images` is one shoot; the pipeline stamps its slug onto every
+folder in `./images` is one shoot; the pipeline stamps its slug onto every
 photo as `shoot`, and [`src/data/shoots.ts`](src/data/shoots.ts) carries the
 editorial metadata for each one — title, date, category, cover, and the story.
 
@@ -65,7 +67,7 @@ render only when filled, so the pages read fine as they are, but they are the
 main thing worth filling in: they are what make a session page more than a
 gallery. I left them empty rather than invent a client's brief or the weather.
 
-To add a shoot: drop the folder into `../Images`, add it to `CATEGORIES` in the
+To add a shoot: drop the folder into `./images`, add it to `CATEGORIES` in the
 pipeline script, run `npm run images`, then add a `SHOOTS` entry whose `source`
 matches the generated `shoot` slug.
 

@@ -1,6 +1,6 @@
 /**
  * Editorial metadata for each real shoot. One entry per source folder in
- * ../images; `source` must match the `shoot` slug in photos.generated.ts.
+ * images/; `source` must match the `shoot` slug in photos.generated.ts.
  *
  * WHAT IS FILLED IN, AND WHAT IS NOT
  *
@@ -66,7 +66,7 @@ export const SHOOTS: Shoot[] = [
   },
   {
     slug: 'maddie-and-will',
-    source: '2024-09-28-delynn-s-wedding',
+    source: '2024-09-28-maddie-will',
     title: 'Maddie & Will',
     category: 'couples',
     date: 'September 2024',
