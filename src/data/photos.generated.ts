@@ -20,21 +20,6 @@ export type Photo = {
 
 export const PHOTOS: Photo[] = [
   {
-    "id": "about-ashley-main-street-5-of-1",
-    "category": "about",
-    "shoot": "about",
-    "src": "/photos/about/ashley-main-street-5-of-1",
-    "widths": [
-      480,
-      960
-    ],
-    "width": 1080,
-    "height": 720,
-    "aspect": 1.5,
-    "color": "rgb(105 115 109)",
-    "lqip": "data:image/webp;base64,UklGRmQAAABXRUJQVlA4IFgAAABwAwCdASoUAA0APu1iqk2ppaQiMAgBMB2JZQAANusLmZSJMAAA/qkr27jLflzL0XafW2wG+AcHBYcHFYjCaQ5ebIX179fx3BdaDMXoLh3u9KGMM7KZyAAA"
-  },
-  {
     "id": "pets-06-27-2024-puppies-108",
     "category": "pets",
     "shoot": "06-27-2024-puppies",
@@ -951,7 +936,7 @@ export const PHOTOS: Photo[] = [
   {
     "id": "couples-am-27",
     "category": "couples",
-    "shoot": "2024-09-28-delynn-s-wedding",
+    "shoot": "2024-09-28-maddie-will",
     "src": "/photos/couples/am-27",
     "widths": [
       480,
@@ -969,7 +954,7 @@ export const PHOTOS: Photo[] = [
   {
     "id": "couples-am-29",
     "category": "couples",
-    "shoot": "2024-09-28-delynn-s-wedding",
+    "shoot": "2024-09-28-maddie-will",
     "src": "/photos/couples/am-29",
     "widths": [
       480,
@@ -987,7 +972,7 @@ export const PHOTOS: Photo[] = [
   {
     "id": "couples-am-3",
     "category": "couples",
-    "shoot": "2024-09-28-delynn-s-wedding",
+    "shoot": "2024-09-28-maddie-will",
     "src": "/photos/couples/am-3",
     "widths": [
       480,
@@ -1005,7 +990,7 @@ export const PHOTOS: Photo[] = [
   {
     "id": "couples-am-30",
     "category": "couples",
-    "shoot": "2024-09-28-delynn-s-wedding",
+    "shoot": "2024-09-28-maddie-will",
     "src": "/photos/couples/am-30",
     "widths": [
       480,
@@ -1023,7 +1008,7 @@ export const PHOTOS: Photo[] = [
   {
     "id": "couples-am-43",
     "category": "couples",
-    "shoot": "2024-09-28-delynn-s-wedding",
+    "shoot": "2024-09-28-maddie-will",
     "src": "/photos/couples/am-43",
     "widths": [
       480,
@@ -1487,6 +1472,42 @@ export const PHOTOS: Photo[] = [
     "aspect": 1.5,
     "color": "rgb(140 133 115)",
     "lqip": "data:image/webp;base64,UklGRlAAAABXRUJQVlA4IEQAAAAQBACdASoUAA0APu1iqU2ppaQiMAgBMB2JZQCsACIfxWxAq1IdgRkBYAD+wGZ1WO1MUyWQWOEucJH49rD23RaU2xAAAA=="
+  },
+  {
+    "id": "about-ashley",
+    "category": "about",
+    "shoot": "ashley",
+    "src": "/photos/about/ashley",
+    "widths": [
+      480,
+      960,
+      1440,
+      2000,
+      2600
+    ],
+    "width": 6000,
+    "height": 4000,
+    "aspect": 1.5,
+    "color": "rgb(170 168 154)",
+    "lqip": "data:image/webp;base64,UklGRmAAAABXRUJQVlA4IFQAAAAQBACdASoUAA0APu1kq04ppaQiMAgBMB2JZQC7ACFNtxbN+tJ6ifjGAAD+0yBKgYdqtrD+yyZ59IyVG0JcVg9zK1tLiYL1e+GuirUMGmKh/EBLwAA="
+  },
+  {
+    "id": "about-ashley-2",
+    "category": "about",
+    "shoot": "ashley",
+    "src": "/photos/about/ashley-2",
+    "widths": [
+      480,
+      960,
+      1440,
+      2000,
+      2600
+    ],
+    "width": 3996,
+    "height": 6006,
+    "aspect": 0.6653,
+    "color": "rgb(137 123 108)",
+    "lqip": "data:image/webp;base64,UklGRowAAABXRUJQVlA4IIAAAABwBQCdASoUAB4APu1kqU4ppaOiMAgBMB2JZQC7ACPTWOVykHOQ+f8WsB/g0R6QnSjC2MAAAOJNNuJo2uL6RX55k1z7t83IJWOH0kyZHthOr+0/I+1+DJoFniDC1ced0NQoNms4fQZl+kChYIDszIu6n9Grsq1ig0wYs3O7rpIeAA=="
   },
   {
     "id": "backgrounds-2024-07-05-park-practice-122",

@@ -340,8 +340,7 @@ export const ABOUT = {
     'Two years later I bought my own camera and taught myself Lightroom and Photoshop off YouTube, pausing every three seconds so I would not miss a step. That turned into design work, an Advertising degree from Iowa State, and — from 2021 — sessions for the people of central Iowa.',
     'If you want to learn the editing side yourself, ask me — I will happily hand over the tips and resources I wish I had had.',
   ],
-  // TODO: swap for a current portrait — this one is lifted from the 2019 site.
-  photoId: 'about-ashley-main-street-5-of-1',
+  photoId: 'about-ashley',
   signature: 'Ashley',
 }
 
@@ -406,12 +405,11 @@ export const ABOUT_PAGE = {
     'I photograph the people of central Iowa: the last spring of high school, the ring that just went on, the whole family in one place for once, and the dog who thinks all of this is about them.',
   /**
    * Tried in order; the first id present in the manifest wins. Drop the new
-   * photographs into Images/Ashley as porch.jpg and bridal.jpg, run
-   * `npm run images`, and these swap themselves in — the 2019 fallback is only
-   * there so the page is never broken in the meantime.
+   * photographs into images/Ashley as porch.jpg and bridal.jpg, run
+   * `npm run images`, and these swap themselves in.
    */
-  portraits: ['about-porch', 'about-ashley-main-street-5-of-1'],
-  secondary: ['about-bridal'],
+  portraits: ['about-porch', 'about-ashley'],
+  secondary: ['about-bridal', 'about-ashley-2'],
   columns: [
     {
       title: 'How it started',

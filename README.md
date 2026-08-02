@@ -110,7 +110,7 @@ and 30-day reminders is its own section (`src/sections/Delivery.tsx`).
       market-rate placeholders and are the only invented numbers on the page.
 - [ ] Set the real contact address (`SITE.email`, and `$TO`/`$FROM` in
       `contact.php`).
-- [ ] **Save the two new photographs of Ashley** into `../Images/Ashley/` as
+- [ ] **Save the two new photographs of Ashley** into `images/Ashley/` as
       `porch.jpg` and `bridal.jpg`, then run `npm run images`. The About page
       resolves `ABOUT_PAGE.portraits` / `.secondary` against the manifest and
       swaps them in automatically; until then it falls back to the 2019 photo.
