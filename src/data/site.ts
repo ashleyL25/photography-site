@@ -12,7 +12,7 @@ export const SITE = {
   tagline: 'Portrait photography in central Iowa',
   base: 'Urbandale, Iowa',
   serves: 'Des Moines metro · Central Iowa · Travel welcome',
-  email: 'hello@photosbyashley.com', // TODO: confirm the live address
+  email: 'ashleydesignia@gmail.com',
   instagram: 'https://www.instagram.com/photosbyashley__/',
   instagramHandle: '@photosbyashley__',
   /** First paid sessions — engagements — were 2021. */

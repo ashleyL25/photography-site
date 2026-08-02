@@ -12,8 +12,8 @@
 
 declare(strict_types=1);
 
-$TO   = 'hello@photosbyashley.com';
-$FROM = 'no-reply@photosbyashley.com';
+$TO   = 'ashleydesignia@gmail.com';
+$FROM = 'no-reply@photosbyashley.com'; // must stay on this domain for Hostinger mail
 
 header('Content-Type: application/json; charset=utf-8');
 
