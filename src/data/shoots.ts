@@ -105,7 +105,7 @@ export const SHOOTS: Shoot[] = [
     date: 'June 2024',
     sort: '2024-06-27',
     story:
-      'A golden retriever and a bernese mountain dog, photographed in a field of coreopsis in full yellow bloom. Very little direction was taken.',
+      'Copper, a golden retriever, and a bernese mountain dog, photographed in a field of coreopsis in full yellow bloom. Very little direction was taken.',
     cover: 'pets-06-27-2024-puppies-128',
   },
   {
@@ -138,7 +138,7 @@ export const SHOOTS: Shoot[] = [
     date: 'June 2022',
     sort: '2022-06-22',
     story:
-      'A summer engagement session with their golden retriever along for all of it: a blossoming tree, a pond bank, tall grass, and a set of black-and-white frames at the end.',
+      'A summer engagement session with Copper along for all of it: a blossoming tree, a pond bank, tall grass, and a set of black-and-white frames at the end.',
     cover: 'engagement-june2022-54',
   },
   {

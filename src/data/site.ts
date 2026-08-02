@@ -220,7 +220,7 @@ export const FEATURED: { photoId: string; caption: string; span: 'tall' | 'wide'
   { photoId: 'seniors-elise-portrait-102', caption: 'Elise · Senior', span: 'tall' },
   { photoId: 'engagement-july2022-109', caption: 'The barn road', span: 'wide' },
   { photoId: 'graduation-em-grad-233', caption: 'Campanile · UNI', span: 'tall' },
-  { photoId: 'pets-06-27-2024-puppies-128', caption: 'Coreopsis season', span: 'wide' },
+  { photoId: 'pets-06-27-2024-puppies-128', caption: 'Copper', span: 'wide' },
   { photoId: 'couples-am-27', caption: 'Maddie & Will', span: 'tall' },
   { photoId: 'family-2024-05-18-grad-party-196', caption: 'All five of them', span: 'wide' },
   { photoId: 'engagement-june2022-bw-84', caption: 'Sara, Grant & Copper', span: 'tall' },
