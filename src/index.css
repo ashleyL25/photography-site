@@ -1,0 +1,238 @@
+@import 'tailwindcss';
+
+/* Theme is driven by a class on <html>, not the OS query, so the toggle wins. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-display: 'Italiana', 'Cormorant Garamond', Georgia, serif;
+  --font-body: 'Lora', Georgia, 'Times New Roman', serif;
+  --font-label: 'Oswald', 'Helvetica Neue', sans-serif;
+
+  /* Brand constants — identical in both themes. */
+  --color-charcoal: #222222;
+  --color-beige: #f0e8e1;
+  --color-copper: #9a562a;
+  --color-forest: #2c401e;
+  --color-champagne: #edd5cb;
+  --color-sage: #5b7343;
+
+  /* Semantic tokens — remapped per theme below. */
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-accent: var(--accent);
+  --color-line: var(--line);
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-quart: cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+:root,
+.light {
+  --canvas: #f0e8e1;
+  --surface: #f7f1ea;
+  --ink: #222222;
+  --muted: #5f584f;
+  --faint: #a2988c;
+  --accent: #9a562a;
+  --line: rgb(34 34 34 / 0.14);
+  --grain: 0.035;
+  --scrim: 34 34 34;
+  color-scheme: light;
+}
+
+.dark {
+  --canvas: #16180f;
+  --surface: #202318;
+  --ink: #ece3da;
+  --muted: #a9a196;
+  --faint: #6f6a60;
+  --accent: #c5804f;
+  --line: rgb(236 227 218 / 0.15);
+  --grain: 0.05;
+  --scrim: 10 12 8;
+  color-scheme: dark;
+}
+
+@layer base {
+  *,
+  ::before,
+  ::after {
+    border-color: var(--line);
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    scroll-behavior: smooth;
+  }
+
+  /**
+   * Lenis drives scrolling; native smooth-scroll fights it. Lenis writes a new
+   * scroll position every frame, and the browser then animates smoothly toward
+   * each one — the two stall each other and long jumps stop part-way.
+   *
+   * Keyed to `.lenis`, which Lenis always sets. (`.lenis-smooth` is not set in
+   * every version, so keying to that silently left this broken.)
+   */
+  html.lenis,
+  html.lenis body {
+    height: auto;
+  }
+  html.lenis {
+    scroll-behavior: auto !important;
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--canvas);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 1rem;
+    line-height: 1.7;
+    overflow-x: clip;
+    transition:
+      background-color 0.5s var(--ease-out-expo),
+      color 0.5s var(--ease-out-expo);
+  }
+
+  ::selection {
+    background: var(--accent);
+    color: var(--canvas);
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-weight: 400;
+    text-wrap: balance;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/**
+ * Page container.
+ *
+ * At xl the fixed index rail occupies the first ~190px of the viewport, so the
+ * inline padding grows to clear it — but only by as much as the centred
+ * container is not already doing on its own. Hence the max/min pair rather than
+ * a flat breakpoint value.
+ */
+@utility shell {
+  margin-inline: auto;
+  max-width: 96rem;
+  padding-inline: 1.5rem;
+
+  @media (width >= 48rem) {
+    padding-inline: 2.5rem;
+  }
+  @media (width >= 80rem) {
+    padding-inline: max(2.5rem, min(11rem, 12.5rem - (100vw - 96rem) / 2));
+  }
+}
+
+@utility label {
+  font-family: var(--font-label);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.28em;
+  font-size: 0.6875rem;
+  line-height: 1;
+}
+
+@utility display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  line-height: 0.92;
+  letter-spacing: 0.005em;
+}
+
+/* Boho arch — a rounded-top window used for portraits and the monogram. */
+@utility arch {
+  border-radius: 999px 999px 6px 6px;
+}
+
+/* Full-bleed 35mm film grain, layered over everything but the cursor. */
+.grain::after {
+  content: '';
+  position: fixed;
+  inset: -100%;
+  z-index: 90;
+  pointer-events: none;
+  opacity: var(--grain);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain-shift 800ms steps(4) infinite;
+}
+
+@keyframes grain-shift {
+  0% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(-3%, 2%);
+  }
+  50% {
+    transform: translate(2%, -3%);
+  }
+  75% {
+    transform: translate(-2%, -2%);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+/* Slow drift for the hero plate — a still frame that never sits perfectly still. */
+@keyframes ken-burns {
+  from {
+    transform: scale(1.06) translate3d(0, 0, 0);
+  }
+  to {
+    transform: scale(1.16) translate3d(-1.5%, -1.5%, 0);
+  }
+}
+
+.ken-burns {
+  animation: ken-burns 28s var(--ease-in-out-quart) infinite alternate;
+}
+
+@keyframes marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+/* Theme swap ripples out from the toggle rather than hard-cutting. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-old(root) {
+  z-index: 1;
+}
+::view-transition-new(root) {
+  z-index: 2;
+}

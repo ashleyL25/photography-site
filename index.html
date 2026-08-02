@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en" class="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <title>Ashley Photography — Senior, Couple &amp; Family Portraits in Des Moines, Iowa</title>
+    <meta
+      name="description"
+      content="Natural-light portrait photography based in Urbandale, serving the Des Moines metro and central Iowa. Senior pictures, graduation, engagements, couples, families and pets — unhurried sessions, honest edits."
+    />
+    <meta name="theme-color" content="#F0E8E1" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#191A15" media="(prefers-color-scheme: dark)" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Ashley Photography — Central Iowa Portrait Photographer" />
+    <meta
+      property="og:description"
+      content="Senior pictures, graduation, engagements, couples, families and pets. Based in Urbandale, travelling across central Iowa and beyond."
+    />
+    <meta property="og:image" content="/photos/engagement/june2022-54-1440.webp" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Italiana&family=Lora:ital,wght@0,400..600;1,400..500&family=Oswald:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Hero plate. Mirrors the srcset the Photo component renders so the
+         browser preloads the same file it will actually use. -->
+    <link
+      rel="preload"
+      as="image"
+      fetchpriority="high"
+      href="/photos/engagement/june2022-54-1440.webp"
+      imagesrcset="
+        /photos/engagement/june2022-54-480.webp   480w,
+        /photos/engagement/june2022-54-960.webp   960w,
+        /photos/engagement/june2022-54-1440.webp 1440w,
+        /photos/engagement/june2022-54-2000.webp 2000w,
+        /photos/engagement/june2022-54-2600.webp 2600w"
+      imagesizes="100vw"
+    />
+
+    <script>
+      // Resolve the theme before first paint so there is no flash of the wrong palette.
+      ;(() => {
+        const stored = localStorage.getItem('ap-theme')
+        const dark = stored ? stored === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches
+        document.documentElement.classList.toggle('dark', dark)
+        document.documentElement.classList.toggle('light', !dark)
+      })()
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
