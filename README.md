@@ -453,16 +453,25 @@ A guide's chapter index is two different controls, in
 Desktop keeps the full-width sticky strip — there is room for all ten chapters at
 once, so showing them is the right answer.
 
-Mobile gets a **floating glass island** near the top instead, and deliberately is
-not the same control. A row of ten chips on a phone is a row you can see three of,
-with no hint the rest exist and no way to tell where you are; a horizontal
-scrollbar would announce that problem rather than solve it. So the island shows
-the two things that are useful while reading — which chapter you are in, and how
-far through you are, drawn as a progress ring around the chapter number — and
-holds the full list behind a tap, as a vertical menu where every title is legible.
+Mobile gets a **glass island** instead, and deliberately is not the same control.
+A row of ten chips on a phone is a row you can see three of, with no hint the rest
+exist and no way to tell where you are; a horizontal scrollbar would announce that
+problem rather than solve it. So the island shows the two things that are useful
+while reading — which chapter you are in, and how far through you are, drawn as a
+progress ring around the chapter number — and holds the full list behind a tap, as
+a vertical menu where every title is legible.
 
-It also eases into a smaller, tighter, slightly higher state once you start
-scrolling, so it settles into the corner of your eye.
+It is `sticky`, not `fixed`: it sits in the page where a chapter index belongs,
+under the letter, and is only picked up when you scroll down to it — same as the
+strip it replaced. Only the formatting changed.
+
+`useStuck` is what tells it when that has happened, by measuring the wrapper's
+distance from the top against its own resolved `top` (which is how the `env()` in
+that offset gets resolved for free). It reads the **wrapper**, not the pill inside:
+`getBoundingClientRect` includes transforms, and the pill is the thing the
+resulting state then moves. Getting stuck is also what triggers the shrink — a
+smaller, tighter, slightly higher state — so the change reads as the moment it
+takes over, rather than something that happened off screen.
 
 Being an *island* is the other half of the point: it is detached, so content
 passing behind it reads as intended rather than as the gap the old top-sealed bar

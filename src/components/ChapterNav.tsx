@@ -100,7 +100,8 @@ function DesktopStrip({ chapters, active }: { chapters: Chapter[]; active: strin
 
 function FloatingIsland({ chapters, active }: { chapters: Chapter[]; active: string }) {
   const [open, setOpen] = useState(false)
-  const scrolled = useScrolled(80)
+  const wrap = useRef<HTMLDivElement>(null)
+  const stuck = useStuck(wrap)
 
   // Read progress, drawn as a ring around the chapter number. A spring keeps it
   // from twitching on a phone's jittery scroll.
@@ -114,9 +115,9 @@ function FloatingIsland({ chapters, active }: { chapters: Chapter[]; active: str
   const current = chapters[index]
   if (!current) return null
 
-  // Compact once you are reading. Matches the island's rise, so the whole thing
-  // settles into the corner of your eye rather than announcing itself.
-  const tight = scrolled && !open
+  // Compact once it has actually been picked up off the page, so the shrink is
+  // the moment it takes over rather than something that happened out of sight.
+  const tight = stuck && !open
 
   return (
     <>
@@ -137,19 +138,20 @@ function FloatingIsland({ chapters, active }: { chapters: Chapter[]; active: str
         )}
       </AnimatePresence>
 
-      <motion.div
-        // `top` stays in CSS because it carries the status-bar inset, which
-        // Motion cannot interpolate; the shrink rides on `y` instead. `x` does
-        // the centering, since a Motion transform would overwrite a Tailwind
-        // `-translate-x-1/2`.
-        style={{ top: 'calc(1.25rem + env(safe-area-inset-top))' }}
-        animate={{ x: '-50%', y: tight ? -8 : 0 }}
-        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-        className="fixed left-1/2 z-50 w-[min(21rem,calc(100vw-2rem))] lg:hidden print:hidden"
+      {/* `sticky`, not `fixed`: the island sits in the page where the chapter
+          index belongs — under the letter — and is only picked up once you
+          scroll down to it. The wrapper stays transform-free so `useStuck` can
+          measure it; the shrink rides on the pill inside. */}
+      <div
+        ref={wrap}
+        style={{ top: STICKY_TOP }}
+        className="sticky z-50 lg:hidden print:hidden"
       >
-        <div
+        <motion.div
+          animate={{ y: tight ? -6 : 0 }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
           className={clsx(
-            'overflow-hidden border border-line bg-surface/80 shadow-[0_8px_32px_rgb(0_0_0/0.12)] backdrop-blur-xl transition-[border-radius] duration-500',
+            'mx-auto w-[min(21rem,calc(100vw-2rem))] overflow-hidden border border-line bg-surface/80 shadow-[0_8px_32px_rgb(0_0_0/0.12)] backdrop-blur-xl transition-[border-radius] duration-500',
             open ? 'rounded-[1.6rem]' : 'rounded-full',
           )}
         >
@@ -222,8 +224,8 @@ function FloatingIsland({ chapters, active }: { chapters: Chapter[]; active: str
               </motion.nav>
             )}
           </AnimatePresence>
-        </div>
-      </motion.div>
+        </motion.div>
+      </div>
     </>
   )
 }
