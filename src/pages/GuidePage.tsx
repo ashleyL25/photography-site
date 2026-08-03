@@ -136,7 +136,7 @@ export default function GuidePage() {
         <section
           key={chapter.id}
           id={chapter.id}
-          className={`scroll-mt-[calc(9rem+env(safe-area-inset-top))] border-t border-line py-20 lg:scroll-mt-32 md:py-28 ${
+          className={`scroll-mt-[calc(12rem+env(safe-area-inset-top))] border-t border-line py-20 lg:scroll-mt-32 md:py-28 ${
             i % 2 === 1 ? 'bg-surface' : ''
           }`}
         >

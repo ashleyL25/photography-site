@@ -410,40 +410,32 @@ never fires and the content stays hidden forever. That is why the mask-reveal
 components put `whileInView` on the wrapper and drive the clipped child through
 variants.
 
-### The header is a bottom bar on mobile
+### iPhone safe areas
 
-Below `lg` the header is pinned to the **bottom** of the screen; at `lg` and above
-it is back at the top and behaves exactly as it always did. One component, two
-positions — see the two commented blocks of classes in
-[`Header.tsx`](src/components/Header.tsx).
+The viewport meta carries `viewport-fit=cover`, so the page fills the screen to
+the physical edges and `env(safe-area-inset-*)` returns real values. **Anything
+pinned to a screen edge has to pad past its inset.**
 
-This started as a fix and turned out to be the better design. Pinning anything to
-the top of an iPhone screen fights Safari: `position: fixed; top: 0` resolves
-against the layout viewport, but the page paints up through the strip the status
-bar sits in, so a gap opens above the bar with live content sliding through it.
-Padding the header by `env(safe-area-inset-top)` is the textbook answer and it did
-not hold up on a real device. Moving the bar to the bottom removes the problem
-rather than defending against it, and it puts the controls under a thumb instead
-of in the far top corner.
+- `Header` — `top-0` plus `pt-[calc(<spacing>+env(safe-area-inset-top))]`, so the
+  bar's background and blur reach the top edge rather than leaving a strip the
+  page scrolls visibly through. Note it is `pt-`/`pb-`, not `py-`.
+- The mobile drawer — top inset, so its items clear the status bar.
+- The sticky cards in `sections/Process.tsx` and the chapter island's own offset —
+  both add `env(safe-area-inset-top)` on top of their clearance, because the
+  header they sit under is taller by that inset.
+- `Footer` — bottom inset, to clear the home indicator.
 
-Consequences worth knowing:
+If you change the header's padding, change those two offsets by the same amount.
+On anything without insets `env()` resolves to `0px`, so these are all no-ops off
+iOS.
 
-- `over` (the light-on-photo state) is gated on a `useMediaQuery` rather than on
-  `lg:` variants, because it is published as a `data-over` attribute that a dozen
-  descendants style off. The mobile bar always sits on content, so it is always
-  glass and `over` is always false there.
-- The mobile drawer wipes **bottom to top** — `inset(100% 0 0 0)` is collapsed
-  against the bottom edge, and animating to `inset(0)` raises the top edge. Its
-  item stagger is reversed to travel the same way.
-- `Footer` carries `pb-[calc(5.5rem+…)]` below `lg` so the last of the page clears
-  the bar, and only the safe-area inset at `lg` and up.
-- Nothing needs a top-inset offset any more. `sections/Process.tsx` and the
-  chapter nav went back to plain offsets.
-
-`viewport-fit=cover` stays in the viewport meta: the page still fills the screen
-edge to edge, and `env(safe-area-inset-bottom)` is what keeps the bar and the
-footer clear of the home indicator. On anything without insets `env()` resolves to
-`0px`, so all of these are no-ops off iOS.
+A note on history, so nobody re-litigates it: the header spent a while as a
+**bottom** bar on mobile, on the theory that pinning anything to the top of an
+iPhone screen fights Safari. It does — but the padding above is the accepted fix
+and the bottom bar was reverted for design reasons. If the strip above the header
+ever reappears, the bulletproof answer is to bleed the header's background
+upward past its own box (an `::before` with `inset: auto 0 100% 0`) rather than
+to move the bar again.
 
 ### Secondary navigation on a phone
 
@@ -463,7 +455,16 @@ a vertical menu where every title is legible.
 
 It is `sticky`, not `fixed`: it sits in the page where a chapter index belongs,
 under the letter, and is only picked up when you scroll down to it — same as the
-strip it replaced. Only the formatting changed.
+strip it replaced. Only the formatting changed. `STICKY_TOP` parks it clear of the
+scrolled header, so the two read as two stacked bars with air between them.
+
+Its corner radius is **one fixed value and is deliberately not animated**.
+`rounded-full` resolves to a radius of ~16,777,216px, so transitioning from that
+to a couple of rem spends almost the whole duration still looking like a pill and
+then appears to snap — which reads as lag on open. `2rem` is more than half the
+collapsed height, so the browser clamps it to a perfect stadium while closed and
+it is a well-proportioned corner once the list is out. Nothing interpolates.
+Don't reintroduce a `transition-[border-radius]` here.
 
 `useStuck` is what tells it when that has happened, by measuring the wrapper's
 distance from the top against its own resolved `top` (which is how the `env()` in

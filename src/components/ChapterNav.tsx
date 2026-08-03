@@ -6,8 +6,12 @@ type Chapter = { id: string; title: string }
 
 const num = (i: number) => String(i + 1).padStart(2, '0')
 
-/** Where the island parks once it has been picked up. */
-const STICKY_TOP = 'calc(1.25rem + env(safe-area-inset-top))'
+/**
+ * Where the island parks once it has been picked up: clear of the scrolled
+ * header (which is ~4rem tall plus the status-bar inset it pads itself by) with
+ * a little air under it, so the two read as two stacked bars rather than one.
+ */
+const STICKY_TOP = 'calc(5.25rem + env(safe-area-inset-top))'
 
 /**
  * `true` once a sticky element has reached its offset and pinned.
@@ -150,10 +154,14 @@ function FloatingIsland({ chapters, active }: { chapters: Chapter[]; active: str
         <motion.div
           animate={{ y: tight ? -6 : 0 }}
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          className={clsx(
-            'mx-auto w-[min(21rem,calc(100vw-2rem))] overflow-hidden border border-line bg-surface/80 shadow-[0_8px_32px_rgb(0_0_0/0.12)] backdrop-blur-xl transition-[border-radius] duration-500',
-            open ? 'rounded-[1.6rem]' : 'rounded-full',
-          )}
+          // One fixed radius, deliberately NOT animated. `rounded-full` resolves
+          // to a radius of ~16,777,216px, so transitioning from that to a couple
+          // of rem spends most of its duration still looking like a pill and then
+          // appears to snap — which is the lag you see on open. 2rem is more than
+          // half the collapsed height, so the browser clamps it to a perfect
+          // stadium while it is closed, and it is a well-proportioned corner once
+          // the list is out. Nothing to interpolate, nothing to lag.
+          className="mx-auto w-[min(21rem,calc(100vw-2rem))] overflow-hidden rounded-[2rem] border border-line bg-surface/80 shadow-[0_8px_32px_rgb(0_0_0/0.12)] backdrop-blur-xl"
         >
           <button
             type="button"

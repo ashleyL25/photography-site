@@ -3,18 +3,17 @@ import { Link, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
 import { NAV, SITE } from '@/data/site'
-import { useMediaQuery, useScrolled } from '@/lib/hooks'
+import { useScrolled } from '@/lib/hooks'
 import { ThemeToggle } from './ThemeToggle'
 import { Wordmark } from './Brand'
+
+const MOBILE_NAV = [...NAV, { label: 'Contact', to: '/contact' }]
 
 /**
  * The header is light-on-photo only where it actually sits on one — the
  * homepage hero and the interior page mastheads, both of which are scrimmed
- * images. Everywhere else it uses the palette. Only ever true on desktop: the
- * mobile bar sits at the bottom, over ordinary content, so it is always glass.
+ * images. Everywhere else it uses the palette.
  */
-const MOBILE_NAV = [...NAV, { label: 'Contact', to: '/contact' }]
-
 const PHOTO_BACKED = (pathname: string) =>
   pathname === '/' ||
   pathname === '/about' ||
@@ -28,12 +27,8 @@ export function Header() {
   const { pathname } = useLocation()
   const scrolled = useScrolled(80)
   const [open, setOpen] = useState(false)
-  const desktop = useMediaQuery('(min-width: 1024px)')
 
-  // Gated on `desktop` rather than handled with `lg:` variants because `over`
-  // is published as a data attribute that a dozen descendants style off. One
-  // boolean is far easier to keep honest than a breakpoint on every one.
-  const over = desktop && !scrolled && PHOTO_BACKED(pathname)
+  const over = !scrolled && PHOTO_BACKED(pathname)
 
   // Close the drawer whenever navigation happens.
   useEffect(() => setOpen(false), [pathname])
@@ -64,18 +59,13 @@ export function Header() {
       <header
         data-over={over}
         className={clsx(
-          'group/head fixed inset-x-0 z-70 transition-all duration-500 ease-[var(--ease-out-expo)]',
-          // MOBILE: a bottom bar. Nothing is pinned to the top of a phone screen
-          // any more, which is what the status-bar strip problem came down to —
-          // and the controls land under your thumb instead of in the far top
-          // corner. Always glass, because it always has content behind it.
-          'bottom-0 border-t border-line bg-canvas/85 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur-xl',
-          // DESKTOP: unchanged. Back to the top, transparent over a hero, and
-          // thinning out once you scroll past it.
-          'lg:top-0 lg:bottom-auto lg:border-t-0 lg:border-b',
+          'group/head fixed inset-x-0 top-0 z-70 transition-all duration-500 ease-[var(--ease-out-expo)]',
+          // The top padding carries the iOS status-bar inset on top of its own
+          // spacing, so the bar's background and blur reach the physical top
+          // edge rather than leaving a strip the page scrolls through.
           scrolled
-            ? 'lg:border-line lg:bg-canvas/85 lg:pt-3 lg:pb-3'
-            : 'lg:border-transparent lg:bg-transparent lg:pt-6 lg:pb-6 lg:backdrop-blur-none',
+            ? 'border-b border-line bg-canvas/85 pt-[calc(0.75rem+env(safe-area-inset-top))] pb-3 backdrop-blur-xl'
+            : 'border-b border-transparent pt-[calc(1.5rem+env(safe-area-inset-top))] pb-6',
           over && 'text-beige [text-shadow:0_1px_18px_rgb(0_0_0/0.35)]',
         )}
       >
@@ -143,13 +133,11 @@ export function Header() {
       <AnimatePresence>
         {open && (
           <motion.div
-            // Wipes up from the bottom edge, out of the bar it belongs to.
-            // `inset(100% 0 0 0)` is collapsed against the bottom; growing to
-            // zero raises the top edge. Bottom padding clears the bar itself.
-            className="fixed inset-0 z-60 flex flex-col justify-center bg-canvas px-8 pt-[env(safe-area-inset-top)] pb-[calc(6rem+env(safe-area-inset-bottom))] lg:hidden"
-            initial={{ clipPath: 'inset(100% 0% 0% 0%)' }}
+            // Wipes down out of the bar it belongs to, which is back at the top.
+            className="fixed inset-0 z-60 flex flex-col justify-center bg-canvas px-8 pt-[calc(5rem+env(safe-area-inset-top))] pb-[env(safe-area-inset-bottom)] lg:hidden"
+            initial={{ clipPath: 'inset(0% 0% 100% 0%)' }}
             animate={{ clipPath: 'inset(0% 0% 0% 0%)' }}
-            exit={{ clipPath: 'inset(100% 0% 0% 0%)' }}
+            exit={{ clipPath: 'inset(0% 0% 100% 0%)' }}
             transition={{ duration: 0.7, ease: [0.76, 0, 0.24, 1] }}
           >
             <nav className="flex flex-col gap-1" aria-label="Mobile">
@@ -158,13 +146,7 @@ export function Header() {
                   key={item.to}
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
-                  // Staggered bottom-up, so the items arrive in the same
-                  // direction the panel is wiping open.
-                  transition={{
-                    delay: 0.18 + (MOBILE_NAV.length - 1 - i) * 0.06,
-                    duration: 0.7,
-                    ease: [0.16, 1, 0.3, 1],
-                  }}
+                  transition={{ delay: 0.18 + i * 0.06, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
                 >
                   <Link
                     to={item.to}

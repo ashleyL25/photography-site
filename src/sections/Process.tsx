@@ -18,10 +18,13 @@ function Step({ step, index, total }: { step: (typeof PROCESS)[number]; index: n
     <div
       ref={ref}
       className="sticky"
-      // Each card parks slightly lower than the last so the stack stays legible
-      // as it collects. No header inset to clear: the bar is at the bottom on
-      // mobile, and on desktop there is no safe area to speak of.
-      style={{ top: `calc(6rem + ${index * 1.75}rem)`, zIndex: index + 1 }}
+      // Clears the fixed header, which is taller by the status-bar inset it pads
+      // itself by on iOS. Each card then parks slightly lower than the last so
+      // the stack stays legible as it collects.
+      style={{
+        top: `calc(6rem + env(safe-area-inset-top) + ${index * 1.75}rem)`,
+        zIndex: index + 1,
+      }}
     >
       <motion.article
         style={reduced ? undefined : { scale, opacity }}

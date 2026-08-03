@@ -6,10 +6,9 @@ export function Footer() {
   const year = new Date().getFullYear()
 
   return (
-    // On mobile the last thing on the page has to clear the fixed bottom bar as
-    // well as the home indicator. On desktop the bar is back at the top, so only
-    // the inset applies — and that is zero anywhere without one.
-    <footer className="border-t border-line bg-canvas pb-[calc(5.5rem+env(safe-area-inset-bottom))] lg:pb-[env(safe-area-inset-bottom)]">
+    // The bottom inset clears the home indicator, which overlaps the page
+    // because of viewport-fit=cover. Zero anywhere without one.
+    <footer className="border-t border-line bg-canvas pb-[env(safe-area-inset-bottom)]">
       <div className="shell py-16 md:py-20">
         <div className="flex flex-col gap-12 lg:flex-row lg:items-start lg:justify-between">
           <div className="max-w-sm">
