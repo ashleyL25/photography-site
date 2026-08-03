@@ -259,7 +259,11 @@
     --grain: 0;
     --scrim: 34 34 34;
   }
-
+html, body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
   body {
     background: #fff;
     font-size: 10.5pt;
