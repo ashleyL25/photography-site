@@ -409,3 +409,32 @@ fully clipped by an `overflow: hidden` ancestor, or its IntersectionObserver
 never fires and the content stays hidden forever. That is why the mask-reveal
 components put `whileInView` on the wrapper and drive the clipped child through
 variants.
+
+### iPhone safe areas
+
+The viewport meta carries `viewport-fit=cover`, so the page fills the screen to
+the physical edges and `env(safe-area-inset-*)` returns real values. **Anything
+pinned to a screen edge has to pad past its inset**, or the page scrolls visibly
+through the strip the status bar sits in — which is what used to happen above the
+header.
+
+Four places depend on it, and they have to move together:
+
+- `Header` — `top-0` plus `pt-[calc(<spacing>+env(safe-area-inset-top))]`, so the
+  bar's own background and blur reach the top edge while the logo sits below the
+  status bar. Note it is `pt-`/`pb-`, not `py-`.
+- The mobile drawer — top and bottom insets, so the centred nav is centred in the
+  space you can actually see.
+- The sticky chapter nav on a guide page, and the sticky cards in
+  `sections/Process.tsx` — both offset by `env(safe-area-inset-top)` on top of
+  their own clearance, because the header they clear is taller by that inset.
+- `Footer` — bottom inset, to clear the home indicator.
+
+If you change the header's padding, change the two sticky offsets by the same
+amount. On anything without insets `env()` resolves to `0px`, so these are all
+no-ops off iOS.
+
+`theme-color` is a single meta tag driven by the site's own palette — set in the
+pre-paint script and again in `useTheme` — rather than two tags keyed to
+`prefers-color-scheme`. Keyed to the media query, a visitor reading in light mode
+on a dark phone got dark browser chrome. Both values must match `--canvas`.

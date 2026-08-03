@@ -18,7 +18,13 @@ function Step({ step, index, total }: { step: (typeof PROCESS)[number]; index: n
     <div
       ref={ref}
       className="sticky"
-      style={{ top: `calc(6rem + ${index * 1.75}rem)`, zIndex: index + 1 }}
+      // `env(...)` clears the fixed header, which is taller by the status-bar
+      // inset on iOS. Each card parks slightly lower than the last so the stack
+      // stays legible as it collects.
+      style={{
+        top: `calc(6rem + env(safe-area-inset-top) + ${index * 1.75}rem)`,
+        zIndex: index + 1,
+      }}
     >
       <motion.article
         style={reduced ? undefined : { scale, opacity }}

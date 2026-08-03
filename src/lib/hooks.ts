@@ -218,6 +218,12 @@ export function useTheme() {
     document.documentElement.classList.toggle('dark', next === 'dark')
     document.documentElement.classList.toggle('light', next === 'light')
     localStorage.setItem('ap-theme', next)
+    // Browser chrome — and on iOS the strip behind the status bar — follows the
+    // palette the visitor actually chose. Keep in step with --canvas in
+    // index.css and with the pre-paint script in index.html.
+    document
+      .getElementById('theme-color')
+      ?.setAttribute('content', next === 'dark' ? '#16180F' : '#F0E8E1')
     setTheme(next)
   }, [])
 

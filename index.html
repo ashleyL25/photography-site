@@ -2,7 +2,11 @@
 <html lang="en" class="light">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- `viewport-fit=cover` lets the page fill the screen right to the physical
+         edges on notched iPhones, and is what makes the `env(safe-area-inset-*)`
+         values non-zero. Anything pinned to an edge has to pad past its inset —
+         see the header in src/components/Header.tsx. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
     <title>Ashley Photography — Senior, Couple &amp; Family Portraits in Des Moines, Iowa</title>
@@ -10,8 +14,11 @@
       name="description"
       content="Natural-light portrait photography based in Urbandale, serving the Des Moines metro and central Iowa. Senior pictures, graduation, engagements, couples, families and pets — unhurried sessions, honest edits."
     />
-    <meta name="theme-color" content="#F0E8E1" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#191A15" media="(prefers-color-scheme: dark)" />
+    <!-- Kept in step with the site's own theme by the script below and by
+         `useTheme` — NOT with `prefers-color-scheme`, because the palette is a
+         class the visitor can toggle, and a media-keyed value leaves the browser
+         chrome dark for someone reading in light mode on a dark phone. -->
+    <meta name="theme-color" id="theme-color" content="#F0E8E1" />
 
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Ashley Photography — Central Iowa Portrait Photographer" />
@@ -50,6 +57,10 @@
         const dark = stored ? stored === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches
         document.documentElement.classList.toggle('dark', dark)
         document.documentElement.classList.toggle('light', !dark)
+        // Must match --canvas for each palette in src/index.css.
+        document
+          .getElementById('theme-color')
+          .setAttribute('content', dark ? '#16180F' : '#F0E8E1')
       })()
     </script>
   </head>

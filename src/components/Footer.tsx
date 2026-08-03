@@ -6,7 +6,9 @@ export function Footer() {
   const year = new Date().getFullYear()
 
   return (
-    <footer className="border-t border-line bg-canvas">
+    // The bottom inset clears the home indicator, which now overlaps the page
+    // because of viewport-fit=cover.
+    <footer className="border-t border-line bg-canvas pb-[env(safe-area-inset-bottom)]">
       <div className="shell py-16 md:py-20">
         <div className="flex flex-col gap-12 lg:flex-row lg:items-start lg:justify-between">
           <div className="max-w-sm">

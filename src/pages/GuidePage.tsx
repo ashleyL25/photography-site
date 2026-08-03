@@ -125,10 +125,11 @@ export default function GuidePage() {
         </div>
       </section>
 
-      {/* Chapter index — sticky, tracks position. */}
+      {/* Chapter index — sticky, tracks position. The offset clears the fixed
+          header, which is taller by the status-bar inset on iOS. */}
       <nav
         aria-label="Chapters"
-        className="sticky top-16 z-40 border-y border-line bg-canvas/90 backdrop-blur-xl print:hidden"
+        className="sticky top-[calc(4rem+env(safe-area-inset-top))] z-40 border-y border-line bg-canvas/90 backdrop-blur-xl print:hidden"
       >
         <div className="shell flex gap-1 overflow-x-auto py-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {guide.chapters.map((chapter, i) => (

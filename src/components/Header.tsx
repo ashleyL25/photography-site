@@ -58,9 +58,13 @@ export function Header() {
         data-over={over}
         className={clsx(
           'group/head fixed inset-x-0 top-0 z-70 transition-all duration-500 ease-[var(--ease-out-expo)]',
+          // The top padding carries the iOS status-bar inset on top of its own
+          // spacing, so the bar's background and blur reach the physical top
+          // edge. `top-0` alone pins to the layout viewport, and on an iPhone
+          // the page then scrolls visibly through the strip above the header.
           scrolled
-            ? 'border-b border-line bg-canvas/85 py-3 backdrop-blur-xl'
-            : 'border-b border-transparent py-6',
+            ? 'border-b border-line bg-canvas/85 pt-[calc(0.75rem+env(safe-area-inset-top))] pb-3 backdrop-blur-xl'
+            : 'border-b border-transparent pt-[calc(1.5rem+env(safe-area-inset-top))] pb-6',
           over && 'text-beige [text-shadow:0_1px_18px_rgb(0_0_0/0.35)]',
         )}
       >
@@ -128,7 +132,7 @@ export function Header() {
       <AnimatePresence>
         {open && (
           <motion.div
-            className="fixed inset-0 z-60 flex flex-col justify-center bg-canvas px-8 lg:hidden"
+            className="fixed inset-0 z-60 flex flex-col justify-center bg-canvas px-8 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] lg:hidden"
             initial={{ clipPath: 'inset(0% 0% 100% 0%)' }}
             animate={{ clipPath: 'inset(0% 0% 0% 0%)' }}
             exit={{ clipPath: 'inset(0% 0% 100% 0%)' }}
