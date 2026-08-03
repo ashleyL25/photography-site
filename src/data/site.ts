@@ -309,9 +309,9 @@ export const ABOUT = {
   eyebrow: 'Behind the camera',
   heading: 'The frame I am waiting for is the one nobody planned.',
   body: [
-    'What I love about this is the half-second nobody arranges — the laugh at something off to the side, the hand that reaches for the other hand, the dog wrecking a perfectly good pose. Those are the photographs you still look at years later, and they only turn up once you have stopped performing for me.',
-    'So before anything else, my job is to put you at ease. I keep it moving, I direct enough that you never have to wonder what to do with your hands, and I would much rather be the person you relaxed and laughed with than the person who pointed a lens at you for an hour.',
-    'Every shoot is somebody’s once — a last spring of high school, a ring that just went on, a puppy who will not be small for long. It should be genuinely fun while it is happening and worth having forever afterwards. That is the whole of it.',
+    'My favorite frames are almost never the ones we lined up. They are the goofy ones — the unexpected ones — the second after a joke lands and a real smile breaks through before anyone has time to pose for it.',
+    'I love watching that happen. The laugh you cannot fake. The look someone gives when they forget the camera is there. The dog that ruins the shot and somehow makes it the one you keep.',
+    'That is what I am always after: the versions of you that feel like you. Not stiff, not arranged — just alive in the frame. Those are the photographs that still make you smile years later.',
   ],
   photoId: 'about-ashley',
   signature: 'Ashley',
