@@ -3,6 +3,7 @@ import { Link, Navigate, useParams } from 'react-router-dom'
 import { GUIDES, GUIDES_BY_ID } from '@/data/guides'
 import { SESSIONS_BY_ID } from '@/data/site'
 import { PageHero } from '@/components/PageHero'
+import { ChapterNav } from '@/components/ChapterNav'
 import { GuideBlock } from '@/components/GuideBlocks'
 import { DrawRule, MaskText, Reveal } from '@/components/motion'
 import { useActiveSection, useDocumentMeta } from '@/lib/hooks'
@@ -125,39 +126,17 @@ export default function GuidePage() {
         </div>
       </section>
 
-      {/* Chapter index — sticky, tracks position. The offset clears the fixed
-          header, which is taller by the status-bar inset on iOS. */}
-      <nav
-        aria-label="Chapters"
-        className="sticky top-[calc(4rem+env(safe-area-inset-top))] z-40 border-y border-line bg-canvas/90 backdrop-blur-xl print:hidden"
-      >
-        <div className="shell flex gap-1 overflow-x-auto py-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {guide.chapters.map((chapter, i) => (
-            <a
-              key={chapter.id}
-              href={`#${chapter.id}`}
-              aria-current={active === chapter.id ? 'true' : undefined}
-              className={`label shrink-0 rounded-full border px-5 py-2.5 whitespace-nowrap transition-colors duration-400 ${
-                active === chapter.id
-                  ? 'border-accent text-accent'
-                  : 'border-transparent text-muted hover:border-accent hover:text-accent'
-              }`}
-            >
-              <span className="mr-2 text-[0.85em] opacity-60">
-                {String(i + 1).padStart(2, '0')}
-              </span>
-              {chapter.title}
-            </a>
-          ))}
-        </div>
-      </nav>
+      {/* Chapter index: a sticky strip on desktop, a floating island on a
+          phone. See ChapterNav for why they are not the same control. */}
+      <ChapterNav chapters={guide.chapters} active={active} />
 
-      {/* Chapters. */}
+      {/* Chapters. The mobile scroll margin clears the floating island, which
+          sits below the status-bar inset. */}
       {guide.chapters.map((chapter, i) => (
         <section
           key={chapter.id}
           id={chapter.id}
-          className={`scroll-mt-32 border-t border-line py-20 md:py-28 ${
+          className={`scroll-mt-[calc(9rem+env(safe-area-inset-top))] border-t border-line py-20 lg:scroll-mt-32 md:py-28 ${
             i % 2 === 1 ? 'bg-surface' : ''
           }`}
         >

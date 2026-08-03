@@ -166,6 +166,23 @@ export function usePageTransition() {
   return { rendered, phase }
 }
 
+/** `true` while `query` matches, kept live. */
+export function useMediaQuery(query: string) {
+  const [matches, setMatches] = useState(
+    () => typeof matchMedia !== 'undefined' && matchMedia(query).matches,
+  )
+
+  useEffect(() => {
+    const mq = matchMedia(query)
+    const onChange = () => setMatches(mq.matches)
+    onChange()
+    mq.addEventListener('change', onChange)
+    return () => mq.removeEventListener('change', onChange)
+  }, [query])
+
+  return matches
+}
+
 /**
  * Number of masonry columns for the current breakpoint. Driven by matchMedia
  * rather than CSS so the column-balancing math matches what is rendered.

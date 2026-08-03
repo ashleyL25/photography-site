@@ -410,29 +410,64 @@ never fires and the content stays hidden forever. That is why the mask-reveal
 components put `whileInView` on the wrapper and drive the clipped child through
 variants.
 
-### iPhone safe areas
+### The header is a bottom bar on mobile
 
-The viewport meta carries `viewport-fit=cover`, so the page fills the screen to
-the physical edges and `env(safe-area-inset-*)` returns real values. **Anything
-pinned to a screen edge has to pad past its inset**, or the page scrolls visibly
-through the strip the status bar sits in — which is what used to happen above the
-header.
+Below `lg` the header is pinned to the **bottom** of the screen; at `lg` and above
+it is back at the top and behaves exactly as it always did. One component, two
+positions — see the two commented blocks of classes in
+[`Header.tsx`](src/components/Header.tsx).
 
-Four places depend on it, and they have to move together:
+This started as a fix and turned out to be the better design. Pinning anything to
+the top of an iPhone screen fights Safari: `position: fixed; top: 0` resolves
+against the layout viewport, but the page paints up through the strip the status
+bar sits in, so a gap opens above the bar with live content sliding through it.
+Padding the header by `env(safe-area-inset-top)` is the textbook answer and it did
+not hold up on a real device. Moving the bar to the bottom removes the problem
+rather than defending against it, and it puts the controls under a thumb instead
+of in the far top corner.
 
-- `Header` — `top-0` plus `pt-[calc(<spacing>+env(safe-area-inset-top))]`, so the
-  bar's own background and blur reach the top edge while the logo sits below the
-  status bar. Note it is `pt-`/`pb-`, not `py-`.
-- The mobile drawer — top and bottom insets, so the centred nav is centred in the
-  space you can actually see.
-- The sticky chapter nav on a guide page, and the sticky cards in
-  `sections/Process.tsx` — both offset by `env(safe-area-inset-top)` on top of
-  their own clearance, because the header they clear is taller by that inset.
-- `Footer` — bottom inset, to clear the home indicator.
+Consequences worth knowing:
 
-If you change the header's padding, change the two sticky offsets by the same
-amount. On anything without insets `env()` resolves to `0px`, so these are all
-no-ops off iOS.
+- `over` (the light-on-photo state) is gated on a `useMediaQuery` rather than on
+  `lg:` variants, because it is published as a `data-over` attribute that a dozen
+  descendants style off. The mobile bar always sits on content, so it is always
+  glass and `over` is always false there.
+- The mobile drawer wipes **bottom to top** — `inset(100% 0 0 0)` is collapsed
+  against the bottom edge, and animating to `inset(0)` raises the top edge. Its
+  item stagger is reversed to travel the same way.
+- `Footer` carries `pb-[calc(5.5rem+…)]` below `lg` so the last of the page clears
+  the bar, and only the safe-area inset at `lg` and up.
+- Nothing needs a top-inset offset any more. `sections/Process.tsx` and the
+  chapter nav went back to plain offsets.
+
+`viewport-fit=cover` stays in the viewport meta: the page still fills the screen
+edge to edge, and `env(safe-area-inset-bottom)` is what keeps the bar and the
+footer clear of the home indicator. On anything without insets `env()` resolves to
+`0px`, so all of these are no-ops off iOS.
+
+### Secondary navigation on a phone
+
+A guide's chapter index is two different controls, in
+[`ChapterNav.tsx`](src/components/ChapterNav.tsx).
+
+Desktop keeps the full-width sticky strip — there is room for all ten chapters at
+once, so showing them is the right answer.
+
+Mobile gets a **floating glass island** near the top instead, and deliberately is
+not the same control. A row of ten chips on a phone is a row you can see three of,
+with no hint the rest exist and no way to tell where you are; a horizontal
+scrollbar would announce that problem rather than solve it. So the island shows
+the two things that are useful while reading — which chapter you are in, and how
+far through you are, drawn as a progress ring around the chapter number — and
+holds the full list behind a tap, as a vertical menu where every title is legible.
+
+It also eases into a smaller, tighter, slightly higher state once you start
+scrolling, so it settles into the corner of your eye.
+
+Being an *island* is the other half of the point: it is detached, so content
+passing behind it reads as intended rather than as the gap the old top-sealed bar
+produced. Any future secondary nav on mobile should follow the same rule — float
+it, do not seal it to an edge.
 
 `theme-color` is a single meta tag driven by the site's own palette — set in the
 pre-paint script and again in `useTheme` — rather than two tags keyed to
