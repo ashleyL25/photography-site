@@ -37,10 +37,17 @@ if (!empty($data['website'])) {
     exit;
 }
 
-$name    = trim((string)($data['name'] ?? ''));
-$email   = trim((string)($data['email'] ?? ''));
-$subject = trim((string)($data['subject'] ?? ''));
-$message = trim((string)($data['message'] ?? ''));
+$field = static fn (string $key): string => trim((string)($data[$key] ?? ''));
+
+$name      = $field('name');
+$email     = $field('email');
+$session   = $field('session');
+$message   = $field('message');
+$phone     = $field('phone');
+$tier      = $field('tier');
+$timeframe = $field('timeframe');
+$location  = $field('location');
+$heardFrom = $field('heardFrom');
 
 $errors = [];
 if ($name === '' || mb_strlen($name) > 120) {
@@ -49,11 +56,21 @@ if ($name === '' || mb_strlen($name) > 120) {
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     $errors[] = 'email';
 }
-if ($subject === '' || mb_strlen($subject) > 120) {
-    $errors[] = 'subject';
+if ($session === '' || mb_strlen($session) > 120) {
+    $errors[] = 'session';
+}
+if ($timeframe === '' || mb_strlen($timeframe) > 120) {
+    $errors[] = 'timeframe';
 }
 if ($message === '' || mb_strlen($message) > 5000) {
     $errors[] = 'message';
+}
+// The optional fields are not required, but they are still bounded — anything
+// unbounded that reaches the mail body is a spam vector.
+foreach (['phone' => $phone, 'tier' => $tier, 'location' => $location, 'heardFrom' => $heardFrom] as $key => $value) {
+    if (mb_strlen($value) > 200) {
+        $errors[] = $key;
+    }
 }
 
 if ($errors) {
@@ -66,12 +83,26 @@ if ($errors) {
 // open relay for injected Bcc: lines.
 $safeHeader = static fn (string $v): string => str_replace(["\r", "\n"], ' ', $v);
 
-$body = "New enquiry from the website\n\n"
-      . "Name:    {$name}\n"
-      . "Email:   {$email}\n"
-      . "Subject: {$subject}\n"
-      . 'Sent:    ' . date('Y-m-d H:i:s T') . "\n\n"
-      . "-----\n\n{$message}\n";
+$rows = [
+    'Name'      => $name,
+    'Email'     => $email,
+    'Phone'     => $phone,
+    'Session'   => $session,
+    'Tier'      => $tier,
+    'Timeframe' => $timeframe,
+    'Location'  => $location,
+    'Found via' => $heardFrom,
+    'Sent'      => date('Y-m-d H:i:s T'),
+];
+
+$body = "New enquiry from the website\n\n";
+foreach ($rows as $label => $value) {
+    if ($value === '') {
+        continue; // Skip the optional fields nobody filled in.
+    }
+    $body .= str_pad($label . ':', 12) . $value . "\n";
+}
+$body .= "\n-----\n\n{$message}\n";
 
 $headers = implode("\r\n", [
     'From: Ashley Photography <' . $FROM . '>',
@@ -82,7 +113,7 @@ $headers = implode("\r\n", [
 
 $sent = mail(
     $TO,
-    '[Website] ' . $safeHeader($subject) . ' — ' . $safeHeader($name),
+    '[Website] ' . $safeHeader($session) . ' — ' . $safeHeader($name),
     $body,
     $headers
 );

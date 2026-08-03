@@ -1,10 +1,10 @@
 /**
- * All homepage copy and structured content lives here so it can be edited
- * without touching component code.
+ * Site copy and structured content. Components read from here and contain no
+ * prose of their own.
  *
- * PRICES — the deliverables in `PACKAGES` are accurate; the dollar figures are
- * placeholders pitched at the central-Iowa market. Confirm all three before
- * going live. They are the only invented numbers on the page.
+ * Pricing lives in `packages.ts` (a tier ladder per session type), client prep
+ * guides in `guides.ts`, and vendor and location recommendations in
+ * `vendors.ts`. Everything else is here.
  */
 
 export const SITE = {
@@ -27,6 +27,7 @@ export const NAV = [
   { label: 'Portfolio', to: '/portfolio' },
   { label: 'Sessions', to: '/sessions' },
   { label: 'Investment', to: '/contact#investment' },
+  { label: 'Guides', to: '/guides' },
   { label: 'About', to: '/about' },
 ] as const
 
@@ -74,21 +75,24 @@ export const INTRO = {
 }
 
 export type Session = {
+  /** URL slug: /sessions/<id>, /guides/<id>. Also keys PACKAGE_SETS and GUIDES. */
   id: string
   index: string
   title: string
   /** One-line summary, used on the homepage list. */
   blurb: string
   photoId: string
+  /** Full-bleed plate behind the masthead on /sessions/<id>. */
+  heroPhotoId: string
   /** Portfolio category this session links through to. */
   filter: string
-  /** Long-form copy for the /sessions page. */
+  /** When it happens and how long it takes, in one line. */
+  runs: string
+  /** Long-form copy for the session's own page. */
   detail: string[]
   /** What this particular session includes, beyond ALWAYS_INCLUDED. */
   points: string[]
-  /** Package id in PACKAGES that prices this session. */
-  packageId: string
-  /** Two extra frames for the /sessions page spread. */
+  /** Two extra frames for the session page spread. */
   gallery: [string, string]
 }
 
@@ -98,19 +102,22 @@ export const SESSIONS: Session[] = [
     index: '01',
     filter: 'seniors',
     title: 'Senior Pictures',
-    blurb: 'Your last year of high school, shot the way you actually are. Sixty edited images, multiple locations, pets welcome.',
+    blurb: 'Your last year of high school, shot the way you actually are. Three outfits, three locations, and lunch in the middle of it.',
     photoId: 'seniors-elise-portrait-121',
+    heroPhotoId: 'seniors-2024-07-05-park-practice-51',
+    runs: 'A weekday, from around midday · up to four hours',
     detail: [
-      'This is the one session where everything is decided in advance, because seniors all want the same things: enough frames to actually choose from, more than one backdrop, and room to change outfits halfway through.',
-      'Sixty edited photographs, more than one location, and as many outfit changes as you want to carry. Bring the letter jacket, the instrument, the truck, the dog — anything that will look like you in ten years.',
+      'This is the one session I run to a routine, because seniors all want the same things: enough frames to actually choose from, more than one backdrop, and room to change halfway through. So it is built as an afternoon rather than an hour.',
+      'We shoot on a weekday and start around midday — parks and downtown are empty on a Tuesday, and starting high means we can work the built, shaded locations first and finish on golden hour in something green. Up to three outfits, up to three locations, and a lunch stop that is part of the shoot rather than a break from it: we eat there, we photograph there, and you change there.',
+      'Afterwards we sit down together and go through every frame from the day. You choose what makes the album; anything you dislike never appears anywhere. Bring the letter jacket, the instrument, the truck, the dog — anything that will look like you in ten years.',
     ],
     points: [
-      'Sixty edited photographs',
-      'More than one location in the one session',
-      'Outfit changes, as many as you like',
+      'Up to three outfits and three locations in one afternoon',
+      'A lunch stop you choose, shot as part of the session',
+      'A sit-down review where you pick every photograph in the album',
+      'Weekday, midday start, planned around the light',
       'Props, jerseys, instruments and pets all welcome',
     ],
-    packageId: 'seniors',
     gallery: ['seniors-elise-portrait-102', 'seniors-2024-07-05-park-practice-51'],
   },
   {
@@ -120,17 +127,20 @@ export const SESSIONS: Session[] = [
     title: 'Graduation',
     blurb: 'Cap, gown and the campus landmarks that mean something to you. Built around your ceremony weekend.',
     photoId: 'graduation-em-grad-278',
+    heroPhotoId: 'graduation-em-grad-233',
+    runs: 'Ceremony weekend · one to three hours',
     detail: [
       'Cap, gown, and the parts of campus that actually meant something to you — the entrance sign, the building you all but lived in, the walk you have done a thousand times.',
-      'These are planned around your ceremony weekend, which is usually a busy one, so we keep it to a single location and shoot it properly. We agree the number of images when we plan the session.',
+      'Ceremony weekends are busy and everybody wants a piece of you, so these are built to be efficient. One or two spots, planned in advance, with the gown frames shot first while it is still crisp and everything without it afterwards. That second half matters more than people expect: the gown photographs are the formal record, and the ones without it are the ones you actually look at.',
+      'Tell me the ceremony time and I will work around it. The morning before is usually best — quiet campus, good light, and you are not yet three events deep into the day.',
     ],
     points: [
-      'Built around your ceremony weekend',
-      'Usually one location, chosen together',
-      'Gown on and gown off, in the same session',
-      'Image count agreed when we plan it',
+      'Planned around your ceremony, not against it',
+      'One to three campus locations, chosen together',
+      'Gown on and gown off in the same session',
+      'Cords, stoles, regalia and department kit all welcome',
+      'Family and housemates can join on the longer session',
     ],
-    packageId: 'graduation',
     gallery: ['graduation-em-grad-278', 'graduation-em-grad-61'],
   },
   {
@@ -140,17 +150,20 @@ export const SESSIONS: Session[] = [
     title: 'Engagements',
     blurb: 'Golden hour at the one spot that suits you, and the version of you two that only shows up when nobody is watching.',
     photoId: 'engagement-mallorie-connor-31',
+    heroPhotoId: 'engagement-july2022-109',
+    runs: 'Evening, timed to sunset · ninety minutes to two and a half hours',
     detail: [
-      'The point of an engagement session is not the ring — it is having photographs of the two of you from before all the planning took over. We pick one spot that suits you and use the last good hour of light on it.',
+      'The point of an engagement session is not the ring — it is having photographs of the two of you from before all the planning took over. We pick a spot that suits you and use the last good hour of light on it.',
+      'Start times are set by the light rather than the clock, so they move through the year: half six in October, half seven in June. The first ten minutes are always the stiffest, for everybody, and that is built into the timing. By minute fifteen you will have forgotten I am there.',
       'Expect more conversation than posing. The frames people keep are almost always the ones taken between the directions.',
     ],
     points: [
-      'Usually one location, chosen together',
-      'Timed for the last hour of good light',
+      'One or two locations, chosen together',
+      'Timed to finish on the last of the light',
+      'Individual portraits as well as the two of you',
       'Your dog is genuinely welcome',
       'A set of black-and-white frames alongside the colour',
     ],
-    packageId: 'couples-family',
     gallery: ['engagement-june2022-176', 'engagement-june2022-bw-84'],
   },
   {
@@ -160,17 +173,20 @@ export const SESSIONS: Session[] = [
     title: 'Couples',
     blurb: 'Anniversaries, just-because sessions, or the first proper photos since the wedding day.',
     photoId: 'couples-am-27',
+    heroPhotoId: 'couples-am-43',
+    runs: 'Evening, timed to sunset · one to two hours',
     detail: [
       'Anniversaries, just-because sessions, or the first proper photographs since the wedding day — the ones where nobody is in a wedding dress and nothing has to be announced.',
-      'Same approach as an engagement session: one location, unhurried, and shaped around what the two of you are actually like together.',
+      'You do not need an occasion and most people who book this do not have one. The most common reason is simply that the last decent photograph of the two of you is from somebody else’s wedding four years ago.',
+      'Same approach as an engagement session: one or two locations, unhurried, timed to the light, and shaped around what the two of you are actually like together.',
     ],
     points: [
-      'Usually one location, chosen together',
+      'One or two locations, chosen together',
       'Anniversary, milestone, or no reason at all',
       'Individual portraits as well as the two of you',
       'A set of black-and-white frames alongside the colour',
+      'Bookable two years at a time if you want the comparison',
     ],
-    packageId: 'couples-family',
     gallery: ['couples-am-43', 'couples-am-30'],
   },
   {
@@ -180,17 +196,20 @@ export const SESSIONS: Session[] = [
     title: 'Families',
     blurb: 'One location, group and individual frames, and enough patience for every last one of them.',
     photoId: 'family-2024-05-18-grad-party-238',
+    heroPhotoId: 'family-2024-05-18-grad-party-196',
+    runs: 'Late afternoon · one to three hours',
     detail: [
-      'Getting everyone in one place is the hard part; the photographs are the easy bit. One location, the whole group together, and then each person on their own while the others recover.',
-      'The image count scales with the size of the group, and everyone who needs their own gallery gets one.',
+      'Getting everyone in one place is the hard part; the photographs are the easy bit. The whole group first while everybody is still cooperative, then the smaller combinations, then each person on their own while the others recover.',
+      'The session scales with how many people we are getting into one place, and I plan the order in advance so nobody stands about for an hour. Small children get to be small children — I have never needed one to sit still and I am not going to start. Anyone elderly gets somewhere with close parking, a bench, and their frames taken first.',
+      'Write down the groupings you want before the day and hand me the list. It is the difference between remembering on the day and remembering when the gallery arrives.',
     ],
     points: [
-      'Usually one location, chosen together',
+      'One or two locations, chosen together',
       'Group frames plus individual portraits of everyone',
-      'Image count scales with the size of the group',
-      'A private gallery for everyone who needs one',
+      'Planned in advance so nobody waits about',
+      'A private gallery for every household, included',
+      'Multiple households in one session on the longer option',
     ],
-    packageId: 'couples-family',
     gallery: ['family-2024-05-18-grad-party-223', 'family-2024-05-18-grad-party-133'],
   },
   {
@@ -200,17 +219,20 @@ export const SESSIONS: Session[] = [
     title: 'Pets',
     blurb: 'New puppy, old friend. They come along at no extra cost, or take the spotlight on their own.',
     photoId: 'pets-06-27-2024-puppies-110',
+    heroPhotoId: 'pets-06-27-2024-puppies-128',
+    runs: 'Early morning or last light · forty-five minutes to two hours',
     detail: [
       'Dogs come along to any session at no extra cost, and they are usually the reason the humans finally relax. Nobody has ever been stiff in front of a camera while holding a lead.',
-      'They can also have the session entirely to themselves — a new puppy, or an old friend you want photographed properly while you still can.',
+      'They can also have the session entirely to themselves — a new puppy, or an old friend you want photographed properly while you still can. No expectation whatsoever that they sit still; the photographs worth having are of them doing what they actually do.',
+      'And get in the frame yourself. Everybody books this for photographs of their animal and then realises what they wanted was photographs of the two of them together, because you are always the one holding the camera.',
     ],
     points: [
       'Included in any other session at no extra cost',
       'Or a session entirely of their own',
+      'Early morning or last light, for the temperature as much as the sun',
       'Shot outdoors, at their pace',
-      'No expectation whatsoever that they sit still',
+      'Portraits of you together, which is what people actually want',
     ],
-    packageId: 'couples-family',
     gallery: ['pets-06-27-2024-puppies-110', 'pets-06-27-2024-puppies-134'],
   },
 ]
@@ -249,70 +271,11 @@ export const PROCESS = [
   },
 ]
 
-export type Package = {
-  id: string
-  name: string
-  /** Placeholder figure — confirm before launch. */
-  price: string
-  unit: string
-  summary: string
-  includes: string[]
-  featured: boolean
-}
-
-export const PACKAGES: Package[] = [
-  {
-    id: 'seniors',
-    name: 'Senior Pictures',
-    price: '$475',
-    unit: 'per session',
-    summary: 'The one package with everything already decided.',
-    includes: [
-      'Sixty edited photographs',
-      'More than one location, and outfit changes',
-      'Your pet along at no extra cost',
-      'Add more images any time after delivery',
-    ],
-    featured: true,
-  },
-  {
-    id: 'graduation',
-    name: 'Graduation & Portraits',
-    price: 'From $325',
-    unit: 'tailored to you',
-    summary: 'Cap and gown, milestones, solo portraits.',
-    includes: [
-      'Usually one location, chosen together',
-      'Built around your ceremony weekend',
-      'Image count set when we plan the session',
-      'Campus landmarks and the walk you have earned',
-    ],
-    featured: false,
-  },
-  {
-    id: 'couples-family',
-    name: 'Couples & Family',
-    price: 'From $400',
-    unit: 'tailored to you',
-    summary: 'Engagements, anniversaries, families, friend groups.',
-    includes: [
-      'Usually one location, chosen together',
-      'Group frames plus individual portraits',
-      'Image count scales with the size of your group',
-      'A gallery for everyone who needs one',
-    ],
-    featured: false,
-  },
-]
-
-/** Applies to every session, whatever the package. */
-export const ALWAYS_INCLUDED = [
-  'Travel included across the Des Moines metro',
-  'A private Pic-Time gallery, online for a full year',
-  'Full download and print rights to your images',
-  'Selected frames also delivered in black and white',
-  'Additional edited images available any time',
-]
+/** Lookup for the session pages and the enquiry form. */
+export const SESSIONS_BY_ID = Object.fromEntries(SESSIONS.map((s) => [s.id, s])) as Record<
+  string,
+  Session
+>
 
 export const GALLERY = {
   eyebrow: 'Your gallery',
@@ -344,15 +307,36 @@ export const ABOUT = {
   signature: 'Ashley',
 }
 
-export const ENQUIRY_SUBJECTS = [
-  'Senior pictures',
-  'Graduation or portraits',
-  'Engagement or couples',
-  'Family or group',
-  'Pets',
-  'A question',
-  'Just saying hi',
-]
+/**
+ * Enquiry form options.
+ *
+ * `sessions` is derived from SESSIONS so the form can never drift from what is
+ * actually offered; the two extras at the end are for people who are not
+ * booking. When a session is picked the form narrows the package select to that
+ * session's tiers (see PACKAGE_SETS in packages.ts).
+ */
+export const ENQUIRY = {
+  sessions: [...SESSIONS.map((s) => s.title), 'Something else', 'Just a question'],
+  /** Maps a `sessions` label back to a session id, for the package select. */
+  sessionIdFor: (label: string) => SESSIONS.find((s) => s.title === label)?.id,
+  undecided: 'Not sure yet — help me choose',
+  timeframes: [
+    'As soon as you have space',
+    'Within the next month',
+    'One to three months out',
+    'Three to six months out',
+    'Later this year',
+    'Next year',
+    'Only gathering information for now',
+  ],
+  heardFrom: [
+    'Instagram',
+    'A friend or family member',
+    'Google',
+    'We have worked together before',
+    'Somewhere else',
+  ],
+}
 
 export const CTA = {
   eyebrow: 'Bookings open',
@@ -360,6 +344,17 @@ export const CTA = {
   body: 'Take a look through the work. If the style feels like yours, send me a note — tell me who is in the photos, roughly when, and where you picture it.',
   action: 'Start an enquiry',
   photoId: 'backgrounds-2024-07-05-park-practice-122',
+}
+
+/* ------------------------------------------------------------------ *
+ * Sessions index
+ * ------------------------------------------------------------------ */
+
+export const SESSIONS_PAGE = {
+  eyebrow: 'What I photograph',
+  heading: 'Six kinds of session.',
+  body: 'Each one has its own page, its own three tiers, and its own prep guide. Senior sessions run to a routine — a weekday afternoon, three outfits, three locations and lunch. The rest are shaped around what you actually want.',
+  photoId: 'backgrounds-italy-2025-318',
 }
 
 /* ------------------------------------------------------------------ *
@@ -490,15 +485,22 @@ export const CONTACT_PAGE = {
 }
 
 /**
- * Only questions I can answer from how the business actually runs.
- *
- * TODO: add booking lead time, deposit terms and the weather / reschedule
- * policy — I do not have those and did not want to invent them.
+ * General questions. Booking terms — retainer, lead time, reschedules — are in
+ * `BOOKING.terms` (packages.ts) and render as a second group on the contact
+ * page, because those three figures are the ones still awaiting confirmation.
  */
 export const FAQ = [
   {
     q: 'How many photographs do I get?',
-    a: 'Senior sessions come with sixty edited images. Every other session is planned individually, so we agree the count when we plan the shoot. You can always add more to your gallery afterwards.',
+    a: 'It is set by the tier you pick, and every tier states it plainly — from twenty-five on a short session to a hundred across the two-season senior package. Nothing is vague about it and nothing is decided after the fact. You can always add more from the raw set afterwards.',
+  },
+  {
+    q: 'How do I know which tier to pick?',
+    a: 'Say what you want in the enquiry and I will tell you which one fits, including when the cheaper one is the right answer. The middle option is the most popular in every session type for a reason, but a one-hour session genuinely is enough for plenty of people.',
+  },
+  {
+    q: 'How do I prepare?',
+    a: 'You get a guide for your session type the day you book — what to wear, when to book hair and makeup, where we are going, what to bring, and how the day runs hour by hour. They are all readable here on the site too, so you can find yours at eleven o’clock the night before.',
   },
   {
     q: 'How long do I have the gallery?',
@@ -509,8 +511,12 @@ export const FAQ = [
     a: 'Some of them, yes. As I edit I pick the frames that work better without colour and deliver those in both. It costs nothing extra and it is not a decision you have to make.',
   },
   {
-    q: 'How many locations do we get?',
-    a: 'Senior sessions use more than one, plus outfit changes. For graduation, engagement, couples and family sessions we usually settle on a single spot that suits you and shoot it properly.',
+    q: 'How many locations and outfits do we get?',
+    a: 'Up to three of each on a full senior afternoon, including the lunch stop, which we shoot rather than sit out. Everything else runs one or two, depending on the tier. An extra location can be added to any session for $150.',
+  },
+  {
+    q: 'Why are senior sessions on a weekday?',
+    a: 'Because parks, downtown and every good doorway in the metro are empty on a Tuesday and heaving on a Saturday, and nobody wants strangers in the background of their senior pictures. A weekday also means four hours without anybody feeling rushed. Weekends are possible when they have to be — ask.',
   },
   {
     q: 'Can my dog come?',

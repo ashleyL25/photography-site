@@ -65,7 +65,7 @@ export function Sessions() {
           {SESSIONS.map((session, i) => (
             <li key={session.id} className="border-b border-line">
               <Link
-                to={`/sessions#${session.id}`}
+                to={`/sessions/${session.id}`}
                 onMouseEnter={() => setHovered(session.id)}
                 onFocus={() => setHovered(session.id)}
                 onBlur={() => setHovered(null)}
@@ -152,7 +152,7 @@ export function Sessions() {
         <ul className="grid gap-x-6 gap-y-12 pt-12 sm:grid-cols-2 lg:hidden">
           {SESSIONS.map((session, i) => (
             <Reveal as="li" key={session.id} delay={(i % 2) * 0.1}>
-              <Link to={`/sessions#${session.id}`} className="group block">
+              <Link to={`/sessions/${session.id}`} className="group block">
                 <div className="arch overflow-hidden">
                   <Photo
                     id={session.photoId}

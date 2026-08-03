@@ -1,7 +1,9 @@
 import { useState, type ReactNode } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
-import { ENQUIRY_SUBJECTS, SITE } from '@/data/site'
+import { ENQUIRY, SESSIONS_BY_ID, SITE } from '@/data/site'
+import { PACKAGES_BY_SESSION } from '@/data/packages'
 import { Reveal } from './motion'
 
 /** Where the form posts. The bundled PHP handler works as-is on Hostinger. */
@@ -26,6 +28,7 @@ const TONE = {
     heading: 'text-champagne',
     body: 'text-beige/70',
     note: 'text-champagne',
+    hint: 'text-beige/45',
   },
   onCanvas: {
     label: 'text-faint group-focus-within:text-accent',
@@ -37,21 +40,27 @@ const TONE = {
     heading: 'text-accent',
     body: 'text-muted',
     note: 'text-accent',
+    hint: 'text-faint',
   },
 } satisfies Record<Tone, Record<string, string>>
 
 function Field({
   label,
   tone,
+  optional,
   children,
 }: {
   label: string
   tone: Tone
+  optional?: boolean
   children: ReactNode
 }) {
   return (
     <label className="group block">
-      <span className={clsx('label mb-3 block transition-colors', TONE[tone].label)}>{label}</span>
+      <span className={clsx('label mb-3 block transition-colors', TONE[tone].label)}>
+        {label}
+        {optional && <span className="ml-2 opacity-60">optional</span>}
+      </span>
       {children}
     </label>
   )
@@ -66,12 +75,24 @@ export function EnquiryForm({
 }) {
   const [status, setStatus] = useState<Status>('idle')
   const [error, setError] = useState('')
+
+  // A session page links here as /contact?session=seniors, so the first select
+  // arrives already answered.
+  const [params] = useSearchParams()
+  const preset = SESSIONS_BY_ID[params.get('session') ?? '']?.title ?? ''
+  const [session, setSession] = useState(preset)
+
   const t = TONE[tone]
 
   const inputClass = clsx(
     'w-full border-b bg-transparent pb-3 text-[1.05rem] transition-colors duration-300 outline-none',
     t.input,
   )
+
+  // The tier select only makes sense once a real session type is chosen, and
+  // its options come from that session's own ladder.
+  const sessionId = ENQUIRY.sessionIdFor(session)
+  const tiers = sessionId ? PACKAGES_BY_SESSION[sessionId]?.tiers : undefined
 
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -92,6 +113,7 @@ export function EnquiryForm({
       if (!res.ok) throw new Error(`Server responded ${res.status}`)
       setStatus('sent')
       form.reset()
+      setSession('')
     } catch (err) {
       setStatus('error')
       setError(err instanceof Error ? err.message : 'Something went wrong.')
@@ -112,8 +134,9 @@ export function EnquiryForm({
         >
           <p className={clsx('display text-[clamp(2rem,4vw,3rem)]', t.heading)}>Message sent.</p>
           <p className={clsx('mx-auto mt-5 max-w-sm leading-relaxed', t.body)}>
-            Thank you — I will get back to you within a couple of days. If it is urgent, a DM on
-            Instagram is the fastest way to reach me.
+            Thank you — I will get back to you within a couple of days with dates and a
+            straight answer on which tier fits. If it is urgent, a DM on Instagram is the fastest
+            way to reach me.
           </p>
         </motion.div>
       ) : (
@@ -150,13 +173,31 @@ export function EnquiryForm({
             </Field>
           </Reveal>
 
-          <Reveal delay={0.12} className="sm:col-span-2">
-            <Field label="What is this about?" tone={tone}>
-              <select name="subject" required defaultValue="" className={inputClass}>
+          <Reveal delay={0.1}>
+            <Field label="Phone" tone={tone} optional>
+              <input
+                name="phone"
+                type="tel"
+                autoComplete="tel"
+                placeholder="515 555 0100"
+                className={inputClass}
+              />
+            </Field>
+          </Reveal>
+
+          <Reveal delay={0.14}>
+            <Field label="Which session?" tone={tone}>
+              <select
+                name="session"
+                required
+                value={session}
+                onChange={(e) => setSession(e.target.value)}
+                className={inputClass}
+              >
                 <option value="" disabled className={t.option}>
                   Choose one
                 </option>
-                {ENQUIRY_SUBJECTS.map((s) => (
+                {ENQUIRY.sessions.map((s) => (
                   <option key={s} value={s} className={t.option}>
                     {s}
                   </option>
@@ -165,13 +206,85 @@ export function EnquiryForm({
             </Field>
           </Reveal>
 
-          <Reveal delay={0.18} className="sm:col-span-2">
+          {/* Appears once a session type is picked. Not required — plenty of
+              people genuinely do not know yet, and that is a valid answer. */}
+          <AnimatePresence initial={false}>
+            {tiers && (
+              <motion.div
+                key="tier"
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+                className="overflow-hidden"
+              >
+                <Field label="Which tier are you thinking?" tone={tone} optional>
+                  <select name="tier" defaultValue="" className={inputClass}>
+                    <option value={ENQUIRY.undecided} className={t.option}>
+                      {ENQUIRY.undecided}
+                    </option>
+                    {tiers.map((tier) => (
+                      <option
+                        key={tier.id}
+                        value={`${tier.name} — ${tier.price}`}
+                        className={t.option}
+                      >
+                        {tier.name} — {tier.price}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <Reveal delay={0.18}>
+            <Field label="When are you hoping for?" tone={tone}>
+              <select name="timeframe" required defaultValue="" className={inputClass}>
+                <option value="" disabled className={t.option}>
+                  Choose one
+                </option>
+                {ENQUIRY.timeframes.map((s) => (
+                  <option key={s} value={s} className={t.option}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+            </Field>
+          </Reveal>
+
+          <Reveal delay={0.22}>
+            <Field label="Where do you picture it?" tone={tone} optional>
+              <input
+                name="location"
+                placeholder="A park, downtown, our own back garden…"
+                className={inputClass}
+              />
+            </Field>
+          </Reveal>
+
+          <Reveal delay={0.26}>
+            <Field label="How did you find me?" tone={tone} optional>
+              <select name="heardFrom" defaultValue="" className={inputClass}>
+                <option value="" className={t.option}>
+                  No need to say
+                </option>
+                {ENQUIRY.heardFrom.map((s) => (
+                  <option key={s} value={s} className={t.option}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+            </Field>
+          </Reveal>
+
+          <Reveal delay={0.3} className="sm:col-span-2">
             <Field label="Tell me about it" tone={tone}>
               <textarea
                 name="message"
                 required
                 rows={5}
-                placeholder="Who is in the photos, roughly when, and where you picture it."
+                placeholder="Who is in the photos, what you have in mind, and anything you are unsure about."
                 className={clsx(inputClass, 'resize-none')}
               />
             </Field>
@@ -187,7 +300,7 @@ export function EnquiryForm({
             className="pointer-events-none absolute -left-[9999px] opacity-0"
           />
 
-          <Reveal delay={0.24} className="flex flex-wrap items-center gap-6 sm:col-span-2">
+          <Reveal delay={0.34} className="flex flex-wrap items-center gap-6 sm:col-span-2">
             <button
               type="submit"
               disabled={status === 'sending'}
@@ -201,6 +314,10 @@ export function EnquiryForm({
               </span>
               <span className="absolute inset-0 origin-bottom scale-y-0 bg-[var(--sweep)] transition-transform duration-500 ease-[var(--ease-out-expo)] group-hover:scale-y-100" />
             </button>
+
+            <p className={clsx('text-[0.82rem]', t.hint)}>
+              Reply within 48 hours. Nothing is committed by asking.
+            </p>
 
             {status === 'error' && (
               <p role="alert" className={clsx('text-[0.85rem]', t.note)}>

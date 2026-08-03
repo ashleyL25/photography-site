@@ -14,9 +14,10 @@ import { Wordmark } from './Brand'
  */
 const PHOTO_BACKED = (pathname: string) =>
   pathname === '/' ||
-  pathname === '/sessions' ||
   pathname === '/about' ||
   pathname === '/contact' ||
+  pathname.startsWith('/sessions') ||
+  pathname.startsWith('/guides') ||
   pathname.startsWith('/portfolio')
 
 export function Header() {
@@ -39,11 +40,15 @@ export function Header() {
     }
   }, [open])
 
+  // Section roots stay lit on their children — /sessions/seniors keeps
+  // "Sessions" marked as the current page.
+  const SECTION_ROOTS = ['/portfolio', '/sessions', '/guides']
+
   const isActive = (to: string) =>
     to.startsWith('/#')
       ? false
-      : to === '/portfolio'
-        ? pathname.startsWith('/portfolio')
+      : SECTION_ROOTS.includes(to)
+        ? pathname.startsWith(to)
         : pathname === to
 
   return (

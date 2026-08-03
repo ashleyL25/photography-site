@@ -224,6 +224,86 @@
   }
 }
 
+/**
+ * Print — the client guides get printed and stuck on a kitchen worktop, so this
+ * has to work rather than merely not crash.
+ *
+ * The critical rule is the first one. Every scroll-triggered element starts at
+ * `opacity: 0` as an inline style written by Motion, and anything the reader has
+ * not scrolled past is still at zero when the print dialog opens — so a naive
+ * print gives you a stack of blank pages. A stylesheet `!important` beats an
+ * inline style that lacks one, which is what makes this work.
+ */
+@media print {
+  *,
+  ::before,
+  ::after {
+    opacity: 1 !important;
+    transform: none !important;
+    clip-path: none !important;
+    filter: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+
+  /* Force the light palette regardless of the reader's theme. */
+  :root,
+  .dark {
+    --canvas: #ffffff;
+    --surface: #ffffff;
+    --ink: #1a1a1a;
+    --muted: #3a3a3a;
+    --faint: #6b6b6b;
+    --accent: #7a3f18;
+    --line: rgb(0 0 0 / 0.2);
+    --grain: 0;
+    --scrim: 34 34 34;
+  }
+
+  body {
+    background: #fff;
+    font-size: 10.5pt;
+  }
+
+  /* Chrome that means nothing on paper. */
+  header,
+  footer,
+  .grain::after {
+    display: none !important;
+  }
+
+  /* Keep a chapter and its heading together where the page break allows. */
+  section {
+    break-inside: avoid;
+    padding-block: 1.2rem !important;
+    border-color: rgb(0 0 0 / 0.2) !important;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    break-after: avoid;
+  }
+
+  li,
+  dl,
+  ol > * {
+    break-inside: avoid;
+  }
+
+  /* Images are decoration in a prep guide and cost a fortune in toner. */
+  img {
+    display: none !important;
+  }
+
+  a[href^='http']::after {
+    content: ' (' attr(href) ')';
+    font-size: 0.8em;
+    word-break: break-all;
+  }
+}
+
 /* Theme swap ripples out from the toggle rather than hard-cutting. */
 ::view-transition-old(root),
 ::view-transition-new(root) {

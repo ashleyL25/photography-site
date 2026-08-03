@@ -1,159 +1,106 @@
 import { Link } from 'react-router-dom'
-import clsx from 'clsx'
-import { ALWAYS_INCLUDED, PACKAGES, SESSIONS } from '@/data/site'
+import { SESSIONS, SESSIONS_PAGE } from '@/data/site'
+import { ALWAYS_INCLUDED, fromPrice, headlineTier } from '@/data/packages'
 import { SHOOTS_BY_DATE } from '@/data/shoots'
 import { Photo } from '@/components/Photo'
 import { PageHero } from '@/components/PageHero'
-import { DrawRule, MaskText, Parallax, Reveal, Unveil } from '@/components/motion'
+import { Tick } from '@/components/TierCards'
+import { MaskText, Reveal } from '@/components/motion'
 import { useDocumentMeta } from '@/lib/hooks'
 
-const PRICE = Object.fromEntries(PACKAGES.map((p) => [p.id, p]))
-
+/**
+ * The sessions index. Each of the six now has its own page at /sessions/<id>
+ * with its own pricing ladder and prep guide, so this page's whole job is to
+ * get you to the right one quickly.
+ */
 export default function SessionsPage() {
   useDocumentMeta(
     'Sessions — Ashley Photography',
-    'Senior pictures, graduation, engagements, couples, families and pets — what each session includes and how it runs.',
+    'Senior pictures, graduation, engagements, couples, families and pets. Pricing, what each session includes, and a prep guide for every one.',
   )
 
   return (
     <>
       <PageHero
-        eyebrow="What I photograph"
-        heading="Six kinds of session."
-        body="One of them is a set package because everybody wants the same things from it. The other five are planned around you. Here is what each one actually involves."
-        photoId="backgrounds-italy-2025-318"
+        eyebrow={SESSIONS_PAGE.eyebrow}
+        heading={SESSIONS_PAGE.heading}
+        body={SESSIONS_PAGE.body}
+        photoId={SESSIONS_PAGE.photoId}
       />
 
-      {/* Jump list — six sessions is a long page. */}
-      <nav
-        aria-label="Sessions"
-        className="sticky top-16 z-40 border-y border-line bg-canvas/90 backdrop-blur-xl"
-      >
-        <div className="shell flex gap-2 overflow-x-auto py-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {SESSIONS.map((session) => (
-            <a
-              key={session.id}
-              href={`#${session.id}`}
-              className="label shrink-0 rounded-full border border-transparent px-5 py-2.5 whitespace-nowrap text-muted transition-colors duration-400 hover:border-accent hover:text-accent"
-            >
-              {session.title}
-            </a>
-          ))}
-        </div>
-      </nav>
+      <section className="shell py-24 md:py-32">
+        <ul className="grid gap-x-8 gap-y-20 lg:grid-cols-2">
+          {SESSIONS.map((session, i) => {
+            const tier = headlineTier(session.id)
+            const shoots = SHOOTS_BY_DATE.filter((s) => s.category === session.filter)
 
-      {SESSIONS.map((session, i) => {
-        const pkg = PRICE[session.packageId]
-        const shoots = SHOOTS_BY_DATE.filter((s) => s.category === session.filter)
-        const flip = i % 2 === 1
-
-        return (
-          <section
-            key={session.id}
-            id={session.id}
-            className={clsx(
-              'scroll-mt-32 border-t border-line py-20 md:py-28',
-              flip && 'bg-surface',
-            )}
-          >
-            <div className="shell grid gap-14 lg:grid-cols-12 lg:gap-16">
-              {/* Plates. Order flips each section so the page alternates. */}
-              <div
-                className={clsx(
-                  'relative lg:col-span-5',
-                  flip ? 'lg:order-2 lg:col-start-8' : 'lg:order-1',
-                )}
-              >
-                <Parallax speed={0.05}>
-                  <Unveil className="arch" direction={flip ? 'right' : 'left'}>
+            return (
+              <Reveal as="li" key={session.id} delay={(i % 2) * 0.1}>
+                <Link to={`/sessions/${session.id}`} className="group block">
+                  <div className="arch overflow-hidden">
                     <Photo
                       id={session.photoId}
                       alt={session.title}
-                      sizes="(min-width: 1024px) 36vw, 90vw"
-                      className="aspect-[3/4]"
+                      sizes="(min-width: 1024px) 44vw, 90vw"
+                      className="aspect-[4/5]"
+                      imgClassName="transition-transform duration-[1400ms] ease-[var(--ease-out-expo)] group-hover:scale-[1.04]"
                     />
-                  </Unveil>
-                </Parallax>
+                  </div>
 
-                <div className="mt-6 grid grid-cols-2 gap-6">
-                  {session.gallery.map((id, g) => (
-                    <Unveil key={id} delay={0.15 + g * 0.1}>
-                      <Photo
-                        id={id}
-                        alt=""
-                        sizes="(min-width: 1024px) 18vw, 44vw"
-                        className="aspect-[4/5]"
-                      />
-                    </Unveil>
-                  ))}
-                </div>
-              </div>
+                  <div className="mt-7 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
+                    <div className="flex items-baseline gap-4">
+                      <span className="label text-faint">{session.index}</span>
+                      <h2 className="display text-[clamp(2rem,3.6vw,2.9rem)] text-ink transition-colors duration-500 group-hover:text-accent">
+                        {session.title}
+                      </h2>
+                    </div>
+                    <span className="label text-accent">{fromPrice(session.id)}</span>
+                  </div>
 
-              <div className={clsx('lg:col-span-6', flip ? 'lg:order-1' : 'lg:order-2')}>
-                <Reveal className="label flex items-center gap-4 text-accent">
-                  <span className="h-px w-10 bg-accent" />
-                  {session.index} · {pkg ? pkg.price : 'By quote'}
-                </Reveal>
+                  <p className="label mt-4 leading-[1.6] text-faint">{session.runs}</p>
 
-                <MaskText
-                  text={session.title}
-                  className="display mt-6 text-[clamp(2.4rem,6vw,4.6rem)] text-ink"
-                />
+                  <p className="mt-5 max-w-lg text-[1rem] leading-[1.85] text-muted">
+                    {session.blurb}
+                  </p>
 
-                <div className="mt-8 max-w-xl space-y-6 text-[1.05rem] leading-[1.85] text-muted">
-                  {session.detail.map((paragraph, d) => (
-                    <Reveal key={d} as="p" delay={0.08 + d * 0.08}>
-                      {paragraph}
-                    </Reveal>
-                  ))}
-                </div>
+                  {tier && (
+                    <p className="mt-5 text-[0.9rem] text-faint italic">
+                      Most booked: {tier.name} — {tier.spec.images}, {tier.spec.time.toLowerCase()}.
+                    </p>
+                  )}
+                </Link>
 
-                <DrawRule className="mt-12" />
-
-                <ul className="mt-8 space-y-4">
-                  {session.points.map((point, pi) => (
-                    <Reveal
-                      as="li"
-                      key={point}
-                      delay={pi * 0.06}
-                      className="flex gap-4 text-[0.98rem] leading-relaxed text-muted"
-                    >
-                      <svg
-                        viewBox="0 0 16 16"
-                        className="mt-[0.6rem] size-2.5 shrink-0 text-accent"
-                        aria-hidden
-                      >
-                        <path d="M8 0v16M0 8h16" stroke="currentColor" strokeWidth="1.4" opacity=".8" />
-                      </svg>
-                      {point}
-                    </Reveal>
-                  ))}
-                </ul>
-
-                <Reveal delay={0.2} className="mt-12 flex flex-wrap gap-4">
+                <div className="mt-7 flex flex-wrap gap-x-8 gap-y-3">
                   <Link
-                    to="/contact"
-                    className="label rounded-full border border-ink px-8 py-4 text-ink transition-colors duration-400 hover:border-accent hover:bg-accent hover:text-canvas"
+                    to={`/sessions/${session.id}`}
+                    className="label inline-flex items-center gap-3 border-b border-ink pb-2 text-ink transition-colors duration-400 hover:border-accent hover:text-accent"
                   >
-                    Enquire about this
+                    The full session
+                    <span aria-hidden>→</span>
+                  </Link>
+                  <Link
+                    to={`/guides/${session.id}`}
+                    className="label inline-flex items-center gap-3 border-b border-line pb-2 text-muted transition-colors duration-400 hover:border-accent hover:text-accent"
+                  >
+                    Prep guide
                   </Link>
                   {shoots.length > 0 && (
                     <Link
                       to={`/portfolio?c=${session.filter}`}
-                      className="label rounded-full border border-line px-8 py-4 text-muted transition-colors duration-400 hover:border-accent hover:text-accent"
+                      className="label inline-flex items-center gap-3 border-b border-line pb-2 text-muted transition-colors duration-400 hover:border-accent hover:text-accent"
                     >
-                      See {shoots.length} {shoots.length === 1 ? 'session' : 'sessions'}
+                      {shoots.length} {shoots.length === 1 ? 'session' : 'sessions'}
                     </Link>
                   )}
-                </Reveal>
-              </div>
-            </div>
-          </section>
-        )
-      })}
+                </div>
+              </Reveal>
+            )
+          })}
+        </ul>
+      </section>
 
-      {/* The universal inclusions, stated once at the end. */}
-      <section className="border-t border-line py-24 md:py-32">
+      {/* The universal inclusions, stated once. */}
+      <section className="border-t border-line bg-surface py-24 md:py-32">
         <div className="shell grid gap-14 lg:grid-cols-12 lg:gap-20">
           <div className="lg:col-span-5">
             <Reveal className="label flex items-center gap-4 text-accent">
@@ -164,12 +111,19 @@ export default function SessionsPage() {
               text="These come with all of them"
               className="display mt-6 text-[clamp(2rem,4.4vw,3.4rem)] text-ink"
             />
-            <Reveal delay={0.16} className="mt-10">
+            <Reveal delay={0.16} className="mt-10 flex flex-col items-start gap-5">
               <Link
                 to="/contact#investment"
                 className="label inline-flex items-center gap-3 border-b border-ink pb-2 text-ink transition-colors hover:border-accent hover:text-accent"
               >
-                See the pricing
+                Every tier, every price
+                <span aria-hidden>→</span>
+              </Link>
+              <Link
+                to="/guides"
+                className="label inline-flex items-center gap-3 border-b border-line pb-2 text-muted transition-colors hover:border-accent hover:text-accent"
+              >
+                The client guides
                 <span aria-hidden>→</span>
               </Link>
             </Reveal>
@@ -183,9 +137,7 @@ export default function SessionsPage() {
                 delay={i * 0.06}
                 className="flex gap-5 border-b border-line pb-5 text-[1.02rem] leading-relaxed text-muted"
               >
-                <span className="label shrink-0 pt-1 text-faint">
-                  {String(i + 1).padStart(2, '0')}
-                </span>
+                <Tick className="mt-[0.6rem]" />
                 {line}
               </Reveal>
             ))}

@@ -1,7 +1,9 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
 import { CONTACT_PAGE, FAQ, SITE } from '@/data/site'
+import { BOOKING } from '@/data/packages'
 import { PageHero } from '@/components/PageHero'
 import { Investment } from '@/sections/Investment'
 import { EnquiryForm } from '@/components/EnquiryForm'
@@ -13,7 +15,7 @@ function Question({
   open,
   onToggle,
 }: {
-  item: (typeof FAQ)[number]
+  item: { q: string; a: string }
   open: boolean
   onToggle: () => void
 }) {
@@ -69,6 +71,7 @@ export default function ContactPage() {
   )
 
   const [open, setOpen] = useState<number | null>(0)
+  const [openTerm, setOpenTerm] = useState<number | null>(0)
 
   return (
     <>
@@ -155,6 +158,48 @@ export default function ContactPage() {
                 item={item}
                 open={open === i}
                 onToggle={() => setOpen(open === i ? null : i)}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Booking terms — separated from the general FAQ because these are the
+          questions with money and dates in them. */}
+      <section id="terms" className="scroll-mt-24 border-t border-line py-24 md:py-32">
+        <div className="shell grid gap-12 lg:grid-cols-12 lg:gap-20">
+          <div className="lg:col-span-4">
+            <Reveal className="label flex items-center gap-4 text-accent">
+              <span className="h-px w-10 bg-accent" />
+              Terms
+            </Reveal>
+            <MaskText
+              text="Dates, deposits and bad weather"
+              className="display mt-6 text-[clamp(2rem,4vw,3.2rem)] text-ink"
+            />
+            <Reveal delay={0.16} className="mt-8 max-w-sm text-[0.95rem] leading-relaxed text-muted">
+              No contracts you need a solicitor for. Everything that could cost you money or move
+              your date is on this list.
+            </Reveal>
+            <Reveal delay={0.22} className="mt-8">
+              <Link
+                to="/guides"
+                className="label inline-flex items-center gap-3 border-b border-line pb-2 text-muted transition-colors hover:border-accent hover:text-accent"
+              >
+                And once you have booked
+                <span aria-hidden>→</span>
+              </Link>
+            </Reveal>
+          </div>
+
+          <div className="lg:col-span-7 lg:col-start-6">
+            <DrawRule />
+            {BOOKING.terms.map((item, i) => (
+              <Question
+                key={item.q}
+                item={item}
+                open={openTerm === i}
+                onToggle={() => setOpenTerm(openTerm === i ? null : i)}
               />
             ))}
           </div>

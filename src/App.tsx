@@ -8,6 +8,9 @@ import Home from '@/pages/Home'
 const Portfolio = lazy(() => import('@/pages/Portfolio'))
 const ShootPage = lazy(() => import('@/pages/ShootPage'))
 const SessionsPage = lazy(() => import('@/pages/SessionsPage'))
+const SessionPage = lazy(() => import('@/pages/SessionPage'))
+const GuidesPage = lazy(() => import('@/pages/GuidesPage'))
+const GuidePage = lazy(() => import('@/pages/GuidePage'))
 const AboutPage = lazy(() => import('@/pages/AboutPage'))
 const ContactPage = lazy(() => import('@/pages/ContactPage'))
 const NotFound = lazy(() => import('@/pages/NotFound'))
@@ -43,6 +46,30 @@ export default function App() {
           element={
             <Suspense fallback={<PageFallback />}>
               <SessionsPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="sessions/:id"
+          element={
+            <Suspense fallback={<PageFallback />}>
+              <SessionPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="guides"
+          element={
+            <Suspense fallback={<PageFallback />}>
+              <GuidesPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="guides/:id"
+          element={
+            <Suspense fallback={<PageFallback />}>
+              <GuidePage />
             </Suspense>
           }
         />
