@@ -2,7 +2,7 @@ import { motion } from 'motion/react'
 import { useTheme } from '@/lib/hooks'
 
 /**
- * Sun / moon toggle. The icon is a single circle with a travelling mask — the
+ * Sun / moon toggle. The icon is a single circle with a traveling mask — the
  * moon is the sun with a bite taken out of it — and the palette swap wipes
  * outward from wherever the button happens to be.
  */

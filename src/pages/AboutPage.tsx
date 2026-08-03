@@ -117,7 +117,7 @@ export default function AboutPage() {
 
         <div className="lg:col-span-6 lg:col-start-7">
           <MaskText
-            text="Shall we make some?"
+            text="Want to make some?"
             className="display text-[clamp(2.2rem,5vw,3.8rem)] text-ink"
           />
           <Reveal delay={0.12} className="mt-10 flex flex-wrap gap-4">
@@ -125,7 +125,7 @@ export default function AboutPage() {
               to="/contact"
               className="label rounded-full border border-ink px-8 py-4 text-ink transition-colors duration-400 hover:border-accent hover:bg-accent hover:text-canvas"
             >
-              Start an enquiry
+              Start an inquiry
             </Link>
             <Link
               to="/portfolio"

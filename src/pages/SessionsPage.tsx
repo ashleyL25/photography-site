@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { SESSIONS, SESSIONS_PAGE } from '@/data/site'
 import { ALWAYS_INCLUDED, fromPrice, headlineTier } from '@/data/packages'
+import { usePricingUnlocked } from '@/lib/pricing'
 import { SHOOTS_BY_DATE } from '@/data/shoots'
 import { Photo } from '@/components/Photo'
 import { PageHero } from '@/components/PageHero'
@@ -14,6 +15,8 @@ import { useDocumentMeta } from '@/lib/hooks'
  * get you to the right one quickly.
  */
 export default function SessionsPage() {
+  const unlocked = usePricingUnlocked()
+
   useDocumentMeta(
     'Sessions — Ashley Photography',
     'Senior pictures, graduation, engagements, couples, families and pets. Pricing, what each session includes, and a prep guide for every one.',
@@ -54,7 +57,9 @@ export default function SessionsPage() {
                         {session.title}
                       </h2>
                     </div>
-                    <span className="label text-accent">{fromPrice(session.id)}</span>
+                    <span className="label text-accent">
+                      {fromPrice(session.id, unlocked)}
+                    </span>
                   </div>
 
                   <p className="label mt-4 leading-[1.6] text-faint">{session.runs}</p>

@@ -1,6 +1,6 @@
 import { CTA, SITE } from '@/data/site'
 import { Photo } from '@/components/Photo'
-import { EnquiryForm } from '@/components/EnquiryForm'
+import { InquiryForm } from '@/components/InquiryForm'
 import { MaskText, Reveal } from '@/components/motion'
 
 export function Contact() {
@@ -35,7 +35,7 @@ export function Contact() {
             <dl className="mt-14 space-y-7">
               {[
                 { term: 'Based in', detail: SITE.base },
-                { term: 'Travelling to', detail: SITE.serves },
+                { term: 'Traveling to', detail: SITE.serves },
                 { term: 'Typically replies', detail: 'Within 48 hours' },
               ].map((row, i) => (
                 <Reveal key={row.term} delay={0.2 + i * 0.08}>
@@ -61,7 +61,7 @@ export function Contact() {
           </div>
 
           <div className="lg:col-span-7">
-            <EnquiryForm tone="onPhoto" action={CTA.action} />
+            <InquiryForm tone="onPhoto" action={CTA.action} />
           </div>
         </div>
       </div>

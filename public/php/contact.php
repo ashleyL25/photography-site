@@ -1,6 +1,6 @@
 <?php
 /**
- * Enquiry form handler for Hostinger shared hosting.
+ * Inquiry form handler for Hostinger shared hosting.
  *
  * The React form POSTs JSON here; this validates it and sends a mail.
  *
@@ -95,7 +95,7 @@ $rows = [
     'Sent'      => date('Y-m-d H:i:s T'),
 ];
 
-$body = "New enquiry from the website\n\n";
+$body = "New inquiry from the website\n\n";
 foreach ($rows as $label => $value) {
     if ($value === '') {
         continue; // Skip the optional fields nobody filled in.

@@ -2,14 +2,24 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'motion/react'
 import clsx from 'clsx'
-import { ADD_ONS, ALWAYS_INCLUDED, BOOKING, PACKAGE_SETS } from '@/data/packages'
+import {
+  ADD_ONS,
+  ALWAYS_INCLUDED,
+  BOOKING,
+  PACKAGE_SETS,
+  PRICING_BY_REQUEST,
+  RETOUCHING,
+  EDITING_STYLE,
+  isPrivatePricing,
+} from '@/data/packages'
 import { BLACK_AND_WHITE, SESSIONS_BY_ID } from '@/data/site'
 import { TierCards, Tick } from '@/components/TierCards'
 import { DrawRule, MaskText, Reveal } from '@/components/motion'
+import { usePricingUnlocked } from '@/lib/pricing'
 
 /**
  * Pricing. Lives on the contact page, directly above the FAQ — hence the
- * same-page `#enquire` links rather than a route change.
+ * same-page `#inquire` links rather than a route change.
  *
  * Six session types × three tiers is eighteen cards, which is far too many to
  * show at once, so the session type is a tab and three cards show at a time.
@@ -19,6 +29,9 @@ export function Investment() {
   const [activeId, setActiveId] = useState(PACKAGE_SETS[0].id)
   const set = PACKAGE_SETS.find((s) => s.id === activeId) ?? PACKAGE_SETS[0]
   const session = SESSIONS_BY_ID[set.id]
+  const unlocked = usePricingUnlocked()
+  const hidePrices = isPrivatePricing(set.id, unlocked)
+  const retouching = RETOUCHING[EDITING_STYLE[set.id] ?? 'natural']
 
   return (
     <section id="investment" className="relative scroll-mt-24 border-t border-line py-28 md:py-40">
@@ -37,17 +50,19 @@ export function Investment() {
           <Reveal delay={0.15} className="max-w-sm pb-3 text-[0.95rem] leading-relaxed text-muted">
             Nothing is quoted after the fact. Pick the session, then pick how much of a day you
             want — the time, the locations, the outfits and the number of photographs are stated on
-            every tier.
+            every tier. Senior and engagement prices are sent on request rather than posted.
           </Reveal>
         </div>
 
         <DrawRule className="mt-14" />
 
-        {/* Session type selector. */}
+        {/* Session type selector. The negative inline margin lets the row bleed
+            to the screen edge as it scrolls on a phone, so the padding that
+            replaces it has to come back on the same axis. */}
         <div
           role="tablist"
           aria-label="Session type"
-          className="-mx-6 flex gap-2 overflow-x-auto px-6 pb-8 [scrollbar-width:none] md:mx-0 md:px-0 [&::-webkit-scrollbar]:hidden"
+          className="-mx-6 mt-10 flex gap-2 overflow-x-auto px-6 pb-10 [scrollbar-width:none] md:mx-0 md:px-0 [&::-webkit-scrollbar]:hidden"
         >
           {PACKAGE_SETS.map((option) => {
             const label = SESSIONS_BY_ID[option.id]?.title ?? option.id
@@ -82,11 +97,28 @@ export function Investment() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
         >
-          <p className="mb-10 max-w-2xl text-[1rem] leading-[1.85] text-muted">{set.intro}</p>
+          <p className="mb-12 max-w-2xl text-[1rem] leading-[1.85] text-muted">{set.intro}</p>
 
-          <TierCards set={set} cta={{ label: 'Enquire', href: '#enquire' }} />
+          <TierCards
+            set={set}
+            cta={{ label: 'Inquire', href: '#inquire' }}
+            hidePrices={hidePrices}
+          />
 
-          <div className="mt-8 flex flex-wrap items-baseline justify-between gap-6">
+          {hidePrices && (
+            <p className="mt-10 max-w-2xl border-l border-accent/40 pl-6 text-[0.97rem] leading-[1.8] text-muted">
+              {PRICING_BY_REQUEST.note}
+            </p>
+          )}
+
+          {/* How much finishing work this kind of session gets — the reason the
+              image counts differ so much between the tabs. */}
+          <div className="mt-10 max-w-2xl">
+            <p className="label text-accent">{retouching.label}</p>
+            <p className="mt-4 text-[0.95rem] leading-[1.8] text-muted">{retouching.body}</p>
+          </div>
+
+          <div className="mt-10 flex flex-wrap items-baseline justify-between gap-6">
             {set.note ? (
               <p className="max-w-xl text-[0.88rem] leading-relaxed text-faint italic">
                 {set.note}

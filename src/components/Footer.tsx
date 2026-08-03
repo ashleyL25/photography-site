@@ -50,7 +50,7 @@ export function Footer() {
               to="/contact"
               className="label mt-4 inline-block w-max rounded-full border border-ink px-7 py-3 text-ink transition-colors duration-400 hover:border-accent hover:bg-accent hover:text-canvas"
             >
-              Enquire
+              Inquire
             </Link>
           </div>
         </div>

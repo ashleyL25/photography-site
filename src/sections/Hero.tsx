@@ -94,7 +94,7 @@ export function Hero() {
             {HERO.eyebrow}
           </motion.p>
 
-          {/* Dropped below the optical centre so the wordmark crosses the
+          {/* Dropped below the optical center so the wordmark crosses the
               couple's torsos rather than their faces. */}
           <div className="flex translate-y-[9vh] flex-col items-center text-center">
             <h1 className="display flex flex-col items-center">

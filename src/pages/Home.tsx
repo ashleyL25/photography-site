@@ -4,7 +4,6 @@ import { Story } from '@/sections/Story'
 import { Sessions } from '@/sections/Sessions'
 import { Selected } from '@/sections/Selected'
 import { Process } from '@/sections/Process'
-import { Delivery } from '@/sections/Delivery'
 import { About } from '@/sections/About'
 import { Contact } from '@/sections/Contact'
 import { useDocumentMeta } from '@/lib/hooks'
@@ -23,7 +22,9 @@ export default function Home() {
       <Sessions />
       <Selected />
       <Process />
-      <Delivery />
+      {/* The gallery timeline (`Delivery`) used to sit here. It is delivery
+          detail rather than a reason to book, so it lives at the foot of the
+          contact page now. */}
       <About />
       <Contact />
     </>

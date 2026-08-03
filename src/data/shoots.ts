@@ -49,7 +49,7 @@ export const SHOOTS: Shoot[] = [
     sort: '2026-05-09',
     location: 'University of Northern Iowa, Cedar Falls',
     story:
-      'Cap and gown across campus — the entrance sign, the campanile, the steps of Lang Hall and a garden trellis for the frames without the gown. Shot the weekend of the ceremony, and finished in black and white as well as colour.',
+      'Cap and gown across campus — the entrance sign, the campanile, the steps of Lang Hall and a garden trellis for the frames without the gown. Shot the weekend of the ceremony, and finished in black and white as well as color.',
     cover: 'graduation-em-grad-233',
   },
   {
@@ -61,7 +61,7 @@ export const SHOOTS: Shoot[] = [
     sort: '2025-06-10',
     location: 'Lake Como, Italy · Salzburg, Austria',
     story:
-      'A fortnight of travel photographed the same way I photograph a session: lake light, narrow streets, a mountain ridge and the people who happened to be standing in front of them.',
+      'Two weeks of travel photographed the same way I photograph a session: lake light, narrow streets, a mountain ridge and the people who happened to be standing in front of them.',
     cover: 'travel-italy-2025-339',
   },
   {
@@ -72,7 +72,7 @@ export const SHOOTS: Shoot[] = [
     date: 'September 2024',
     sort: '2024-09-28',
     story:
-      'Couple portraits taken beside the water in the last of the evening light, in colour and in black and white.',
+      'Couple portraits taken beside the water in the last of the evening light, in color and in black and white.',
     cover: 'couples-am-27',
   },
   {
@@ -83,7 +83,7 @@ export const SHOOTS: Shoot[] = [
     date: 'May 2024',
     sort: '2024-05-18',
     story:
-      'A family of five in the back garden on graduation day: the whole group together, each of the siblings on their own, and a good deal of not standing still.',
+      'A family of five in the backyard on graduation day: the whole group together, each of the siblings on their own, and a good deal of not standing still.',
     cover: 'family-2024-05-18-grad-party-196',
   },
   {
@@ -105,7 +105,7 @@ export const SHOOTS: Shoot[] = [
     date: 'June 2024',
     sort: '2024-06-27',
     story:
-      'Copper, a golden retriever, and a bernese mountain dog, photographed in a field of coreopsis in full yellow bloom. Very little direction was taken.',
+      'A golden retriever and a bernese mountain dog, photographed in a field of coreopsis in full yellow bloom. Very little direction was taken.',
     cover: 'pets-06-27-2024-puppies-128',
   },
   {
@@ -116,7 +116,7 @@ export const SHOOTS: Shoot[] = [
     date: 'September 2023',
     sort: '2023-09-17',
     story:
-      'Early autumn, a blue floral dress, and three settings in one afternoon: the water’s edge, a willow, and a tree-lined path running into the light.',
+      'Early fall, a blue floral dress, and three settings in one afternoon: the water’s edge, a willow, and a tree-lined path running into the light.',
     cover: 'seniors-elise-portrait-121',
   },
   {
@@ -138,7 +138,7 @@ export const SHOOTS: Shoot[] = [
     date: 'June 2022',
     sort: '2022-06-22',
     story:
-      'A summer engagement session with Copper along for all of it: a blossoming tree, a pond bank, tall grass, and a set of black-and-white frames at the end.',
+      'A summer engagement session with the dog along for all of it: a blossoming tree, a pond bank, tall grass, and a set of black-and-white frames at the end.',
     cover: 'engagement-june2022-54',
   },
   {

@@ -133,7 +133,7 @@
  * Page container.
  *
  * At xl the fixed index rail occupies the first ~190px of the viewport, so the
- * inline padding grows to clear it — but only by as much as the centred
+ * inline padding grows to clear it — but only by as much as the centerd
  * container is not already doing on its own. Hence the max/min pair rather than
  * a flat breakpoint value.
  */
@@ -225,7 +225,7 @@
 }
 
 /**
- * Print — the client guides get printed and stuck on a kitchen worktop, so this
+ * Print — the client guides get printed and stuck on a kitchen countertop, so this
  * has to work rather than merely not crash.
  *
  * The critical rule is the first one. Every scroll-triggered element starts at

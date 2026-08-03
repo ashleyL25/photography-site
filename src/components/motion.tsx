@@ -40,7 +40,7 @@ const wordVariants: Variants = {
 /**
  * Word-by-word mask reveal: each word rides up from behind a clipped line box,
  * staggered left to right. Used for every section heading so the page has one
- * recognisable typographic gesture rather than a grab-bag of effects.
+ * recognizable typographic gesture rather than a grab-bag of effects.
  */
 export function MaskText({
   text,
@@ -60,7 +60,11 @@ export function MaskText({
   const words = text.split(' ')
   return (
     <Tag className={className}>
+      {/* Keyed on the text: the viewport trigger is one-shot, so if the copy is
+          swapped under a mounted instance the new words inherit a spent parent
+          and never leave the mask. A fresh key remounts and re-observes. */}
       <motion.span
+        key={text}
         className="inline"
         initial="hidden"
         whileInView="shown"

@@ -22,12 +22,17 @@ export const SITE = {
 /**
  * Primary navigation. `to` values starting with `/#` land on a homepage
  * section — the router handles the route, then the hash handler scrolls.
+ *
+ * The prep guides are deliberately NOT in here. They are per-session documents
+ * that belong to people who have booked, so they are reached from a session page
+ * (and by the link in the booking email). `/guides` still exists and still lists
+ * all six.
  */
 export const NAV = [
   { label: 'Portfolio', to: '/portfolio' },
   { label: 'Sessions', to: '/sessions' },
+  { label: 'Experience', to: '/experience' },
   { label: 'Investment', to: '/contact#investment' },
-  { label: 'Guides', to: '/guides' },
   { label: 'About', to: '/about' },
 ] as const
 
@@ -38,16 +43,15 @@ export const SECTIONS = [
   { id: 'sessions', label: 'Sessions' },
   { id: 'work', label: 'Selected' },
   { id: 'process', label: 'Process' },
-  { id: 'delivery', label: 'Delivery' },
   { id: 'about', label: 'Ashley' },
-  { id: 'contact', label: 'Enquire' },
+  { id: 'contact', label: 'Inquire' },
 ] as const
 
 export const HERO = {
   eyebrow: 'Portraits · Urbandale, Iowa',
   lead: 'Ashley',
   script: 'Photography',
-  sub: 'Natural-light portraits for the people, places and small ridiculous dogs that make up a life.',
+  sub: 'Natural-light portraits of the people, the places and the very good dogs that make up a life.',
   scroll: 'Scroll',
 }
 
@@ -65,11 +69,11 @@ export const INTRO = {
   heading: 'Pictures capture a moment in time — a picture keeps it.',
   body: [
     'An engagement, a homecoming, a new puppy, the last spring before everyone scatters. These are the moments worth slowing down for, and I will walk you through every step to get the shot.',
-    'I picked up my parents’ old Canon back in 2015, started taking engagement sessions in 2021, added seniors the year after, and everything else the year after that. Sessions are unhurried and a little bit fun, because nobody has ever looked relaxed while being told to relax.',
+    'Nobody has ever looked relaxed while being told to relax, so we skip that part. Sessions are unhurried and genuinely fun, and I direct just enough that you never have to wonder what to do with your hands — the frames you end up loving come from the gaps in between.',
   ],
   stats: [
     { value: '2021', label: 'Booking since' },
-    { value: '60', label: 'Images, senior session' },
+    { value: '150+', label: 'Photos, senior session' },
     { value: '48h', label: 'Reply time' },
   ],
 }
@@ -117,6 +121,7 @@ export const SESSIONS: Session[] = [
       'A sit-down review where you pick every photograph in the album',
       'Weekday, midday start, planned around the light',
       'Props, jerseys, instruments and pets all welcome',
+      'Every photograph fully retouched, not just color-corrected',
     ],
     gallery: ['seniors-elise-portrait-102', 'seniors-2024-07-05-park-practice-51'],
   },
@@ -154,7 +159,7 @@ export const SESSIONS: Session[] = [
     runs: 'Evening, timed to sunset · ninety minutes to two and a half hours',
     detail: [
       'The point of an engagement session is not the ring — it is having photographs of the two of you from before all the planning took over. We pick a spot that suits you and use the last good hour of light on it.',
-      'Start times are set by the light rather than the clock, so they move through the year: half six in October, half seven in June. The first ten minutes are always the stiffest, for everybody, and that is built into the timing. By minute fifteen you will have forgotten I am there.',
+      'Start times are set by the light rather than the clock, so they move through the year: 6:30 in October, 7:30 in June. The first ten minutes are always the stiffest, for everybody, and that is built into the timing. By minute fifteen you will have forgotten I am there.',
       'Expect more conversation than posing. The frames people keep are almost always the ones taken between the directions.',
     ],
     points: [
@@ -162,7 +167,8 @@ export const SESSIONS: Session[] = [
       'Timed to finish on the last of the light',
       'Individual portraits as well as the two of you',
       'Your dog is genuinely welcome',
-      'A set of black-and-white frames alongside the colour',
+      'A set of black-and-white frames alongside the color',
+      'A big album — a hundred and twenty photographs or more',
     ],
     gallery: ['engagement-june2022-176', 'engagement-june2022-bw-84'],
   },
@@ -184,7 +190,7 @@ export const SESSIONS: Session[] = [
       'One or two locations, chosen together',
       'Anniversary, milestone, or no reason at all',
       'Individual portraits as well as the two of you',
-      'A set of black-and-white frames alongside the colour',
+      'A set of black-and-white frames alongside the color',
       'Bookable two years at a time if you want the comparison',
     ],
     gallery: ['couples-am-43', 'couples-am-30'],
@@ -224,7 +230,7 @@ export const SESSIONS: Session[] = [
     detail: [
       'Dogs come along to any session at no extra cost, and they are usually the reason the humans finally relax. Nobody has ever been stiff in front of a camera while holding a lead.',
       'They can also have the session entirely to themselves — a new puppy, or an old friend you want photographed properly while you still can. No expectation whatsoever that they sit still; the photographs worth having are of them doing what they actually do.',
-      'And get in the frame yourself. Everybody books this for photographs of their animal and then realises what they wanted was photographs of the two of them together, because you are always the one holding the camera.',
+      'And get in the frame yourself. Everybody books this for photographs of their animal and then realizes what they wanted was photographs of the two of them together, because you are always the one holding the camera.',
     ],
     points: [
       'Included in any other session at no extra cost',
@@ -242,19 +248,19 @@ export const FEATURED: { photoId: string; caption: string; span: 'tall' | 'wide'
   { photoId: 'seniors-elise-portrait-102', caption: 'Elise · Senior', span: 'tall' },
   { photoId: 'engagement-july2022-109', caption: 'The barn road', span: 'wide' },
   { photoId: 'graduation-em-grad-233', caption: 'Campanile · UNI', span: 'tall' },
-  { photoId: 'pets-06-27-2024-puppies-128', caption: 'Copper', span: 'wide' },
+  { photoId: 'pets-06-27-2024-puppies-128', caption: 'New puppy adventures', span: 'wide' },
   { photoId: 'couples-am-27', caption: 'Maddie & Will', span: 'tall' },
-  { photoId: 'family-2024-05-18-grad-party-196', caption: 'All five of them', span: 'wide' },
-  { photoId: 'engagement-june2022-bw-84', caption: 'Sara, Grant & Copper', span: 'tall' },
-  { photoId: 'seniors-2024-07-05-park-practice-51', caption: 'Park practice', span: 'std' },
-  { photoId: 'graduation-em-grad-253', caption: 'The trellis', span: 'tall' },
+  { photoId: 'family-2024-05-18-grad-party-196', caption: 'The whole crew', span: 'wide' },
+  { photoId: 'engagement-june2022-bw-84', caption: 'Engagement + Puppy', span: 'tall' },
+  { photoId: 'seniors-2024-07-05-park-practice-51', caption: 'Portrait star', span: 'std' },
+  { photoId: 'graduation-em-grad-253', caption: 'Cap & Gown', span: 'tall' },
 ]
 
 export const PROCESS = [
   {
     index: '01',
     title: 'Pick your place',
-    body: 'You already have the shoot in your head. Send me the idea and we settle on the spot together — usually one location, more for senior sessions. I travel to you anywhere in the Des Moines metro, and further afield for a travel fee.',
+    body: 'You already have the shoot in your head. Send me the idea and we settle on the spot together — usually one location, more for senior sessions. I come to you anywhere in the Des Moines metro, and anywhere in Iowa the photograph happens to be.',
     photoId: 'backgrounds-2024-07-05-park-practice-127',
   },
   {
@@ -265,13 +271,13 @@ export const PROCESS = [
   },
   {
     index: '03',
-    title: 'Get your gallery',
-    body: 'I edit the set, add black-and-white versions of the frames that suit it, and deliver everything to a private Pic-Time gallery. Download it, share it, order prints — it is yours for a year, and you will get two reminders before it closes.',
+    title: 'Get your album',
+    body: 'A couple of weeks later the finished album arrives in your own online photo gallery — every frame edited, the ones that earn it in black and white as well as color, ready to download at full size, share with everyone, and order prints from. Then comes the best bit: sitting down and going through all of them.',
     photoId: 'graduation-em-grad-61',
   },
 ]
 
-/** Lookup for the session pages and the enquiry form. */
+/** Lookup for the session pages and the inquiry form. */
 export const SESSIONS_BY_ID = Object.fromEntries(SESSIONS.map((s) => [s.id, s])) as Record<
   string,
   Session
@@ -280,7 +286,7 @@ export const SESSIONS_BY_ID = Object.fromEntries(SESSIONS.map((s) => [s.id, s]))
 export const GALLERY = {
   eyebrow: 'Your gallery',
   heading: 'Online for a year, and you will never be caught out by the deadline.',
-  body: 'Every session is delivered to a private Pic-Time gallery you can download from, share and order prints through. It stays up for a full year — and I email you twice before it comes down, so nothing is lost to a forgotten tab.',
+  body: 'Every session is delivered to a private online photo gallery you can download from, share and order prints through. It stays up for a full year — and I email you twice before it comes down, so nothing is lost to a forgotten tab.',
   // Percentages position each marker along the one-year timeline.
   timeline: [
     { at: 0, label: 'Delivered', detail: 'Gallery goes live' },
@@ -292,30 +298,34 @@ export const GALLERY = {
 
 export const BLACK_AND_WHITE = {
   eyebrow: 'A small thing I do',
-  body: 'Some frames are simply better without colour. As I edit, I pick the ones that earn it and deliver those in black and white as well as colour — at no extra cost, and no extra decision for you to make.',
+  body: 'Some frames are simply better without color. As I edit, I pick the ones that earn it and deliver those in black and white as well as color — at no extra cost, and no extra decision for you to make.',
 }
 
+/**
+ * The homepage "behind the camera" block is about why I do this, not when I
+ * started. The history lives on the About page — see ABOUT_PAGE.
+ */
 export const ABOUT = {
   eyebrow: 'Behind the camera',
-  heading: 'Photography stopped being a hobby a long time ago.',
+  heading: 'The frame I am waiting for is the one nobody planned.',
   body: [
-    'It started in 2015 with my parents’ 2008 Canon and a friend who needed senior pictures — no Photoshop, just the adjustment panel on a desktop, and results as bad as you are imagining.',
-    'Two years later I bought my own camera and taught myself Lightroom and Photoshop off YouTube, pausing every three seconds so I would not miss a step. That turned into design work, an Advertising degree from Iowa State, and — from 2021 — sessions for the people of central Iowa.',
-    'If you want to learn the editing side yourself, ask me — I will happily hand over the tips and resources I wish I had had.',
+    'What I love about this is the half-second nobody arranges — the laugh at something off to the side, the hand that reaches for the other hand, the dog wrecking a perfectly good pose. Those are the photographs you still look at years later, and they only turn up once you have stopped performing for me.',
+    'So before anything else, my job is to put you at ease. I keep it moving, I direct enough that you never have to wonder what to do with your hands, and I would much rather be the person you relaxed and laughed with than the person who pointed a lens at you for an hour.',
+    'Every shoot is somebody’s once — a last spring of high school, a ring that just went on, a puppy who will not be small for long. It should be genuinely fun while it is happening and worth having forever afterwards. That is the whole of it.',
   ],
   photoId: 'about-ashley',
   signature: 'Ashley',
 }
 
 /**
- * Enquiry form options.
+ * Inquiry form options.
  *
  * `sessions` is derived from SESSIONS so the form can never drift from what is
  * actually offered; the two extras at the end are for people who are not
  * booking. When a session is picked the form narrows the package select to that
  * session's tiers (see PACKAGE_SETS in packages.ts).
  */
-export const ENQUIRY = {
+export const INQUIRY = {
   sessions: [...SESSIONS.map((s) => s.title), 'Something else', 'Just a question'],
   /** Maps a `sessions` label back to a session id, for the package select. */
   sessionIdFor: (label: string) => SESSIONS.find((s) => s.title === label)?.id,
@@ -342,7 +352,7 @@ export const CTA = {
   eyebrow: 'Bookings open',
   heading: 'Creating memories that last a lifetime.',
   body: 'Take a look through the work. If the style feels like yours, send me a note — tell me who is in the photos, roughly when, and where you picture it.',
-  action: 'Start an enquiry',
+  action: 'Start an inquiry',
   photoId: 'backgrounds-2024-07-05-park-practice-122',
 }
 
@@ -355,6 +365,143 @@ export const SESSIONS_PAGE = {
   heading: 'Six kinds of session.',
   body: 'Each one has its own page, its own three tiers, and its own prep guide. Senior sessions run to a routine — a weekday afternoon, three outfits, three locations and lunch. The rest are shaped around what you actually want.',
   photoId: 'backgrounds-italy-2025-318',
+}
+
+/* ------------------------------------------------------------------ *
+ * The experience
+ *
+ * Everything that is true of every session, whichever kind you book. The prep
+ * guides are per-session and go out on booking; this is the version anybody can
+ * read before they have decided anything.
+ * ------------------------------------------------------------------ */
+
+export const EXPERIENCE_PAGE = {
+  eyebrow: 'The experience',
+  heading: 'What it is actually like.',
+  intro:
+    'Every session is different, and yet most of it is the same every time — how we plan it, how the hour itself feels, and what turns up in your inbox afterwards. All of that is on this page, so nothing about booking me is a surprise.',
+  photoId: 'backgrounds-italy-2025-319',
+
+  /** The arc every session follows, whatever kind it is. */
+  arc: {
+    eyebrow: 'Start to finish',
+    heading: 'How it goes, every time',
+    lead: 'From the first message to the album landing. Senior sessions add a review appointment in the middle; everything else runs exactly like this.',
+    items: [
+      {
+        time: 'You send a note',
+        title: 'Tell me what you have in mind',
+        detail:
+          'Who is in the photographs, roughly when, and where you picture it. I reply within forty-eight hours with dates that work — and if you ask which package fits, I will tell you honestly, including when the cheaper one is the right answer.',
+      },
+      {
+        time: 'Then',
+        title: 'We hold the date',
+        detail:
+          'A $150 retainer holds it, and it comes off your total rather than sitting on top of it. The balance is due the day we shoot.',
+      },
+      {
+        time: 'The same day',
+        title: 'Your prep guide arrives',
+        detail:
+          'A guide written for your session type: what to wear, when to book hair and makeup, where we are going, what to bring, and how the day runs hour by hour. From here until the album lands, ask me anything as often as you like.',
+      },
+      {
+        time: 'A week or so out',
+        title: 'We settle the details',
+        detail:
+          'Locations, the meeting point, where to park. Send me photographs of your outfit options and I will tell you honestly which will work best where we are going — almost nobody does this, and it is the single most useful thing you can do in advance.',
+      },
+      {
+        time: 'The evening before',
+        title: 'I message you about the forecast',
+        detail:
+          'A straight answer about whether we are on, sent the night before rather than the morning of. You will never be left guessing.',
+      },
+      {
+        time: 'The session',
+        title: 'You turn up and I do the rest',
+        detail:
+          'I guide every pose, so nobody has to wonder what to do with their hands. The first fifteen minutes are the stiffest — for everybody, always — and then you forget I am there. That is when the good ones happen.',
+      },
+      {
+        time: 'About two weeks later',
+        title: 'Your album arrives',
+        detail:
+          'The finished set, edited, in your own private online photo gallery. Senior sessions sit down with me first and choose every photograph that makes the album.',
+      },
+    ],
+  },
+
+  /** What is true of every session, regardless of type or tier. */
+  principles: {
+    eyebrow: 'However you book it',
+    heading: 'Four things that are always true',
+    items: [
+      {
+        title: 'You will never wonder what to do',
+        body: 'I direct every pose. If you are worried about being awkward on camera — and nearly everybody is — that worry is mine to handle, not yours. Turn up with your outfits and let me do the thinking.',
+      },
+      {
+        title: 'Your dog is genuinely invited',
+        body: 'Pets come along to any session at no extra cost, and they are usually the reason the humans finally relax. Nobody has ever been stiff in front of a camera while holding a lead.',
+      },
+      {
+        title: 'Nothing is quoted after the fact',
+        body: 'The time, the locations, the outfits and what you receive are stated on every package before you book. If you want more afterwards, the add-ons are priced on the page too.',
+      },
+      {
+        title: 'Ask as many questions as you like',
+        body: 'Whether a color works, what to do about a haircut, whether the forecast means it is off. All of it is answerable in advance, so ask — that is what the weeks before the session are for.',
+      },
+    ],
+  },
+
+  /**
+   * The editing question, answered before anybody has to ask it. The two
+   * descriptions themselves come from RETOUCHING in policy.ts, so this page and
+   * the prep guides cannot end up saying different things.
+   */
+  finishing: {
+    eyebrow: 'How the photographs are finished',
+    heading: 'Two levels, and you should know which you are getting',
+    body: 'Every session is edited by hand, frame by frame, and everything arrives at full resolution — both of these print beautifully. What differs is how much work goes into each individual photograph, and that is what decides how many of them there are.',
+    applies: {
+      retouched: 'Senior pictures · Graduation · Families',
+      natural: 'Engagements · Couples · Pets',
+    },
+  },
+
+  /** Itemized, so a client can see the whole of what they are buying. */
+  receive: {
+    eyebrow: 'What you receive',
+    heading: 'Everything that comes with a session',
+    body: 'Whichever session and whichever tier, this is what is included. What changes between tiers is how much of a day you get — and the top tier of a senior, engagement or family session adds a printed album.',
+    items: [
+      'Your full edited album, in a private online photo gallery',
+      'Full-resolution downloads of every image, and the right to print any of them',
+      'Selected frames delivered in black and white as well as color',
+      'A print store built into the gallery, if that is easier than finding your own',
+      'The gallery live for a full year, with two reminders before it closes',
+      'A prep guide for your session type, sent the day you book',
+      'Locations planned together, and honest feedback on your outfits beforehand',
+      'Travel anywhere in the Des Moines metro, included',
+      'Your dog, at no extra cost, always',
+      'Additional edited images from the raw set whenever you want them',
+      'A printed album on the top tier of senior, engagement and family sessions',
+    ],
+  },
+
+  /** Weather policy — the columns come from guides.ts so the two cannot drift. */
+  weather: {
+    eyebrow: 'Weather, and moving a date',
+    heading: 'Gray skies are good news',
+  },
+
+  close: {
+    heading: 'Still got a question?',
+    body: 'Then ask it. No question about a session is too small, and I would much rather answer it now than have you wondering about it the night before.',
+  },
 }
 
 /* ------------------------------------------------------------------ *
@@ -385,7 +532,7 @@ export const PORTFOLIO_FILTERS = [
 export const PORTFOLIO = {
   eyebrow: 'Selected work',
   heading: 'The portfolio',
-  body: 'Every session, start to finish — seniors, graduations, engagements, families and a great many dogs. Pick a category, or scroll the lot.',
+  body: 'Every session, start to finish — seniors, graduations, engagements, families and a whole lot of dogs. Pick a category, or scroll all of it.',
   photoId: 'backgrounds-2024-07-05-park-practice-188',
 }
 
@@ -433,18 +580,8 @@ export const ABOUT_PAGE = {
     },
     {
       year: '2018',
-      title: 'Into design',
-      body: 'Added Illustrator, InDesign and front-end code to the toolkit.',
-    },
-    {
-      year: '2019',
-      title: 'Merrill Manufacturing',
-      body: 'Built their e-commerce site from scratch and shot every product and staff photograph on it.',
-    },
-    {
-      year: '2020',
-      title: 'Iowa State',
-      body: 'Graduated with a degree in Advertising, minors in German and business.',
+      title: 'Family, friends and trips',
+      body: 'Started photographing family, friends and everywhere I traveled — hundreds of frames, no clients, and the best possible practice.',
     },
     {
       year: '2021',
@@ -464,7 +601,7 @@ export const ABOUT_PAGE = {
     {
       year: 'Now',
       title: 'Full swing',
-      body: 'Shooting across the Des Moines metro, and travelling for the sessions worth travelling for.',
+      body: 'Shooting across the Des Moines metro, and happy to travel anywhere in Iowa the session takes me.',
     },
   ],
   aside: {
@@ -492,11 +629,19 @@ export const CONTACT_PAGE = {
 export const FAQ = [
   {
     q: 'How many photographs do I get?',
-    a: 'It is set by the tier you pick, and every tier states it plainly — from twenty-five on a short session to a hundred across the two-season senior package. Nothing is vague about it and nothing is decided after the fact. You can always add more from the raw set afterwards.',
+    a: 'Every tier states a floor and I almost always go over it — roughly forty photographs per hour of shooting on a session that gets fully retouched, and about double that on one that does not. So a one-hour family session is forty or more, a four-hour senior afternoon is a hundred and fifty or more, and a ninety-minute engagement session is a hundred and twenty or more. Nothing is decided after the fact.',
+  },
+  {
+    q: 'Why does an engagement session come with more photographs than a senior session?',
+    a: 'Because of how much is done to each one. Senior, graduation and family photographs are fully retouched — every frame goes through Photoshop as well as Lightroom, so breakouts, sweat marks and creases come out properly. Engagement, couples and pet sessions are edited naturally: color, light and the small things I would fix without being asked, finished in Lightroom. Both are full resolution and both print beautifully. One simply takes several times as long per photograph, so there are fewer of them. If you want a particular engagement frame properly retouched, say which and I will do that one as an add-on.',
+  },
+  {
+    q: 'Do I get a printed album?',
+    a: 'On the top tier of senior, engagement and family sessions, yes — included. On any other tier it is an add-on, priced by size and page count. Every session comes with the full digital album in your online gallery regardless.',
   },
   {
     q: 'How do I know which tier to pick?',
-    a: 'Say what you want in the enquiry and I will tell you which one fits, including when the cheaper one is the right answer. The middle option is the most popular in every session type for a reason, but a one-hour session genuinely is enough for plenty of people.',
+    a: 'Say what you want in the inquiry and I will tell you which one fits, including when the cheaper one is the right answer. The middle option is the most popular in every session type for a reason, but a one-hour session genuinely is enough for plenty of people.',
   },
   {
     q: 'How do I prepare?',
@@ -504,11 +649,11 @@ export const FAQ = [
   },
   {
     q: 'How long do I have the gallery?',
-    a: 'A full year in a private Pic-Time gallery. I email you twice before it closes — ninety days out and again at thirty — so it never disappears on you unannounced. Download everything before then and it is yours forever.',
+    a: 'A full year in a private online photo gallery. I email you twice before it closes — ninety days out and again at thirty — so it never disappears on you unannounced. Download everything before then and it is yours forever.',
   },
   {
     q: 'Do I get black-and-white versions?',
-    a: 'Some of them, yes. As I edit I pick the frames that work better without colour and deliver those in both. It costs nothing extra and it is not a decision you have to make.',
+    a: 'Some of them, yes. As I edit I pick the frames that work better without color and deliver those in both. It costs nothing extra and it is not a decision you have to make.',
   },
   {
     q: 'How many locations and outfits do we get?',
@@ -516,7 +661,7 @@ export const FAQ = [
   },
   {
     q: 'Why are senior sessions on a weekday?',
-    a: 'Because parks, downtown and every good doorway in the metro are empty on a Tuesday and heaving on a Saturday, and nobody wants strangers in the background of their senior pictures. A weekday also means four hours without anybody feeling rushed. Weekends are possible when they have to be — ask.',
+    a: 'Because parks, downtown and every good doorway in the metro are empty on a Tuesday and packed on a Saturday, and nobody wants strangers in the background of their senior pictures. A weekday also means four hours without anybody feeling rushed. Weekends are possible when they have to be — ask.',
   },
   {
     q: 'Can my dog come?',
@@ -528,6 +673,6 @@ export const FAQ = [
   },
   {
     q: 'Can I print the photographs?',
-    a: 'Yes. You get full download and print rights to every image in your gallery, and you can order prints directly through Pic-Time if that is easier.',
+    a: 'Yes. You get full download and print rights to every image in your gallery, and you can order prints directly through the gallery itself if that is easier.',
   },
 ]

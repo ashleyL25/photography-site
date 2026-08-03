@@ -6,7 +6,8 @@ import { CONTACT_PAGE, FAQ, SITE } from '@/data/site'
 import { BOOKING } from '@/data/packages'
 import { PageHero } from '@/components/PageHero'
 import { Investment } from '@/sections/Investment'
-import { EnquiryForm } from '@/components/EnquiryForm'
+import { Delivery } from '@/sections/Delivery'
+import { InquiryForm } from '@/components/InquiryForm'
 import { DrawRule, MaskText, Reveal } from '@/components/motion'
 import { useDocumentMeta } from '@/lib/hooks'
 
@@ -67,7 +68,7 @@ function Question({
 export default function ContactPage() {
   useDocumentMeta(
     'Contact — Ashley Photography',
-    'Pricing and enquiries for senior, graduation, engagement, couples, family and pet sessions across the Des Moines metro and central Iowa.',
+    'Pricing and inquiries for senior, graduation, engagement, couples, family and pet sessions across the Des Moines metro and central Iowa.',
   )
 
   const [open, setOpen] = useState<number | null>(0)
@@ -82,11 +83,11 @@ export default function ContactPage() {
         photoId={CONTACT_PAGE.photoId}
       />
 
-      <section id="enquire" className="shell grid gap-16 scroll-mt-24 py-24 md:py-32 lg:grid-cols-12 lg:gap-20">
+      <section id="inquire" className="shell grid gap-16 scroll-mt-24 py-24 md:py-32 lg:grid-cols-12 lg:gap-20">
         <div className="lg:col-span-7">
           <Reveal className="label text-accent">The form</Reveal>
           <div className="mt-10">
-            <EnquiryForm tone="onCanvas" action="Send it" />
+            <InquiryForm tone="onCanvas" action="Send it" />
           </div>
         </div>
 
@@ -123,7 +124,7 @@ export default function ContactPage() {
 
             {[
               { term: 'Based in', detail: SITE.base },
-              { term: 'Travelling to', detail: SITE.serves },
+              { term: 'Traveling to', detail: SITE.serves },
               { term: 'Typically replies', detail: 'Within 48 hours' },
             ].map((row, i) => (
               <Reveal key={row.term} delay={0.16 + i * 0.08}>
@@ -178,7 +179,7 @@ export default function ContactPage() {
               className="display mt-6 text-[clamp(2rem,4vw,3.2rem)] text-ink"
             />
             <Reveal delay={0.16} className="mt-8 max-w-sm text-[0.95rem] leading-relaxed text-muted">
-              No contracts you need a solicitor for. Everything that could cost you money or move
+              No contracts you need a lawyer for. Everything that could cost you money or move
               your date is on this list.
             </Reveal>
             <Reveal delay={0.22} className="mt-8">
@@ -205,6 +206,10 @@ export default function ContactPage() {
           </div>
         </div>
       </section>
+
+      {/* What happens to the photographs afterwards. This is delivery detail
+          rather than a reason to book, so it sits at the very bottom. */}
+      <Delivery />
     </>
   )
 }

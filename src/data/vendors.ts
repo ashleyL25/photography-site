@@ -19,7 +19,7 @@
 
 export type Vendor = {
   name: string
-  /** Neighbourhood or town, as a client would think of it. */
+  /** Neighborhood or town, as a client would think of it. */
   area: string
   address?: string
   /** What they are good for, in one line. */
@@ -57,13 +57,13 @@ export const HAIR_AND_MAKEUP: Vendor[] = [
     name: 'Trixie’s Salon',
     area: 'Beaverdale, Des Moines',
     address: '4118 University Avenue',
-    does: 'Strong with colour and with textured or curly hair. Good if your look is less classic and more specific.',
+    does: 'Strong with color and with textured or curly hair. Good if your look is less classic and more specific.',
   },
   {
     name: 'Allegory Salon',
     area: 'East Village, Des Moines',
     address: '521 E Locust St, #101',
-    does: 'Cuts, colour and treatments. Book the treatment a fortnight out, not the morning of.',
+    does: 'Cuts, color and treatments. Book the treatment two weeks out, not the morning of.',
   },
   {
     name: 'Oliver + James',
@@ -86,7 +86,7 @@ export const LUNCH_STOPS: Vendor[] = [
     name: 'Snookies Malt Shop',
     area: 'Beaverdale, Des Moines',
     does: 'A walk-up window, a paper cup and a picnic table. Unbeatable for the frames people put on their wall, and there is no such thing as a bad photograph of somebody holding a milkshake.',
-    note: 'Seasonal — open spring through autumn, which is most of senior season anyway.',
+    note: 'Seasonal — open spring through fall, which is most of senior season anyway.',
   },
   {
     name: 'Bauder’s Pharmacy',
@@ -101,7 +101,7 @@ export const LUNCH_STOPS: Vendor[] = [
   {
     name: 'Early Bird',
     area: 'East Village, Des Moines',
-    does: 'A modern take on a diner — booths, colour, and a doorway that works as a frame. Good for the louder, more graphic look.',
+    does: 'A modern take on a diner — booths, color, and a doorway that works as a frame. Good for the louder, more graphic look.',
   },
   {
     name: 'Fong’s Pizza',
@@ -142,7 +142,7 @@ export const LOCATIONS: { group: string; blurb: string; places: string[] }[] = [
   },
   {
     group: 'Brick and city',
-    blurb: 'Texture, colour, murals and doorways. Best in the middle of the day, in shade.',
+    blurb: 'Texture, color, murals and doorways. Best in the middle of the day, in shade.',
     places: [
       'East Village — brick, alleys and the Capitol at the end of the street',
       'Valley Junction, Fifth Street',
@@ -166,9 +166,9 @@ export const LOCATIONS: { group: string; blurb: string; places: string[] }[] = [
   {
     group: 'Yours',
     blurb:
-      'Almost always the best of the three. A back garden, a grandparents’ farm, the pitch you played on, the shop you worked at, the truck.',
+      'Almost always the best of the three. A backyard, a grandparents’ farm, the pitch you played on, the shop you worked at, the truck.',
     places: [
-      'Your own house or garden',
+      'Your own house or yard',
       'A family farm or acreage',
       'Your field, court, pool or track',
       'Wherever you have worked for two years',

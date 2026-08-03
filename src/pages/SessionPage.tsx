@@ -1,6 +1,14 @@
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { SESSIONS, SESSIONS_BY_ID } from '@/data/site'
-import { ALWAYS_INCLUDED, PACKAGES_BY_SESSION, fromPrice } from '@/data/packages'
+import {
+  ALWAYS_INCLUDED,
+  EDITING_STYLE,
+  PACKAGES_BY_SESSION,
+  PRICING_BY_REQUEST,
+  RETOUCHING,
+  fromPrice,
+  isPrivatePricing,
+} from '@/data/packages'
 import { GUIDES_BY_ID } from '@/data/guides'
 import { SHOOTS_BY_DATE } from '@/data/shoots'
 import { Photo } from '@/components/Photo'
@@ -8,6 +16,7 @@ import { PageHero } from '@/components/PageHero'
 import { TierCards, Tick } from '@/components/TierCards'
 import { DrawRule, MaskText, Parallax, Reveal, Unveil } from '@/components/motion'
 import { useDocumentMeta } from '@/lib/hooks'
+import { usePricingUnlocked } from '@/lib/pricing'
 
 /**
  * One session type in full: the long copy, its three tiers, its prep guide and
@@ -16,9 +25,12 @@ import { useDocumentMeta } from '@/lib/hooks'
 export default function SessionPage() {
   const { id = '' } = useParams()
   const session = SESSIONS_BY_ID[id]
+  const unlocked = usePricingUnlocked()
 
   useDocumentMeta(
     session ? `${session.title} — Ashley Photography` : 'Sessions — Ashley Photography',
+    // Never the unlocked figure: a meta description is for search engines, which
+    // are exactly who the private list is being kept from.
     session ? `${session.blurb} ${session.runs}. ${fromPrice(session.id)}.` : undefined,
   )
 
@@ -26,6 +38,8 @@ export default function SessionPage() {
   // back to the index instead of showing a 404.
   if (!session) return <Navigate to="/sessions" replace />
 
+  const hidePrices = isPrivatePricing(session.id, unlocked)
+  const retouching = RETOUCHING[EDITING_STYLE[session.id] ?? 'natural']
   const set = PACKAGES_BY_SESSION[session.id]
   const guide = GUIDES_BY_ID[session.id]
   const shoots = SHOOTS_BY_DATE.filter((s) => s.category === session.filter).slice(0, 3)
@@ -43,7 +57,7 @@ export default function SessionPage() {
         photoId={session.heroPhotoId}
       >
         <Reveal delay={0.25} className="mt-12 flex flex-wrap items-center gap-x-10 gap-y-4">
-          <span className="label text-champagne">{fromPrice(session.id)}</span>
+          <span className="label text-champagne">{fromPrice(session.id, unlocked)}</span>
           <span aria-hidden className="hidden h-px w-10 bg-beige/30 sm:block" />
           <span className="label leading-[1.6] text-beige/70">{session.runs}</span>
         </Reveal>
@@ -134,7 +148,29 @@ export default function SessionPage() {
 
             <DrawRule className="mt-14" />
 
-            <TierCards set={set} cta={{ label: 'Enquire', to: '/contact' }} />
+            <div className="mt-12">
+              <TierCards
+                set={set}
+                cta={{ label: 'Inquire', to: `/contact?session=${session.id}` }}
+                hidePrices={hidePrices}
+              />
+            </div>
+
+            {hidePrices && (
+              <Reveal
+                delay={0.2}
+                className="mt-10 max-w-2xl border-l border-accent/40 pl-6 text-[0.97rem] leading-[1.8] text-muted"
+              >
+                {PRICING_BY_REQUEST.note}
+              </Reveal>
+            )}
+
+            {/* How much finishing work this kind of session gets. It is the
+                reason the image counts differ so much between session types. */}
+            <Reveal delay={0.15} className="mt-12 max-w-2xl">
+              <p className="label text-accent">{retouching.label}</p>
+              <p className="mt-4 text-[0.95rem] leading-[1.8] text-muted">{retouching.body}</p>
+            </Reveal>
 
             {set.note && (
               <Reveal delay={0.2} className="mt-10 max-w-2xl text-[0.9rem] leading-relaxed text-faint italic">
@@ -306,7 +342,7 @@ export default function SessionPage() {
               to={`/contact?session=${session.id}`}
               className="label rounded-full border border-ink px-9 py-4 text-ink transition-colors duration-400 hover:border-accent hover:bg-accent hover:text-canvas"
             >
-              Enquire about this
+              Inquire about this
             </Link>
             <Link
               to="/sessions"

@@ -34,7 +34,7 @@ function Chevron({ dir }: { dir: 'prev' | 'next' }) {
  * Full-screen image viewer.
  *
  * Keyboard: Escape closes, arrows page. Focus is trapped while open and
- * returned to whatever opened it on close. Neighbouring frames are warmed in
+ * returned to whatever opened it on close. Neighboring frames are warmed in
  * the background so paging does not flash a placeholder.
  */
 export function Lightbox({ ids, index, onClose, onNavigate, caption }: Props) {
@@ -97,16 +97,16 @@ export function Lightbox({ ids, index, onClose, onNavigate, caption }: Props) {
     }
   }, [open, go, onClose])
 
-  // Warm the neighbours so paging is instant.
+  // Warm the neighbors so paging is instant.
   useEffect(() => {
     if (index === null) return
     for (const delta of [1, -1]) {
-      const neighbour = BY_ID[ids[(index + delta + ids.length) % ids.length]]
-      if (!neighbour) continue
+      const neighbor = BY_ID[ids[(index + delta + ids.length) % ids.length]]
+      if (!neighbor) continue
       const img = new Image()
-      img.srcset = srcSet(neighbour)
+      img.srcset = srcSet(neighbor)
       img.sizes = '100vw'
-      img.src = `${neighbour.src}-${neighbour.widths[neighbour.widths.length - 1]}.webp`
+      img.src = `${neighbor.src}-${neighbor.widths[neighbor.widths.length - 1]}.webp`
     }
   }, [index, ids])
 

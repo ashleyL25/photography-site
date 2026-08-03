@@ -15,6 +15,7 @@
  * knowing what is in it. Add a block kind here and a case in the renderer.
  */
 
+import { RESCHEDULE_NOTE, RETOUCHING, weatherColumns, type EditingStyle } from './policy'
 import { HAIR_AND_MAKEUP, LOCATIONS, LUNCH_STOPS, type Vendor } from './vendors'
 
 export type Block =
@@ -93,7 +94,7 @@ function hairAndMakeup(lead: string, timing: string[]): Chapter {
           title: 'Does not',
           items: [
             'Shimmer or anything with glitter in it — it throws light straight back at the lens',
-            'A brand-new haircut or colour the week of the session',
+            'A brand-new haircut or color the week of the session',
             'Heavy contour, which reads as a stripe rather than a shadow',
             'Facials, peels and masks inside seven days',
             'A spray tan you have not had before, ever',
@@ -115,19 +116,39 @@ function hairAndMakeup(lead: string, timing: string[]): Chapter {
   }
 }
 
-function gallery(extra?: string): Chapter {
+/**
+ * `style` decides which editing explanation the chapter carries — see
+ * EDITING_STYLE in policy.ts. It is spelled out in every guide because "how many
+ * photographs, and how finished are they" is the single thing clients compare
+ * between photographers, and getting it wrong in their heads is how a delighted
+ * client turns into a disappointed one.
+ */
+function gallery(style: EditingStyle, extra?: string): Chapter {
   return {
     id: 'your-gallery',
     title: 'Your gallery',
-    lead: 'Where the photographs live, and for how long.',
+    lead: 'Where the photographs live, how they are finished, and for how long.',
     blocks: [
       {
         kind: 'prose',
         text: [
-          'Your finished set arrives in a private Pic-Time gallery, usually about two weeks after we shoot. You can download the whole thing at full resolution, share the link with anyone you like, and order prints straight through it if that is easier than finding your own printer.',
-          'You have full download and print rights to every image — no watermarks, no licence to read, no asking me first. Some frames come in black and white as well as colour, because as I edit I pick the ones that are better without it. That is not an extra and it is not a decision you have to make.',
+          'Your finished album arrives in a private online photo gallery, usually about two weeks after we shoot. You can download the whole thing at full resolution, share the link with anyone you like, and order prints straight through it if that is easier than finding your own printer.',
+          'You have full download and print rights to every image — no watermarks, no license to read, no asking me first. Some frames come in black and white as well as color, because as I edit I pick the ones that are better without it. That is not an extra and it is not a decision you have to make.',
           'The gallery stays up for a full year. I email you twice before it closes — ninety days out and again at thirty — so it never vanishes on you unannounced. Download everything once and it is yours regardless.',
           ...(extra ? [extra] : []),
+        ],
+      },
+      {
+        kind: 'columns',
+        items: [
+          { title: RETOUCHING[style].label, body: RETOUCHING[style].body },
+          {
+            title: 'Why the number of photographs varies',
+            body:
+              style === 'retouched'
+                ? 'A fully retouched frame takes several times as long to finish as a naturally edited one, so a session like yours delivers fewer photographs than an engagement session of the same length — and every one of them has had far more work done to it. Roughly forty per hour of shooting is the floor, and I usually go over.'
+                : 'Because nothing here is being retouched frame by frame, a session like yours delivers roughly twice as many photographs as a senior or family session of the same length — about eighty per hour of shooting, and I usually go over. Different job, not a lesser one.',
+          },
         ],
       },
       {
@@ -143,33 +164,8 @@ function weather(session: string): Chapter {
     id: 'weather',
     title: 'Weather, and the rest of the small print',
     blocks: [
-      {
-        kind: 'columns',
-        items: [
-          {
-            title: 'Overcast is not bad weather',
-            body: 'A flat grey sky is the best light there is — soft, even, and forgiving. If you wake up to cloud, that is good news. Do not text me to cancel.',
-          },
-          {
-            title: 'Rain and wind are',
-            body: `Steady rain, high wind or genuinely unusable light and we move the ${session}, free, to the next date that works for both of us. I would far rather reschedule than shoot in the wrong conditions.`,
-          },
-          {
-            title: 'Heat is a real factor',
-            body: 'In July and August we will find shade, take breaks and go through more water than you expect. Bring some. It matters more than you think for how you look in the last hour.',
-          },
-          {
-            title: 'Decisions happen the day before',
-            body: 'I watch the forecast and message you the evening before with a straight answer. You will never be left guessing on the morning.',
-          },
-        ],
-      },
-      {
-        kind: 'prose',
-        text: [
-          'If you need to move the date for any other reason, tell me as soon as you know. One change at no charge is fine as long as it is a week out.',
-        ],
-      },
+      { kind: 'columns', items: weatherColumns(session) },
+      { kind: 'prose', text: [RESCHEDULE_NOTE] },
     ],
   }
 }
@@ -179,7 +175,7 @@ const OUTFIT_RULES: Block = {
   yes: {
     title: 'What works',
     items: [
-      'Solid colours, and deeper ones — emerald, rust, navy, cream, oxblood, black',
+      'Solid colors, and deeper ones — emerald, rust, navy, cream, oxblood, black',
       'Texture instead of pattern: knit, linen, denim, corduroy, leather',
       'Things that move. A skirt, a long coat or wide sleeves give me something to work with',
       'Clothes that fit properly now, not the size you were last year',
@@ -191,7 +187,7 @@ const OUTFIT_RULES: Block = {
     items: [
       'Small busy patterns — thin stripes and tight checks buzz and go strange',
       'Large logos and slogans, which date the photograph instantly',
-      'Neon and highlighter shades, which throw colour up onto your face',
+      'Neon and highlighter shades, which throw color up onto your face',
       'Anything you are still tugging at after two minutes',
       'Brand-new shoes. Please break them in first',
     ],
@@ -213,7 +209,7 @@ export const GUIDES: Guide[] = [
     photoId: 'seniors-elise-portrait-121',
     intro: [
       'Right — here is the whole thing written down so you are not holding it in your head. This is my routine for senior pictures, and we can move any part of it around.',
-      'On poses: we will try a great many, and some of them will feel deeply strange while you are doing them. Ignore that completely. Afterwards we sit down and go through every single photograph together, and you will be surprised which ones you end up liking the most — it is almost never the ones people expect.',
+      'On poses: we will try plenty of them, and some of them will feel deeply strange while you are doing them. Ignore that completely. Afterwards we sit down and go through every single photograph together, and you will be surprised which ones you end up liking the most — it is almost never the ones people expect.',
       'Do not worry about taking up my time. I have blocked out the afternoon and I am genuinely excited about this. I will guide you through every pose, so the only job you have is turning up with your outfits and your gear.',
     ],
     signOff: 'Ashley',
@@ -222,7 +218,7 @@ export const GUIDES: Guide[] = [
       { label: 'How long', value: 'Around four hours' },
       { label: 'Outfits', value: 'Up to three' },
       { label: 'Locations', value: 'Up to three, plus the lunch stop' },
-      { label: 'You get', value: 'Sixty edited photographs' },
+      { label: 'You get', value: '150+ fully retouched photos' },
       { label: 'Afterwards', value: 'A review appointment, then your gallery' },
     ],
     chapters: [
@@ -234,7 +230,7 @@ export const GUIDES: Guide[] = [
           {
             kind: 'prose',
             text: [
-              'We shoot on a weekday on purpose. Parks, downtown and every good doorway in the East Village are all but empty on a Tuesday and heaving on a Saturday, and nobody wants strangers in the background of their senior pictures. A weekday also means we can take four hours without anybody feeling rushed.',
+              'We shoot on a weekday on purpose. Parks, downtown and every good doorway in the East Village are all but empty on a Tuesday and packed on a Saturday, and nobody wants strangers in the background of their senior pictures. A weekday also means we can take four hours without anybody feeling rushed.',
               'Starting around midday sounds wrong for photographs and it is not. It lets us shoot the built, shaded locations while the sun is high — brick, alleys, awnings, interiors — then work outward into open green as the light drops, and finish on the last golden hour. The day gets progressively prettier, which is also a nice way to end.',
             ],
           },
@@ -269,7 +265,7 @@ export const GUIDES: Guide[] = [
                 time: 'Late afternoon',
                 title: 'Outfit three, location three',
                 detail:
-                  'The last change. Save your favourite outfit for this, because this is the best light of the day and you want it on the thing you like most.',
+                  'The last change. Save your favorite outfit for this, because this is the best light of the day and you want it on the thing you like most.',
               },
               {
                 time: 'Golden hour',
@@ -296,8 +292,8 @@ export const GUIDES: Guide[] = [
         'Book it for the morning of, and give yourself an hour of slack.',
         [
           'Have it done the morning of the session if you are having it done professionally. It is one less thing to think about, it lasts far better than something you did the night before, and someone else being in charge of your hair for an hour is a good way to start the day.',
-          'Book the appointment to end at least an hour before we meet. Salons overrun, and an hour of buffer turns the only stressful part of the day into a non-event.',
-          'Two weeks before is the window for anything structural — a cut, colour, or a treatment. Not the week of. A haircut you have not lived with yet is the single most common regret in senior pictures, and there is no fixing it in editing.',
+          'Book the appointment to end at least an hour before we meet. Salons run late, and an hour of buffer turns the only stressful part of the day into a non-event.',
+          'Two weeks before is the window for anything structural — a cut, color, or a treatment. Not the week of. A haircut you have not lived with yet is the single most common regret in senior pictures, and there is no fixing it in editing.',
           'Nails: get them done one or two days before, not the morning of. Hands end up in more frames than you would guess — in your hair, on a railing, holding a milkshake — and chipped polish is the thing you will notice first.',
         ],
       ),
@@ -311,7 +307,7 @@ export const GUIDES: Guide[] = [
             kind: 'prose',
             text: [
               'Three outfits is the number because it is what fits comfortably into the afternoon, and because three is enough for the set to feel varied without turning the day into a changing-room. You do not have to use all three. Plenty of people bring two and are happier for it.',
-              'The useful way to choose is not "which of my clothes is nicest" but "which three of these look like different parts of my life". Aim for one dressed-up, one that is entirely and recognisably you, and one that comes with a story attached.',
+              'The useful way to choose is not "which of my clothes is nicest" but "which three of these look like different parts of my life". Aim for one dressed-up, one that is entirely and recognizably you, and one that comes with a story attached.',
             ],
           },
           {
@@ -323,7 +319,7 @@ export const GUIDES: Guide[] = [
               },
               {
                 title: 'Two — actually you',
-                body: 'Jeans and the jumper you wear constantly. This sounds like the boring one and it is nearly always where the best photographs come from, because it is the only outfit you are not thinking about while wearing.',
+                body: 'Jeans and the sweater you wear constantly. This sounds like the boring one and it is nearly always where the best photographs come from, because it is the only outfit you are not thinking about while wearing.',
               },
               {
                 title: 'Three — the story one',
@@ -336,7 +332,7 @@ export const GUIDES: Guide[] = [
             kind: 'prose',
             text: [
               'A practical note on layers: a jacket, a cardigan or a flannel over the top of a look effectively gives you a fourth outfit for free, because on and off read as two different photographs. Same with letting your hair down halfway through.',
-              'Bring everything on hangers if you can, in the order you plan to wear it. Changing happens at the lunch stop and in the car, so folded piles in a rucksack become an ironing problem at exactly the wrong moment.',
+              'Bring everything on hangers if you can, in the order you plan to wear it. Changing happens at the lunch stop and in the car, so folded piles in a backpack become an ironing problem at exactly the wrong moment.',
             ],
           },
           {
@@ -355,7 +351,7 @@ export const GUIDES: Guide[] = [
             kind: 'prose',
             text: [
               'Three locations across one afternoon works because the metro is small and I plan them as a loop rather than three separate trips — usually a built one first, the lunch stop second, and something green and open for the golden hour at the end.',
-              'The best sessions have at least one location that is nobody else\'s. A grandparents\' farm, your own back garden, the pitch you played on for four years, the car you fixed yourself, the shop where you have worked since you were fifteen. Those are the frames that stop being "nice photographs" and start being about you specifically. If you have one, we build the day around it.',
+              'The best sessions have at least one location that is nobody else\'s. A grandparents\' farm, your own backyard, the pitch you played on for four years, the car you fixed yourself, the shop where you have worked since you were fifteen. Those are the frames that stop being "nice photographs" and start being about you specifically. If you have one, we build the day around it.',
             ],
           },
           { kind: 'locations', items: LOCATIONS },
@@ -421,7 +417,7 @@ export const GUIDES: Guide[] = [
 
       {
         id: 'countdown',
-        title: 'The fortnight before',
+        title: 'The two weeks before',
         lead: 'In order, so nothing lands on the wrong day.',
         blocks: [
           {
@@ -430,7 +426,7 @@ export const GUIDES: Guide[] = [
               {
                 label: 'Two weeks out',
                 detail:
-                  'Haircut, colour, or any facial or treatment. This is the last safe window for all of them. Book hair and makeup for the morning of, if you are having it done.',
+                  'Haircut, color, or any facial or treatment. This is the last safe window for all of them. Book hair and makeup for the morning of, if you are having it done.',
               },
               {
                 label: 'One week out',
@@ -470,20 +466,21 @@ export const GUIDES: Guide[] = [
           {
             kind: 'prose',
             text: [
-              'We sit down together and go through every photograph from the session — properly, all of them, not a shortlist I have made for you. You pick your favourites, and those are the ones that go forward into the final edited album.',
-              'What you are looking at during the review is the unedited raw files. They are flat, the colour is not there yet, and they look nothing like the finished article — that is normal and it is the point. You are choosing the moment and the expression; the rest is my job afterwards.',
+              'We sit down together and go through every photograph from the session — properly, all of them, not a shortlist I have made for you. You pick your favorites, and those are the ones that go forward into the final edited album.',
+              'What you are looking at during the review is the unedited raw files. They are flat, the color is not there yet, and they look nothing like the finished article — that is normal and it is the point. You are choosing the moment and the expression; the rest is my job afterwards.',
               'Anything you do not like does not make it. It comes out of the album entirely and never appears anywhere. You do not have to justify it and I will not be offended — I have my own opinions about which frames are the good ones and I am wrong about it constantly.',
-              'If we are doing a second session in the autumn, this is also where we plan it: what worked, what we want to do differently, and the outfits and locations for next time.',
+              'If we are doing a second session in the fall, this is also where we plan it: what worked, what we want to do differently, and the outfits and locations for next time.',
             ],
           },
           {
             kind: 'note',
-            text: 'Mum gets veto rights on a couple of photographs you disliked. This is a real policy and it has been used. Consider yourself warned.',
+            text: 'Mom gets veto rights on a couple of photographs you disliked. This is a real policy and it has been used. Consider yourself warned.',
           },
         ],
       },
 
       gallery(
+        'retouched',
         'Any photograph that did not make the album is still on the raw set, so if you change your mind in a month you can add it — thirty a piece, or twenty for four hundred and fifty.',
       ),
 
@@ -510,7 +507,7 @@ export const GUIDES: Guide[] = [
       { label: 'How long', value: 'One to three hours' },
       { label: 'Outfits', value: 'Gown on, gown off' },
       { label: 'Locations', value: 'One to three on campus' },
-      { label: 'You get', value: '30 to 70 edited photographs' },
+      { label: 'You get', value: '40 to 120 fully retouched photos' },
       { label: 'Book by', value: 'Six weeks out — these weekends fill first' },
     ],
     chapters: [
@@ -538,13 +535,13 @@ export const GUIDES: Guide[] = [
                 time: 'Two weeks out',
                 title: 'Haircut, and pick the spots',
                 detail:
-                  'Last safe window for a cut or colour. Send me the two or three places on campus that matter and I will plan the walking order.',
+                  'Last safe window for a cut or color. Send me the two or three places on campus that matter and I will plan the walking order.',
               },
               {
                 time: 'A week out',
                 title: 'Regalia check',
                 detail:
-                  'Get the gown out of the bag and hang it up. Cords, stoles and honours sashes — find them now, not on the morning.',
+                  'Get the gown out of the bag and hang it up. Cords, stoles and honors sashes — find them now, not on the morning.',
               },
               {
                 time: 'The day',
@@ -564,7 +561,7 @@ export const GUIDES: Guide[] = [
           {
             kind: 'prose',
             text: [
-              'Take the gown out of its bag as soon as you get it and hang it somewhere it can drop. They arrive folded into a square and the creases photograph like creases. A steamer for ten minutes, or a hot shower with it hanging in the bathroom, sorts it entirely. Do not iron it directly — the fabric will not survive it.',
+              'Take the gown out of its bag as soon as you get it and hang it somewhere it can drop. They arrive folded into a square and the creases photograph like creases. A steamer for ten minutes, or a hot shower with it hanging in the bathroom, takes care of it completely. Do not iron it directly — the fabric will not survive it.',
               'We shoot the gown frames first, while it still looks pressed, then take it off and shoot everything else. That second half matters more than people expect: in five years the gown photographs are the formal record, and the ones without it are the ones you actually look at.',
             ],
           },
@@ -573,7 +570,7 @@ export const GUIDES: Guide[] = [
             items: [
               'Gown, hung and steamed at least a day before',
               'Cap, and the tassel on the correct side for your school',
-              'Every cord, stole, sash and honours pin you have earned',
+              'Every cord, stole, sash and honors pin you have earned',
               'Bobby pins for the cap — it will not stay on by itself in any wind',
               'A proper outfit under the gown, not something you would not be seen in',
               'A second outfit for the frames without the gown',
@@ -596,8 +593,8 @@ export const GUIDES: Guide[] = [
           {
             kind: 'prose',
             text: [
-              'You need two looks: something that reads well under and behind an open gown, and something entirely your own for the second half. Solid colours both times — the gown is already a large flat block of one colour and a pattern underneath fights it.',
-              'Check what colour your gown actually is before you choose. Deep green regalia and a red dress is a decision, not an accident, and you should at least make it on purpose.',
+              'You need two looks: something that reads well under and behind an open gown, and something entirely your own for the second half. Solid colors both times — the gown is already a large flat block of one color and a pattern underneath fights it.',
+              'Check what color your gown actually is before you choose. Deep green regalia and a red dress is a decision, not an accident, and you should at least make it on purpose.',
             ],
           },
           OUTFIT_RULES,
@@ -609,12 +606,12 @@ export const GUIDES: Guide[] = [
         [
           'The cap flattens whatever is on the top of your head and leaves a line. Tell your stylist it is going on and off repeatedly and they will build the style to survive it — usually something with volume lower down, or a style that looks deliberate once the cap comes off.',
           'Book it for the morning of if you can, finishing at least an hour before we meet. Ceremony mornings run late by nature and that hour is what stops the whole day sliding.',
-          'Two weeks out for a cut or colour. Not the week of, and certainly not the day before the ceremony.',
+          'Two weeks out for a cut or color. Not the week of, and certainly not the day before the ceremony.',
           'Bring bobby pins and whatever holds your hair, because we will be taking the cap on and off perhaps fifteen times.',
         ],
       ),
 
-      gallery(),
+      gallery('retouched'),
       weather('session'),
     ],
   },
@@ -638,7 +635,10 @@ export const GUIDES: Guide[] = [
       { label: 'How long', value: 'Ninety minutes to two and a half hours' },
       { label: 'Outfits', value: 'One or two each' },
       { label: 'Locations', value: 'One or two' },
-      { label: 'You get', value: '40 to 65 edited photographs' },
+      // Engagement albums are large because they are naturally edited rather
+      // than retouched frame by frame. "120+" is a floor, not a promise of a
+      // number — how many earn a place is my call once I have seen the set.
+      { label: 'You get', value: '120+ naturally edited photos' },
       { label: 'Best months', value: 'May, June, late September, October' },
     ],
     chapters: [
@@ -650,7 +650,7 @@ export const GUIDES: Guide[] = [
           {
             kind: 'prose',
             text: [
-              'I will give you a start time roughly two hours before sunset, which means it moves through the year — half six in October, half seven in June. Set an alarm for it, because the whole plan is built on finishing exactly as the sun goes.',
+              'I will give you a start time roughly two hours before sunset, which means it moves through the year — 6:30 in October, 7:30 in June. Set an alarm for it, because the whole plan is built on finishing exactly as the sun goes.',
               'The first ten minutes are always the stiffest, for everybody, including couples who have been together a decade. That is expected and built into the timing. By minute fifteen you will have forgotten I am there, and that is when the session actually starts.',
             ],
           },
@@ -694,7 +694,7 @@ export const GUIDES: Guide[] = [
           {
             kind: 'prose',
             text: [
-              'Pick a palette together and then dress differently within it — two or three colours that sit near each other, in different weights. Identical white shirts and jeans is the classic error; you end up looking like a stock photograph of a couple rather than like yourselves.',
+              'Pick a palette together and then dress differently within it — two or three colors that sit near each other, in different weights. Identical white shirts and jeans is the classic error; you end up looking like a stock photograph of a couple rather than like yourselves.',
               'One of you should be the plainer one. If you are both in something with a lot going on, the eye has nowhere to rest and the photograph is busy. Usually one in a solid, one with texture or a subtle pattern works best.',
               'A note on height and hemlines, because it comes up: if one of you is in something long and flowing and the other is in shorts, the photographs will look like the two of you turned up to different events. Match the formality, not the garment.',
             ],
@@ -725,7 +725,7 @@ export const GUIDES: Guide[] = [
         [
           'These sessions are in the evening, so a morning appointment has eight hours to fall out before we start. Aim to finish two hours before we meet.',
           'We will be outdoors in whatever wind central Iowa is offering. Tell your stylist that — a style built to survive it looks far better in the photographs than an elaborate one that does not.',
-          'Two weeks out for a cut or colour. If the wedding is close and you are trialling a look, this session is a genuinely useful dress rehearsal for it, so consider booking the trial for this day.',
+          'Two weeks out for a cut or color. If the wedding is close and you are trialling a look, this session is a genuinely useful dress rehearsal for it, so consider booking the trial for this day.',
           'Both of you should think about it, not just one of you. A fresh shave or a tidy-up on the neckline photographs more obviously than people expect.',
         ],
       ),
@@ -746,6 +746,7 @@ export const GUIDES: Guide[] = [
       },
 
       gallery(
+        'natural',
         'If you want a set for save-the-dates, tell me at the review stage and I will make sure there are frames with room for text in them — horizontal, with space to one side.',
       ),
       weather('session'),
@@ -771,7 +772,7 @@ export const GUIDES: Guide[] = [
       { label: 'How long', value: 'One to two hours' },
       { label: 'Outfits', value: 'One or two each' },
       { label: 'Locations', value: 'One or two' },
-      { label: 'You get', value: '35 to 60 edited photographs' },
+      { label: 'You get', value: '80 to 240 naturally edited photos' },
       { label: 'Dogs', value: 'Included, always' },
     ],
     chapters: [
@@ -783,8 +784,8 @@ export const GUIDES: Guide[] = [
             kind: 'prose',
             text: [
               'I will give you a start time about ninety minutes before sunset. We spend the first stretch walking and talking while I shoot loosely, and the last half hour barely moving because the light is doing all the work by then.',
-              'You will get individual portraits as well as the two of you. People forget to ask for these and then find they are the ones they use for everything — work profiles, family galleries, the lot.',
-              'If you have been together a while and feel self-conscious about it, that is the norm rather than the exception, and it wears off inside quarter of an hour. Nobody is being asked to gaze into anything.',
+              'You will get individual portraits as well as the two of you. People forget to ask for these and then find they are the ones they use for everything — work profiles, family galleries, all of it.',
+              'If you have been together a while and feel self-conscious about it, that is the norm rather than the exception, and it wears off inside fifteen minutes. Nobody is being asked to gaze into anything.',
             ],
           },
         ],
@@ -798,8 +799,8 @@ export const GUIDES: Guide[] = [
           {
             kind: 'prose',
             text: [
-              'Agree a palette — two or three colours that sit near each other — and then dress differently inside it. One of you plainer, one with texture. Two identical outfits reads as a costume; two unrelated ones reads as an accident.',
-              'If you are doing two looks, make the second one properly casual: your own jumpers, at home or somewhere you actually go. Those frames age far better than the dressed-up ones and they are the reason to bother with a second outfit at all.',
+              'Agree a palette — two or three colors that sit near each other — and then dress differently inside it. One of you plainer, one with texture. Two identical outfits reads as a costume; two unrelated ones reads as an accident.',
+              'If you are doing two looks, make the second one properly casual: your own sweaters, at home or somewhere you actually go. Those frames age far better than the dressed-up ones and they are the reason to bother with a second outfit at all.',
             ],
           },
           OUTFIT_RULES,
@@ -828,7 +829,7 @@ export const GUIDES: Guide[] = [
 
       { id: 'locations', title: 'Where we go', blocks: [{ kind: 'locations', items: LOCATIONS }] },
 
-      gallery(),
+      gallery('natural'),
       weather('session'),
     ],
   },
@@ -844,7 +845,7 @@ export const GUIDES: Guide[] = [
     intro: [
       'You have already done the difficult thing by getting a date everyone agreed to. What follows is the short version of how to make the hour itself painless.',
       'The order is always the same: the whole group first, while everybody is still fresh and cooperative, then the smaller combinations, then each person on their own while the others recover. Nobody has to stand still for an hour.',
-      'One thing worth saying to whoever is organising this: your job on the day is not to manage anybody. Mine is. You are in the photographs too, and it shows when you are also trying to run the session.',
+      'One thing worth saying to whoever is organizing this: your job on the day is not to manage anybody. Mine is. You are in the photographs too, and it shows when you are also trying to run the session.',
     ],
     signOff: 'Ashley',
     meta: [
@@ -852,7 +853,7 @@ export const GUIDES: Guide[] = [
       { label: 'How long', value: 'One to three hours' },
       { label: 'Outfits', value: 'One, or two for longer sessions' },
       { label: 'Locations', value: 'One or two' },
-      { label: 'You get', value: '40 to 90 edited photographs' },
+      { label: 'You get', value: '40 to 120 fully retouched photos' },
       { label: 'Galleries', value: 'One per household, included' },
     ],
     chapters: [
@@ -907,8 +908,8 @@ export const GUIDES: Guide[] = [
           {
             kind: 'prose',
             text: [
-              'Pick three colours and let everybody choose their own clothes inside them. That is the whole method and it works every time. What you are avoiding is both extremes: everybody in identical white shirts and jeans, which looks like a uniform, and everybody in whatever they grabbed, which looks like nobody discussed it.',
-              'Deeper and softer colours beat bright ones for a group — cream, oatmeal, rust, olive, navy, denim, dusty pink, charcoal. Layer in texture rather than pattern: knits, linen, corduroy. If one person is in a pattern, let it be one person.',
+              'Pick three colors and let everybody choose their own clothes inside them. That is the whole method and it works every time. What you are avoiding is both extremes: everybody in identical white shirts and jeans, which looks like a uniform, and everybody in whatever they grabbed, which looks like nobody discussed it.',
+              'Deeper and softer colors beat bright ones for a group — cream, oatmeal, rust, olive, navy, denim, dusty pink, charcoal. Layer in texture rather than pattern: knits, linen, corduroy. If one person is in a pattern, let it be one person.',
               'Lay it all out on a bed the day before and photograph it with your phone. If it looks like a set in that photo, it will look like a set in mine. Send it to me and I will tell you what to swap.',
             ],
           },
@@ -917,7 +918,7 @@ export const GUIDES: Guide[] = [
             yes: {
               title: 'Works for a group',
               items: [
-                'Three agreed colours, everybody dressing differently within them',
+                'Three agreed colors, everybody dressing differently within them',
                 'One person in the pattern, everybody else in solids',
                 'Layers — cardigans, jackets, flannels — for depth between people',
                 'The same level of formality across everybody',
@@ -957,7 +958,7 @@ export const GUIDES: Guide[] = [
           },
           {
             kind: 'note',
-            text: 'That last one matters more than any of the others. Write down the combinations you want — "Mum with each of us", "all the grandchildren", "the four cousins" — and hand it to me at the start. It is the difference between remembering on the day and remembering when the gallery arrives.',
+            text: 'That last one matters more than any of the others. Write down the combinations you want — "Mom with each of us", "all the grandchildren", "the four cousins" — and hand it to me at the start. It is the difference between remembering on the day and remembering when the gallery arrives.',
           },
         ],
       },
@@ -966,12 +967,15 @@ export const GUIDES: Guide[] = [
         'Optional for most families, and worth it for whoever is most self-conscious.',
         [
           'Most families do their own and it looks completely fine. If one person is dreading this, book them a blow-out — it is a small amount of money for a noticeably more relaxed hour.',
-          'Whatever you do, keep it recognisable. These photographs are going on a wall for a decade and you want to look like yourselves.',
+          'Whatever you do, keep it recognizable. These photographs are going on a wall for a decade and you want to look like yourselves.',
           'If you are booking for several people, allow twice as long as the salon quotes, and aim to finish two hours before we meet.',
         ],
       ),
 
-      gallery('Every household gets its own gallery link at no extra cost — tell me at the review who needs one.'),
+      gallery(
+        'retouched',
+        'Every household gets its own gallery link at no extra cost — tell me at the review who needs one.',
+      ),
       weather('session'),
     ],
   },
@@ -994,7 +998,7 @@ export const GUIDES: Guide[] = [
       { label: 'When', value: 'Early morning or the last hour of light' },
       { label: 'How long', value: 'Forty-five minutes to two hours' },
       { label: 'Locations', value: 'One or two' },
-      { label: 'You get', value: '25 to 60 edited photographs' },
+      { label: 'You get', value: '60 to 160 naturally edited photos' },
       { label: 'With another session', value: 'They come free, always' },
     ],
     chapters: [
@@ -1005,7 +1009,7 @@ export const GUIDES: Guide[] = [
           {
             kind: 'prose',
             text: [
-              'Walk them first, but not to exhaustion — twenty minutes takes the edge off and leaves them with enough interest to look at things. A dog that has been in the house all morning will spend our first quarter of an hour smelling the ground.',
+              'Walk them first, but not to exhaustion — twenty minutes takes the edge off and leaves them with enough interest to look at things. A dog that has been in the house all morning will spend our first fifteen minutes smelling the ground.',
               'Come slightly hungry. Not cruel, just skip the meal before. High-value treats they do not normally get are the single most effective piece of equipment either of us will bring, and they are how we get an ear up and a head turn on command.',
               'Bring the noise. The squeaky toy, the specific whistle, the word that makes them tilt their head. Whatever it is that gets a reaction in your kitchen will get one in a field, and I cannot make that noise myself.',
             ],
@@ -1054,14 +1058,14 @@ export const GUIDES: Guide[] = [
           {
             kind: 'prose',
             text: [
-              'Get in the frame. Everybody books this for photographs of their animal and then realises afterwards that what they wanted was photographs of the two of them together — there are almost never any, because you are always the one holding the camera.',
+              'Get in the frame. Everybody books this for photographs of their animal and then realizes afterwards that what they wanted was photographs of the two of them together — there are almost never any, because you are always the one holding the camera.',
               'Wear something plain and something you do not mind getting paw prints on. Mid-tones work better than black or white against most coats. Avoid anything that will pick up hair like a magnet, and by all means bring a change of clothes.',
             ],
           },
         ],
       },
 
-      gallery(),
+      gallery('natural'),
       weather('walk'),
     ],
   },

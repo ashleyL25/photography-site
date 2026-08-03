@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import clsx from 'clsx'
-import type { PackageSet } from '@/data/packages'
+import { PRICING_BY_REQUEST, type PackageSet } from '@/data/packages'
 import { Reveal } from './motion'
 
 /** Small plus-tick used as the list bullet wherever inclusions are listed. */
@@ -30,13 +30,22 @@ const SPEC_LABELS = [
  * spec table and CTA sit on the same baselines across the row even though the
  * copy lengths differ. That is the whole reason for the row-span dance — drop
  * it and the prices stop lining up, which makes the ladder much harder to read.
+ *
+ * The span has to match the number of children exactly. A subgrid cannot create
+ * implicit tracks, so an extra child gets crushed into the last row instead —
+ * which is what stranded the CTA in the middle of the card. Seven rows, seven
+ * children in flow: index, name, summary, price, spec, inclusions, CTA. The
+ * "Most booked" badge is absolutely positioned and so is not one of them.
  */
 export function TierCards({
   set,
   cta,
+  hidePrices = false,
 }: {
   set: PackageSet
   cta: { label: string; to?: string; href?: string }
+  /** Senior and engagement pricing is sent, not posted. See lib/pricing.ts. */
+  hidePrices?: boolean
 }) {
   return (
     <div className="grid gap-px overflow-hidden bg-line md:grid-cols-3 md:grid-rows-[auto_auto_auto_auto_auto_1fr_auto]">
@@ -45,7 +54,7 @@ export function TierCards({
           key={tier.id}
           delay={i * 0.1}
           className={clsx(
-            'group relative flex flex-col bg-canvas p-8 transition-colors duration-500 md:row-span-6 md:grid md:grid-rows-subgrid md:p-10',
+            'group relative flex flex-col bg-canvas p-8 transition-colors duration-500 md:row-span-7 md:grid md:grid-rows-subgrid md:p-10',
             tier.featured && 'bg-surface',
           )}
         >
@@ -62,11 +71,19 @@ export function TierCards({
             {tier.summary}
           </p>
 
+          {/* Two children whether or not the figure is shown, so the subgrid
+              row count is unaffected. Never wrap: a two-line price breaks the
+              row that keeps all three cards on the same baselines. */}
           <div className="mt-8 border-b border-line pb-8">
-            {/* Never wrap: a two-line price breaks the subgrid row that keeps
-                all three cards on the same baselines. */}
-            <span className="display block text-[clamp(2.1rem,3.5vw,3.1rem)] leading-none whitespace-nowrap text-accent">
-              {tier.price}
+            <span
+              className={clsx(
+                'display block leading-none whitespace-nowrap text-accent',
+                hidePrices
+                  ? 'text-[clamp(1.7rem,2.6vw,2.3rem)]'
+                  : 'text-[clamp(2.1rem,3.5vw,3.1rem)]',
+              )}
+            >
+              {hidePrices ? PRICING_BY_REQUEST.price : tier.price}
             </span>
             <span className="label mt-3 block text-faint">{tier.unit}</span>
           </div>

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import Lenis from 'lenis'
 
 /** `true` once the user has asked the OS to cut down on motion. */
@@ -82,9 +83,92 @@ export function useSmoothScroll() {
   }, [reduced])
 }
 
+/* ------------------------------------------------------------------ *
+ * Route transitions
+ * ------------------------------------------------------------------ */
+
+/** How long the curtain takes to fall, and to lift again. Seconds. */
+export const CURTAIN_FALL = 0.45
+export const CURTAIN_LIFT = 0.55
+/** Beat the curtain holds down while the incoming page mounts behind it. */
+const CURTAIN_HOLD_MS = 240
+
+export type CurtainPhase = 'idle' | 'falling' | 'covered' | 'lifting'
+
+/**
+ * Drives the between-pages curtain (see `PageCurtain`) and returns the location
+ * the routes should actually render.
+ *
+ * `Routes` is given this deferred location rather than the live one, so the
+ * outgoing page stays on screen until the curtain has fallen and the incoming
+ * page has mounted behind it. Everything inside `Routes` — Layout, Header, the
+ * scroll manager — picks the deferred location up for free, because
+ * `<Routes location>` publishes it on React Router's own context.
+ *
+ * The swap is also what fixes a heading that never arrived on a same-route
+ * navigation, one guide or session to the next. `MaskText` rides its words up
+ * from behind a mask on a one-shot IntersectionObserver, and when only a route
+ * param changes React reconciles the existing elements rather than remounting
+ * them, so nothing re-observes and the words stay parked below the mask. Layout
+ * keys `<main>` on the pathname, so the page is rebuilt under the curtain and
+ * every entrance animation plays from the top.
+ *
+ * A query-string or hash change is not a page change — the portfolio filter
+ * writes `?c=` on every click — so those pass straight through uncovered.
+ */
+export function usePageTransition() {
+  const location = useLocation()
+  const reduced = useReducedMotion()
+  const [rendered, setRendered] = useState(location)
+  const [phase, setPhase] = useState<CurtainPhase>('idle')
+
+  useEffect(() => {
+    if (location.pathname === rendered.pathname) {
+      if (location.key !== rendered.key) setRendered(location)
+      return
+    }
+
+    if (reduced) {
+      setRendered(location)
+      return
+    }
+
+    // Drop the curtain, then swap underneath it. Clicking a second link
+    // mid-transition re-enters here and simply restarts the fall.
+    setPhase('falling')
+    const timer = setTimeout(() => {
+      setRendered(location)
+      setPhase('covered')
+    }, CURTAIN_FALL * 1000)
+    return () => clearTimeout(timer)
+  }, [location, rendered, reduced])
+
+  // A short hold so the incoming page has a moment to paint before it is
+  // revealed — interior pages are lazy, so on a first visit the chunk can still
+  // be in flight when the swap commits.
+  //
+  // Deliberately a timer rather than a requestAnimationFrame wait on the first
+  // paint: frames are throttled to nothing in a background tab, and a curtain
+  // that will not lift until the tab is looked at again is a curtain that has
+  // covered the site.
+  useEffect(() => {
+    if (phase !== 'covered') return
+    const timer = setTimeout(() => setPhase('lifting'), CURTAIN_HOLD_MS)
+    return () => clearTimeout(timer)
+  }, [phase])
+
+  useEffect(() => {
+    if (phase !== 'lifting') return
+    const timer = setTimeout(() => setPhase('idle'), CURTAIN_LIFT * 1000)
+    return () => clearTimeout(timer)
+  }, [phase])
+
+  return { rendered, phase }
+}
+
 /**
  * Number of masonry columns for the current breakpoint. Driven by matchMedia
- * rather than CSS so the column-balancing maths matches what is rendered.
+ * rather than CSS so the column-balancing math matches what is rendered.
  */
 export function useColumnCount() {
   const read = () => {

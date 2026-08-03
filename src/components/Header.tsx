@@ -16,6 +16,7 @@ const PHOTO_BACKED = (pathname: string) =>
   pathname === '/' ||
   pathname === '/about' ||
   pathname === '/contact' ||
+  pathname === '/experience' ||
   pathname.startsWith('/sessions') ||
   pathname.startsWith('/guides') ||
   pathname.startsWith('/portfolio')
@@ -97,7 +98,7 @@ export function Header() {
               to="/contact"
               className="label hidden rounded-full border border-ink px-6 py-3 text-ink transition-colors duration-400 hover:border-accent hover:bg-accent hover:text-canvas group-data-[over=true]/head:border-beige/60 group-data-[over=true]/head:text-beige group-data-[over=true]/head:hover:border-champagne group-data-[over=true]/head:hover:bg-champagne group-data-[over=true]/head:hover:text-charcoal sm:inline-block"
             >
-              Enquire
+              Inquire
             </Link>
             <ThemeToggle />
             <button

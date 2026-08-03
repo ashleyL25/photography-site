@@ -202,7 +202,7 @@ export default function GuidePage() {
               className="display mt-6 text-[clamp(2.2rem,5.2vw,3.8rem)] text-ink"
             />
             <Reveal delay={0.15} className="mt-8 text-[1.04rem] leading-[1.9] text-muted">
-              No question about this is too small — what to do with your hands, whether a colour
+              No question about this is too small — what to do with your hands, whether a color
               will work, whether we should move the whole thing because of the forecast. Message me
               and I will answer properly.
             </Reveal>

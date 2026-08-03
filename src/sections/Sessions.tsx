@@ -7,7 +7,7 @@ import { DrawRule, MaskText, Reveal } from '@/components/motion'
 import { useReducedMotion } from '@/lib/hooks'
 
 /**
- * The session list is the page's centrepiece interaction.
+ * The session list is the page's centerpiece interaction.
  *
  * On a fine pointer it reads as a bare typographic index — no thumbnails at all
  * — and the photograph for whichever row you are hovering flies in under the

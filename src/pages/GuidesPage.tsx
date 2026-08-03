@@ -118,7 +118,7 @@ export default function GuidesPage() {
                 to="/contact"
                 className="label mt-4 inline-block rounded-full border border-ink px-9 py-4 text-ink transition-colors duration-400 hover:border-accent hover:bg-accent hover:text-canvas"
               >
-                Start an enquiry
+                Start an inquiry
               </Link>
             </Reveal>
           </div>

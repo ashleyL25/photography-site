@@ -8,8 +8,12 @@ import { Preloader } from './Preloader'
 import { resetScroll, scrollToElement, useSmoothScroll } from '@/lib/hooks'
 
 /**
- * Restores scroll position on navigation, and honours a `/#section` hash by
+ * Restores scroll position on navigation, and honors a `/#section` hash by
  * scrolling to it once the destination page has rendered.
+ *
+ * `useLocation` here is the *deferred* location published by `<Routes location>`
+ * (see PageTransition), so this fires the moment the page swaps behind the
+ * curtain rather than while the outgoing page is still on screen.
  */
 function ScrollManager() {
   const { pathname, hash } = useLocation()
@@ -94,7 +98,12 @@ export function Layout() {
         {pathname === '/' && <IndexRail />}
         <SocialRail />
 
-        <main id="main" className="flex-1">
+        {/* Keyed on the pathname so a page is torn down and rebuilt rather than
+            reconciled. Without it, navigating between two of the same kind of
+            page — guide to guide, session to session — leaves every scroll
+            reveal already spent, and the masked headings never appear. The
+            curtain covers the remount. */}
+        <main id="main" key={pathname} className="flex-1">
           <Outlet />
         </main>
 

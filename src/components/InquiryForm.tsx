@@ -2,8 +2,9 @@ import { useState, type ReactNode } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
-import { ENQUIRY, SESSIONS_BY_ID, SITE } from '@/data/site'
-import { PACKAGES_BY_SESSION } from '@/data/packages'
+import { INQUIRY, SESSIONS_BY_ID, SITE } from '@/data/site'
+import { PACKAGES_BY_SESSION, isPrivatePricing } from '@/data/packages'
+import { usePricingUnlocked } from '@/lib/pricing'
 import { Reveal } from './motion'
 
 /** Where the form posts. The bundled PHP handler works as-is on Hostinger. */
@@ -66,15 +67,16 @@ function Field({
   )
 }
 
-export function EnquiryForm({
+export function InquiryForm({
   tone = 'onPhoto',
-  action = 'Start an enquiry',
+  action = 'Start an inquiry',
 }: {
   tone?: Tone
   action?: string
 }) {
   const [status, setStatus] = useState<Status>('idle')
   const [error, setError] = useState('')
+  const unlocked = usePricingUnlocked()
 
   // A session page links here as /contact?session=seniors, so the first select
   // arrives already answered.
@@ -91,8 +93,9 @@ export function EnquiryForm({
 
   // The tier select only makes sense once a real session type is chosen, and
   // its options come from that session's own ladder.
-  const sessionId = ENQUIRY.sessionIdFor(session)
+  const sessionId = INQUIRY.sessionIdFor(session)
   const tiers = sessionId ? PACKAGES_BY_SESSION[sessionId]?.tiers : undefined
+  const hidePrices = isPrivatePricing(sessionId ?? '', unlocked)
 
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -197,7 +200,7 @@ export function EnquiryForm({
                 <option value="" disabled className={t.option}>
                   Choose one
                 </option>
-                {ENQUIRY.sessions.map((s) => (
+                {INQUIRY.sessions.map((s) => (
                   <option key={s} value={s} className={t.option}>
                     {s}
                   </option>
@@ -220,18 +223,20 @@ export function EnquiryForm({
               >
                 <Field label="Which tier are you thinking?" tone={tone} optional>
                   <select name="tier" defaultValue="" className={inputClass}>
-                    <option value={ENQUIRY.undecided} className={t.option}>
-                      {ENQUIRY.undecided}
+                    <option value={INQUIRY.undecided} className={t.option}>
+                      {INQUIRY.undecided}
                     </option>
-                    {tiers.map((tier) => (
-                      <option
-                        key={tier.id}
-                        value={`${tier.name} — ${tier.price}`}
-                        className={t.option}
-                      >
-                        {tier.name} — {tier.price}
-                      </option>
-                    ))}
+                    {tiers.map((tier) => {
+                      // The label carries the price so the mail says which tier
+                      // at which figure — except where the price is private, in
+                      // which case this select would be the one place it leaked.
+                      const label = hidePrices ? tier.name : `${tier.name} — ${tier.price}`
+                      return (
+                        <option key={tier.id} value={label} className={t.option}>
+                          {label}
+                        </option>
+                      )
+                    })}
                   </select>
                 </Field>
               </motion.div>
@@ -244,7 +249,7 @@ export function EnquiryForm({
                 <option value="" disabled className={t.option}>
                   Choose one
                 </option>
-                {ENQUIRY.timeframes.map((s) => (
+                {INQUIRY.timeframes.map((s) => (
                   <option key={s} value={s} className={t.option}>
                     {s}
                   </option>
@@ -257,7 +262,7 @@ export function EnquiryForm({
             <Field label="Where do you picture it?" tone={tone} optional>
               <input
                 name="location"
-                placeholder="A park, downtown, our own back garden…"
+                placeholder="A park, downtown, our own backyard…"
                 className={inputClass}
               />
             </Field>
@@ -269,7 +274,7 @@ export function EnquiryForm({
                 <option value="" className={t.option}>
                   No need to say
                 </option>
-                {ENQUIRY.heardFrom.map((s) => (
+                {INQUIRY.heardFrom.map((s) => (
                   <option key={s} value={s} className={t.option}>
                     {s}
                   </option>
