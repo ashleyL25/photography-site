@@ -17,10 +17,12 @@
  * of their parts, discounted, with a printed album folded in where one is
  * included. Those are the only hand-set figures.
  *
- * Image counts follow from the length and from EDITING_STYLE: roughly forty
- * delivered photos per hour on a fully retouched session, roughly eighty on a
- * naturally edited one. A retouched frame takes several times as long to finish,
- * which is the whole reason the counts differ.
+ * Image counts are set per tier, NOT derived — the senior ladder in particular
+ * is 60 / 100 / 150 because Ashley says so, and does not follow from the hours.
+ * What does hold across the board is EDITING_STYLE: a naturally edited session
+ * delivers far more photographs than a fully retouched one of the same length,
+ * because a retouched frame takes several times as long to finish. Do not
+ * reintroduce a per-hour formula here; it will contradict the senior numbers.
  *
  * WHERE THE LEVEL CAME FROM
  *
@@ -120,7 +122,7 @@ export const PACKAGE_SETS: PackageSet[] = [
           time: 'One hour',
           locations: 'One',
           outfits: 'One or two',
-          images: '40+ retouched photos',
+          images: '60 professionally edited photos',
         },
         includes: [
           'One location, picked together beforehand',
@@ -140,7 +142,7 @@ export const PACKAGE_SETS: PackageSet[] = [
           time: 'Four hours',
           locations: 'Up to three',
           outfits: 'Up to three',
-          images: '150+ retouched photos',
+          images: '100 professionally edited photos',
         },
         includes: [
           'Three locations across the metro, planned with you',
@@ -163,7 +165,7 @@ export const PACKAGE_SETS: PackageSet[] = [
           time: 'Two four-hour afternoons',
           locations: 'Up to six across both',
           outfits: 'Up to six across both',
-          images: '300+ retouched photos',
+          images: '150 professionally edited photos',
         },
         includes: [
           'Two full afternoons, months apart',

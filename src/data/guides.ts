@@ -146,8 +146,8 @@ function gallery(style: EditingStyle, extra?: string): Chapter {
             title: 'Why the number of photographs varies',
             body:
               style === 'retouched'
-                ? 'A fully retouched frame takes several times as long to finish as a naturally edited one, so a session like yours delivers fewer photographs than an engagement session of the same length — and every one of them has had far more work done to it. Roughly forty per hour of shooting is the floor, and I usually go over.'
-                : 'Because nothing here is being retouched frame by frame, a session like yours delivers roughly twice as many photographs as a senior or family session of the same length — about eighty per hour of shooting, and I usually go over. Different job, not a lesser one.',
+                ? 'A fully retouched frame takes several times as long to finish as a naturally edited one, so a session like yours delivers fewer photographs than an engagement session of the same length — and every single one of them has had far more work done to it. Your package states exactly how many you get, and that is the number I work to.'
+                : 'Because nothing here is being retouched frame by frame, a session like yours delivers considerably more photographs than a senior or family session of the same length — your package states the floor, and I usually go over it. Different job, not a lesser one.',
           },
         ],
       },
@@ -218,7 +218,7 @@ export const GUIDES: Guide[] = [
       { label: 'How long', value: 'Around four hours' },
       { label: 'Outfits', value: 'Up to three' },
       { label: 'Locations', value: 'Up to three, plus the lunch stop' },
-      { label: 'You get', value: '150+ fully retouched photos' },
+      { label: 'You get', value: '100 professionally edited photos' },
       { label: 'Afterwards', value: 'A review appointment, then your gallery' },
     ],
     chapters: [

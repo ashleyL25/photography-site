@@ -262,13 +262,16 @@
 html, body {
   margin: 0;
   padding: 0;
+  background: var(--canvas);
   box-sizing: border-box;
 }
   body {
     background: #fff;
     font-size: 10.5pt;
   }
-
+header {
+  padding-top: env(safe-area-inset-top);
+}
   /* Chrome that means nothing on paper. */
   header,
   footer,

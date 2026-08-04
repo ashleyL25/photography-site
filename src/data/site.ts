@@ -73,7 +73,7 @@ export const INTRO = {
   ],
   stats: [
     { value: '2021', label: 'Booking since' },
-    { value: '150+', label: 'Photos, senior session' },
+    { value: '100', label: 'Photos, senior session' },
     { value: '48h', label: 'Reply time' },
   ],
 }
@@ -629,7 +629,7 @@ export const CONTACT_PAGE = {
 export const FAQ = [
   {
     q: 'How many photographs do I get?',
-    a: 'Every tier states a floor and I almost always go over it — roughly forty photographs per hour of shooting on a session that gets fully retouched, and about double that on one that does not. So a one-hour family session is forty or more, a four-hour senior afternoon is a hundred and fifty or more, and a ninety-minute engagement session is a hundred and twenty or more. Nothing is decided after the fact.',
+    a: 'Every tier states its number before you book, and nothing is decided after the fact. A senior session is sixty, a hundred, or a hundred and fifty photographs depending on which of the three you pick. Everywhere else the count sits on the card too — and it is higher on an engagement, couples or pet session than on a senior or family one of the same length, for the reason in the next answer.',
   },
   {
     q: 'Why does an engagement session come with more photographs than a senior session?',
