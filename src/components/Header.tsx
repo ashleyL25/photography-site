@@ -64,7 +64,7 @@ export function Header() {
           // spacing, so the bar's background and blur reach the physical top
           // edge rather than leaving a strip the page scrolls through.
           scrolled
-            ? 'border-b border-line bg-canvas/85 pt-[calc(0.75rem+env(safe-area-inset-top))] pb-3 backdrop-blur-xl'
+            ? 'border-b border-line bg-canvas/85 pt-[env(safe-area-inset-top)] pb-3 backdrop-blur-xl'
             : 'border-b border-transparent pt-[calc(1.5rem+env(safe-area-inset-top))] pb-6',
           over && 'text-beige [text-shadow:0_1px_18px_rgb(0_0_0/0.35)]',
         )}

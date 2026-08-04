@@ -13,9 +13,10 @@
  * cost $450 — a $130 jump for fifteen minutes — and nothing across the six
  * session types agreed on what an hour was worth. Now one table decides.
  *
- * Multi-session tiers (Two Seasons, Before The Wedding, Every Year) are the sum
- * of their parts, discounted, with a printed album folded in where one is
- * included. Those are the only hand-set figures.
+ * Multi-session tiers (Before The Wedding, Every Year) are the sum of their
+ * parts. The three senior tiers are hand-set collection prices that deliberately
+ * do NOT derive from the hours — Ashley prices that ladder as collections, so do
+ * not "fix" it back onto the rate card. Anything with an album adds ALBUM.
  *
  * Image counts are set per tier, NOT derived — the senior ladder in particular
  * is 60 / 100 / 150 because Ashley says so, and does not follow from the hours.
@@ -43,8 +44,10 @@
 export { EDITING_STYLE, RETOUCHING } from './policy'
 
 /**
- * Price for a given session length. The single source of truth for every
- * single-session tier; change a number here and the ladders follow.
+ * Price for a given session length, for the five session types sold by the hour.
+ * Change a number here and those ladders follow.
+ *
+ * Seniors are NOT on this table — see the note on that set below.
  */
 export const RATE_CARD = {
   short: 295, // forty-five minutes
@@ -53,8 +56,17 @@ export const RATE_CARD = {
   two: 575, // two hours
   half: 675, // two and a half hours
   three: 775, // three hours
-  four: 895, // four hours — the senior afternoon, and the anchor for the rest
 } as const
+
+/**
+ * The printed album, which Ashley charges $200 for.
+ *
+ * Any tier that lists an album carries this on top of the session price, so the
+ * arithmetic stays visible: a tier priced `money(RATE_CARD.three + ALBUM)` is
+ * self-evidently a three-hour session with an album in it. Add the constant AND
+ * the `includes` line together, never one without the other.
+ */
+export const ALBUM = 200
 
 /** `1450` → `'$1,450'`. */
 export const money = (n: number) => `$${n.toLocaleString('en-US')}`
@@ -115,7 +127,7 @@ export const PACKAGE_SETS: PackageSet[] = [
       {
         id: 'seniors-hour',
         name: 'The Hour',
-        price: money(RATE_CARD.hour),
+        price: money(895),
         unit: 'one hour',
         summary: 'The yearbook photo, and a set you actually like.',
         spec: {
@@ -135,7 +147,7 @@ export const PACKAGE_SETS: PackageSet[] = [
       {
         id: 'seniors-afternoon',
         name: 'The Afternoon',
-        price: money(RATE_CARD.four),
+        price: money(1395 + ALBUM),
         unit: 'the full routine',
         summary: 'Three looks, three places, and lunch in the middle of it.',
         spec: {
@@ -148,6 +160,7 @@ export const PACKAGE_SETS: PackageSet[] = [
           'Three locations across the metro, planned with you',
           'A lunch stop that doubles as a location and a changing room',
           'A sit-down review where you choose every photograph that makes the album',
+          'A printed album of your selects, included',
           'Props, jerseys, instruments, trucks and dogs all welcome',
           'Every photograph fully retouched',
         ],
@@ -156,9 +169,7 @@ export const PACKAGE_SETS: PackageSet[] = [
       {
         id: 'seniors-two-seasons',
         name: 'Two Seasons',
-        // Two full afternoons ($1,790 of time) discounted, with the printed
-        // album included rather than charged for.
-        price: money(1595),
+        price: money(2000 + ALBUM),
         unit: 'two afternoons',
         summary: 'Once in the spring green, once in the fall color.',
         spec: {
@@ -169,7 +180,7 @@ export const PACKAGE_SETS: PackageSet[] = [
         },
         includes: [
           'Two full afternoons, months apart',
-          'A printed album, included — the only tier that comes with one',
+          'A printed album, included',
           'The spring session doubles as the plan for the fall one',
           'A review appointment after each',
           'Two completely different sets of weather, light and color',
@@ -294,9 +305,8 @@ export const PACKAGE_SETS: PackageSet[] = [
       {
         id: 'engagements-before',
         name: 'Before The Wedding',
-        // Golden Hour plus Two Places at full value, with the printed album
-        // standing in for the bundle discount.
-        price: money(RATE_CARD.ninety + RATE_CARD.half),
+        // Golden Hour plus Two Places at full value, plus the album.
+        price: money(RATE_CARD.ninety + RATE_CARD.half + ALBUM),
         unit: 'two evenings',
         summary: 'The engagement session, and a second one closer to the day.',
         spec: {
@@ -307,7 +317,7 @@ export const PACKAGE_SETS: PackageSet[] = [
         },
         includes: [
           'Two sessions in two different seasons',
-          'A printed album, included — the only tier that comes with one',
+          'A printed album, included',
           'Save-the-date frames from the first, everything else from the second',
           'Somewhere that matters to you both for one of them',
           'One combined gallery at the end',
@@ -431,7 +441,7 @@ export const PACKAGE_SETS: PackageSet[] = [
       {
         id: 'families-generations',
         name: 'Generations',
-        price: money(RATE_CARD.three),
+        price: money(RATE_CARD.three + ALBUM),
         unit: 'three hours',
         summary: 'The whole family, in one place, for once.',
         spec: {
@@ -442,7 +452,7 @@ export const PACKAGE_SETS: PackageSet[] = [
         },
         includes: [
           'Multiple households in one session, planned in advance',
-          'A printed album, included — the only tier that comes with one',
+          'A printed album, included',
           'Every combination, plus a portrait of each person',
           'Enough time built in for the toddlers and the grandparents',
           'A private gallery for every household',
@@ -583,9 +593,9 @@ export const ADD_ONS: { label: string; price: string; detail?: string }[] = [
   },
   {
     label: 'A printed album',
-    price: 'Quoted',
+    price: 'From $200',
     detail:
-      'Priced by size and page count. Already included on the top tier of senior, engagement and family sessions.',
+      'Already included on the top two senior packages, and on the top tier of engagement and family sessions. Larger page counts cost more.',
   },
   {
     label: 'An extra location',

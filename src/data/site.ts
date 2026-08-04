@@ -476,7 +476,7 @@ export const EXPERIENCE_PAGE = {
   receive: {
     eyebrow: 'What you receive',
     heading: 'Everything that comes with a session',
-    body: 'Whichever session and whichever tier, this is what is included. What changes between tiers is how much of a day you get — and the top tier of a senior, engagement or family session adds a printed album.',
+    body: 'Whichever session and whichever tier, this is what is included. What changes between tiers is how much of a day you get — and the larger senior packages, plus the top engagement and family tiers, add a printed album.',
     items: [
       'Your full edited album, in a private online photo gallery',
       'Full-resolution downloads of every image, and the right to print any of them',
@@ -488,7 +488,7 @@ export const EXPERIENCE_PAGE = {
       'Travel anywhere in the Des Moines metro, included',
       'Your dog, at no extra cost, always',
       'Additional edited images from the raw set whenever you want them',
-      'A printed album on the top tier of senior, engagement and family sessions',
+      'A printed album on the larger senior packages and the top engagement and family tiers',
     ],
   },
 
@@ -637,7 +637,7 @@ export const FAQ = [
   },
   {
     q: 'Do I get a printed album?',
-    a: 'On the top tier of senior, engagement and family sessions, yes — included. On any other tier it is an add-on, priced by size and page count. Every session comes with the full digital album in your online gallery regardless.',
+    a: 'Included on the two larger senior packages, and on the top tier of engagement and family sessions. Anywhere else it is an add-on from $200, depending on the page count. Every session comes with the full digital album in your online gallery regardless.',
   },
   {
     q: 'How do I know which tier to pick?',
