@@ -71,36 +71,40 @@ export type Guide = {
  * once and parameterised.
  * ------------------------------------------------------------------ */
 
-function hairAndMakeup(lead: string, timing: string[]): Chapter {
-  return {
-    id: 'hair-and-makeup',
-    title: 'Hair and makeup',
-    lead,
-    blocks: [
-      { kind: 'prose', text: timing },
-      {
-        kind: 'compare',
-        yes: {
-          title: 'Does photograph well',
-          items: [
-            'Matte foundation, and a little more of it than you would wear on a normal day',
-            'Eyes and brows done slightly stronger than feels natural — a camera flattens everything',
-            'A hairstyle you have worn before and know how to fix',
-            'Setting spray, because we will be outside for hours',
-            'Lips you can reapply without a mirror',
-          ],
-        },
-        no: {
-          title: 'Does not',
-          items: [
-            'Shimmer or anything with glitter in it — it throws light straight back at the lens',
-            'A brand-new haircut or color the week of the session',
-            'Heavy contour, which reads as a stripe rather than a shadow',
-            'Facials, peels and masks inside seven days',
-            'A spray tan you have not had before, ever',
-          ],
-        },
+function hairAndMakeup(
+  lead: string,
+  timing: string[],
+  opts: { vendors?: boolean } = {},
+): Chapter {
+  const blocks: Block[] = [
+    { kind: 'prose', text: timing },
+    {
+      kind: 'compare',
+      yes: {
+        title: 'Does photograph well',
+        items: [
+          'Matte foundation, and a little more of it than you would wear on a normal day',
+          'Eyes and brows done slightly stronger than feels natural — a camera flattens everything',
+          'A hairstyle you have worn before and know how to fix',
+          'Setting spray, because we will be outside for hours',
+          'Lips you can reapply without a mirror',
+        ],
       },
+      no: {
+        title: 'Does not',
+        items: [
+          'Shimmer or anything with glitter in it — it throws light straight back at the lens',
+          'A brand-new haircut or color the week of the session',
+          'Heavy contour, which reads as a stripe rather than a shadow',
+          'Facials, peels and masks inside seven days',
+          'A spray tan you have not had before, ever',
+        ],
+      },
+    },
+  ]
+
+  if (opts.vendors) {
+    blocks.push(
       {
         kind: 'prose',
         text: [
@@ -112,7 +116,14 @@ function hairAndMakeup(lead: string, timing: string[]): Chapter {
         kind: 'note',
         text: 'Whoever you book, get the appointment to finish at least an hour before we start. Salons run late, traffic happens, and an hour of slack costs you nothing but removes the only genuinely stressful part of the day.',
       },
-    ],
+    )
+  }
+
+  return {
+    id: 'hair-and-makeup',
+    title: 'Hair and makeup',
+    lead,
+    blocks,
   }
 }
 
@@ -296,6 +307,7 @@ export const GUIDES: Guide[] = [
           'Two weeks before is the window for anything structural — a cut, color, or a treatment. Not the week of. A haircut you have not lived with yet is the single most common regret in senior pictures, and there is no fixing it in editing.',
           'Nails: get them done one or two days before, not the morning of. Hands end up in more frames than you would guess — in your hair, on a railing, holding a milkshake — and chipped polish is the thing you will notice first.',
         ],
+        { vendors: true },
       ),
 
       {
@@ -602,12 +614,10 @@ export const GUIDES: Guide[] = [
       },
 
       hairAndMakeup(
-        'The cap is the complication. Plan the hair around it.',
+        'You do not need it done professionally — most people do not.',
         [
-          'The cap flattens whatever is on the top of your head and leaves a line. Tell your stylist it is going on and off repeatedly and they will build the style to survive it — usually something with volume lower down, or a style that looks deliberate once the cap comes off.',
-          'Book it for the morning of if you can, finishing at least an hour before we meet. Ceremony mornings run late by nature and that hour is what stops the whole day sliding.',
-          'Two weeks out for a cut or color. Not the week of, and certainly not the day before the ceremony.',
-          'Bring bobby pins and whatever holds your hair, because we will be taking the cap on and off perhaps fifteen times.',
+          'Most graduates do their own hair and makeup, and that looks completely fine. The only real complication is the cap: it flattens whatever is on top of your head and leaves a line, so plan a style that still looks deliberate once it comes off, and bring bobby pins — we will be taking it on and off a lot.',
+          'If you are getting a cut or color, two weeks out. Not the week of.',
         ],
       ),
 
@@ -721,12 +731,10 @@ export const GUIDES: Guide[] = [
       },
 
       hairAndMakeup(
-        'Whoever is having it done: book it for the afternoon, not the morning.',
+        'Optional — and a useful dress rehearsal if you want one.',
         [
-          'These sessions are in the evening, so a morning appointment has eight hours to fall out before we start. Aim to finish two hours before we meet.',
-          'We will be outdoors in whatever wind central Iowa is offering. Tell your stylist that — a style built to survive it looks far better in the photographs than an elaborate one that does not.',
-          'Two weeks out for a cut or color. If the wedding is close and you are trialling a look, this session is a genuinely useful dress rehearsal for it, so consider booking the trial for this day.',
-          'Both of you should think about it, not just one of you. A fresh shave or a tidy-up on the neckline photographs more obviously than people expect.',
+          'You do not need professional hair and makeup for this. Plenty of people do their own and look wonderful. If you are having a wedding makeup trial anyway, book it for this session — you get to see how it photographs once before the day, which is genuinely useful.',
+          'Keep the hair more casual: curls, or whatever you do for a good date night. These pictures are meant to feel like the two of you at ease — fun, relaxed, yourselves. They will show up on your save-the-dates and RSVP site, and for some of your extended family this may be the first proper look at you as a couple. Look great, just not like you are already walking down the aisle.',
         ],
       ),
 
@@ -819,10 +827,9 @@ export const GUIDES: Guide[] = [
       },
 
       hairAndMakeup(
-        'Afternoon appointment, finishing two hours before we meet.',
+        'Optional. Most couples do their own.',
         [
-          'These are evening sessions, so an early appointment has all day to come apart. Aim to be finished two hours before we start.',
-          'Keep it close to what you normally look like, only slightly stronger. The aim is a photograph that looks like you on a good day, not one that looks like you on somebody else\'s wedding day.',
+          'Keep it close to what you normally look like, only slightly stronger — a photograph of you on a good day, not somebody else\'s wedding day.',
           'Both of you, not just one of you. A tidy-up on a neckline or a fresh shave shows up in every close frame.',
         ],
       ),
@@ -964,11 +971,10 @@ export const GUIDES: Guide[] = [
       },
 
       hairAndMakeup(
-        'Optional for most families, and worth it for whoever is most self-conscious.',
+        'Optional for most families.',
         [
-          'Most families do their own and it looks completely fine. If one person is dreading this, book them a blow-out — it is a small amount of money for a noticeably more relaxed hour.',
-          'Whatever you do, keep it recognizable. These photographs are going on a wall for a decade and you want to look like yourselves.',
-          'If you are booking for several people, allow twice as long as the salon quotes, and aim to finish two hours before we meet.',
+          'Most families do their own and it looks completely fine. Keep it recognizable — these photographs are going on a wall for a decade and you want to look like yourselves.',
+          'If one person is dreading this, a blow-out can take the edge off. That is about as far as it needs to go.',
         ],
       ),
 
@@ -1076,6 +1082,6 @@ export const GUIDES_BY_ID = Object.fromEntries(GUIDES.map((g) => [g.id, g])) as 
 export const GUIDES_INDEX = {
   eyebrow: 'Client guides',
   heading: 'Everything you need before your session.',
-  body: 'One guide per session type — what to wear, when to book hair and makeup, where we are going, what to bring, and how the day actually runs. Yours arrives by email when you book; they live here too so you can find one at eleven o\'clock the night before.',
+  body: 'One guide per session type — what to wear, what photographs well, where we are going, what to bring, and how the day actually runs. Yours arrives by email when you book; they live here too so you can find one at eleven o\'clock the night before.',
   photoId: 'backgrounds-italy-2025-196',
 }
