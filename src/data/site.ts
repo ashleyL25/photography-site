@@ -51,7 +51,7 @@ export const HERO = {
   eyebrow: 'Portraits · Urbandale, Iowa',
   lead: 'Ashley',
   script: 'Photography',
-  sub: 'Natural-light portraits of the people, the places and the very good dogs that make up a life.',
+  sub: 'Natural-light portraits of the people and places that make up a life.',
   scroll: 'Scroll',
 }
 
@@ -68,8 +68,8 @@ export const INTRO = {
   eyebrow: 'A little context',
   heading: 'Pictures capture a moment in time — a picture keeps it.',
   body: [
-    'An engagement, a homecoming, a new puppy, the last spring before everyone scatters. These are the moments worth slowing down for, and I will walk you through every step to get the shot.',
-    'Nobody has ever looked relaxed while being told to relax, so we skip that part. Sessions are unhurried and genuinely fun, and I direct just enough that you never have to wonder what to do with your hands — the frames you end up loving come from the gaps in between.',
+    'An engagement, a homecoming, a new puppy, the last spring before everyone scatters. These are the moments worth slowing down for, and I will walk you through every step.',
+    'Sessions are unhurried and genuinely fun. I guide you enough that nothing feels awkward, then leave room for the real moments — the ones you end up loving most often happen between the poses.',
   ],
   stats: [
     { value: '2021', label: 'Booking since' },
@@ -266,7 +266,7 @@ export const PROCESS = [
   {
     index: '02',
     title: 'Have an actual good time',
-    body: 'Photoshoots do not have to be stressful. I keep it moving, keep it light, and direct just enough that you never have to wonder what to do with your hands.',
+    body: 'Photoshoots do not have to be stressful. I keep it moving and light, guide you through the poses, and leave space for the real smiles to show up on their own.',
     photoId: 'engagement-june2022-176',
   },
   {
@@ -310,7 +310,7 @@ export const ABOUT = {
   heading: 'The frame I am waiting for is the one nobody planned.',
   body: [
     'My favorite frames are almost never the ones we lined up. They are the goofy ones — the unexpected ones — the second after a joke lands and a real smile breaks through before anyone has time to pose for it.',
-    'I love watching that happen. The laugh you cannot fake. The look someone gives when they forget the camera is there. The dog that ruins the shot and somehow makes it the one you keep.',
+    'I love watching that happen. The laugh you cannot fake. The look someone gives when they forget the camera is there. The little sideways glance that was never on the shot list.',
     'That is what I am always after: the versions of you that feel like you. Not stiff, not arranged — just alive in the frame. Those are the photographs that still make you smile years later.',
   ],
   photoId: 'about-ashley',

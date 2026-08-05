@@ -101,8 +101,8 @@ export default function GuidesPage() {
             <Reveal as="p">
               Almost every worry people bring to a session is a planning worry rather than a
               photography one: whether the outfit works, whether the haircut was a mistake, whether
-              the forecast means it is off. All of those are answerable in advance, so they are
-              answered in advance.
+              the forecast means it is off. I try to answer all of those in advance, so you can
+              relax on the day of your session.
             </Reveal>
             <Reveal as="p" delay={0.08}>
               Your guide arrives the day you book. The checklists tick off and stay ticked on your
@@ -110,8 +110,8 @@ export default function GuidesPage() {
               of them prints cleanly if you would rather have it on paper on the kitchen table.
             </Reveal>
             <Reveal as="p" delay={0.16}>
-              Not booked yet? Read them anyway. They are the most honest description of how a
-              session actually runs that I could write.
+              Not booked yet? Read them anyway — they are a clear preview of what a shoot with
+              me actually feels like.
             </Reveal>
             <Reveal delay={0.24}>
               <Link
