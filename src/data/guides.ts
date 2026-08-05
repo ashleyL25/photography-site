@@ -364,12 +364,12 @@ export const GUIDES: Guide[] = [
             text: [
               'Three locations across one afternoon works because the metro is small and I plan them as a loop rather than three separate trips — usually a built one first, the lunch stop second, and something green and open for the golden hour at the end.',
               'The best sessions have at least one location that is nobody else\'s. A grandparents\' farm, your own backyard, the pitch you played on for four years, the car you fixed yourself, the shop where you have worked since you were fifteen. Those are the frames that stop being "nice photographs" and start being about you specifically. If you have one, we build the day around it.',
+              'If you cannot picture how a spot will look in photographs, tell me — I can send example frames from that place so you can see what it actually offers.',
             ],
           },
-          { kind: 'locations', items: LOCATIONS },
           {
             kind: 'note',
-            text: 'A few places charge admission or need a permit — the Botanical Garden and Salisbury House among them. Tell me if one of those is on your list and I will check the current rules and cost before we commit to it. Anywhere beyond the metro is fine too; I will quote the travel before you decide.',
+            text: 'A few places charge admission or need a permit — the Botanical Garden and Salisbury House among them. Tell me if one of those is on your list and I will check the current rules and cost before we commit to it. Anywhere in the Des Moines metro is included; a campus or other spot outside that drive has a travel fee, and I will quote it before you decide.',
           },
         ],
       },
@@ -734,7 +734,7 @@ export const GUIDES: Guide[] = [
         'Optional — and a useful dress rehearsal if you want one.',
         [
           'You do not need professional hair and makeup for this. Plenty of people do their own and look wonderful. If you are having a wedding makeup trial anyway, book it for this session — you get to see how it photographs once before the day, which is genuinely useful.',
-          'Keep the hair more casual: curls, or whatever you do for a good date night. These pictures are meant to feel like the two of you at ease — fun, relaxed, yourselves. They will show up on your save-the-dates and RSVP site, and for some of your extended family this may be the first proper look at you as a couple. Look great, just not like you are already walking down the aisle.',
+          'Keep the hair more casual: curls, or whatever you do for a good date night. These pictures are meant to feel like the two of you at ease — fun, relaxed, yourselves. They will show up on your save-the-dates and RSVP website, and for some of your extended family this may be the first proper look at you as a couple.',
         ],
       ),
 
@@ -745,11 +745,16 @@ export const GUIDES: Guide[] = [
           {
             kind: 'prose',
             text: [
-              'One location, done properly, beats three rushed ones. The exception is if you have two places with genuinely different characters and the time to do both — then we start in town and finish somewhere open, so the golden hour lands on the second one.',
+              'One location is typically what we stick to. The exception is if you have two places with genuinely different characters and the time to do both — then we start in town and finish somewhere open, so the golden hour lands on the second one.',
               'The best answer is somewhere with a reason. Where you met, the bar you go to every Friday, the trail you walk, the lake you grew up on, your own kitchen. A pretty park is a pretty park; your park is a photograph about you.',
+              'If you met in college, a campus session is a great choice — you get the photographs and a walk down memory lane in the same hour.',
+              'If you cannot picture how a spot will look in photographs, tell me — I can send example frames from that place so you can see what it actually offers.',
             ],
           },
-          { kind: 'locations', items: LOCATIONS },
+          {
+            kind: 'note',
+            text: 'Anywhere in the Des Moines metro is included. A campus or other spot outside that drive has a travel fee, and I will quote it before you decide.',
+          },
         ],
       },
 
