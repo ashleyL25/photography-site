@@ -86,7 +86,8 @@
     scroll-behavior: auto !important;
   }
 
-  html {
+  html, body {
+    margin: 0;
     background-color: var(--canvas);
   }
 
