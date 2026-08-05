@@ -41,7 +41,11 @@ export function Hero() {
   // arch, turning the opening frame into a hung print.
   const sideInset = useTransform(scrollYProgress, [0, 1], ['0%', '11%'])
   const topInset = useTransform(scrollYProgress, [0, 1], ['0%', '4%'])
-  const arch = useTransform(scrollYProgress, [0, 1], ['0px', '320px'])
+  // Held under half the inset plate's width. Past that the browser scales every
+  // radius down to fit, by a factor that itself moves with the insets, so on a
+  // phone the corners snapped to a dome partway down and then drifted.
+  const archPx = useTransform(scrollYProgress, [0, 1], [0, 320])
+  const arch = useMotionTemplate`min(${archPx}px, 38vw)`
   const foot = useTransform(scrollYProgress, [0, 1], ['0px', '6px'])
   const clipPath = useMotionTemplate`inset(${topInset} ${sideInset} ${topInset} ${sideInset} round ${arch} ${arch} ${foot} ${foot})`
 
@@ -56,7 +60,7 @@ export function Hero() {
       <div className="sticky top-0 h-[100svh] overflow-hidden">
         <motion.div
           className="absolute inset-0"
-          style={reduced ? undefined : { clipPath }}
+          style={reduced ? undefined : { clipPath, willChange: 'clip-path' }}
         >
           <Photo
             id={HERO_PHOTO}
