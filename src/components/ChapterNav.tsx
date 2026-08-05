@@ -11,7 +11,7 @@ const num = (i: number) => String(i + 1).padStart(2, '0')
  * header (which is ~4rem tall plus the status-bar inset it pads itself by) with
  * a little air under it, so the two read as two stacked bars rather than one.
  */
-const STICKY_TOP = 'calc(4.55rem + env(safe-area-inset-top))'
+const STICKY_TOP = 'calc(5.25rem + env(safe-area-inset-top))'
 
 /**
  * `true` once a sticky element has reached its offset and pinned.
@@ -148,7 +148,7 @@ function FloatingIsland({ chapters, active }: { chapters: Chapter[]; active: str
           measure it; the shrink rides on the pill inside. */}
       <div
         ref={wrap}
-        style={{ top: STICKY_TOP }}
+        style={{ top: STICKY_TOP, paddingBottom: '20px' }}
         className="sticky z-50 lg:hidden print:hidden"
       >
         <motion.div
