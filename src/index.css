@@ -56,6 +56,31 @@
   color-scheme: dark;
 }
 
+html, body {
+  margin: 0;
+  background-color: var(--canvas);
+}
+
+body {
+  margin: 0;
+  background-color: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.7;
+  overflow-x: clip;
+  transition:
+    background-color 0.5s var(--ease-out-expo),
+    color 0.5s var(--ease-out-expo);
+    max-width: 100vw;
+    display: block;
+    float: left;
+    width: 100%;
+    height: 100%;
+}
+header {
+  z-index: 9999;
+}
 @layer base {
   *,
   ::before,
@@ -85,12 +110,11 @@
   html.lenis {
     scroll-behavior: auto !important;
   }
-
   html, body {
     margin: 0;
     background-color: var(--canvas);
   }
-
+  
   body {
     margin: 0;
     background-color: var(--canvas);
@@ -108,7 +132,6 @@
       width: 100%;
       height: 100%;
   }
-
   ::selection {
     background: var(--accent);
     color: var(--canvas);
