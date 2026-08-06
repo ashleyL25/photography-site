@@ -144,9 +144,12 @@ export function Lightbox({ ids, index, onClose, onNavigate, caption }: Props) {
             </button>
           </div>
 
-          {/* Clicking the surround closes; clicking the photo does not. */}
+          {/* Clicking the surround closes; clicking the photo does not.
+              `min-h-0` is load-bearing: without it this row's automatic minimum
+              size is the photo's intrinsic height, so a tall frame pushes its
+              own bottom past the fixed overlay where nothing scrolls. */}
           <div
-            className="relative flex flex-1 items-center justify-center px-4 pb-4 md:px-20"
+            className="relative flex min-h-0 flex-1 items-center justify-center px-4 pb-4 md:px-20"
             onClick={onClose}
           >
             <AnimatePresence mode="wait">
