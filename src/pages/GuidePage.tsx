@@ -142,7 +142,7 @@ export default function GuidePage() {
         >
           <div className="shell">
             <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
-              <div className="lg:col-span-4">
+              <div className="lg:col-span-4 lg:sticky lg:top-28 lg:self-start">
                 <Reveal className="label text-accent">
                   Chapter {String(i + 1).padStart(2, '0')}
                 </Reveal>

@@ -50,7 +50,7 @@ export function weatherColumns(session: string) {
   return [
     {
       title: 'Overcast is not bad weather',
-      body: 'A flat gray sky is the best light there is — soft, even, and forgiving. If you wake up to cloud, that is good news. Do not text me to cancel.',
+      body: 'A flat gray sky is the best light there is — soft, even, and forgiving. If you wake up to cloud, that is good news.',
     },
     {
       title: 'Rain and wind are',
