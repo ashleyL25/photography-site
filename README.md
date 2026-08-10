@@ -181,9 +181,13 @@ than copied six times. Change the wording there and it changes everywhere.
 1. `npm run build`
 2. Upload the **contents** of `dist/` into `public_html` — including the hidden
    `.htaccess` (turn on "show hidden files" in the File Manager, or use SFTP).
-3. Open `public_html/php/contact.php` and set `$TO` and `$FROM`. `$FROM` must be
-   an address on this domain or the host will drop the mail.
-4. Send a test inquiry and confirm it arrives.
+3. Send a test inquiry and confirm it arrives.
+
+`php/contact.php` needs no post-upload edit any more: `$TO` and `$FROM` ship set
+for this site. `$FROM` has to stay on `ashleyphotographyia.com` — Hostinger drops
+mail whose `From:` header is off-domain, and because that failure is silent, an
+edit-after-upload step was a standing way to break the contact form without
+noticing. Change it in the repo if it ever needs changing, not on the server.
 
 `.htaccess` forces HTTPS, sets long cache lifetimes on the fingerprinted assets
 while keeping `index.html` revalidating, and routes unknown paths back to

@@ -4,16 +4,20 @@
  *
  * The React form POSTs JSON here; this validates it and sends a mail.
  *
- * BEFORE GOING LIVE:
- *   1. Set $TO to the real inbox.
- *   2. Set $FROM to an address on this domain — Hostinger (and most hosts)
- *      reject mail whose From: header is a Gmail/Outlook address.
+ * Both addresses below are set for this site and ship correct, so uploading
+ * `dist/` no longer needs a hand-edit afterwards. That step was a standing
+ * hazard: $FROM was left pointing at photosbyashley.com — a different domain —
+ * and Hostinger drops mail whose From: header is off-domain, so every deploy that
+ * forgot the edit silently stopped delivering inquiries with no error anywhere.
+ *
+ * $FROM must stay on ashleyphotographyia.com for that reason. $TO can be any
+ * inbox; it is only the recipient.
  */
 
 declare(strict_types=1);
 
 $TO   = 'ashleydesignia@gmail.com';
-$FROM = 'no-reply@photosbyashley.com'; // must stay on this domain for Hostinger mail
+$FROM = 'no-reply@ashleyphotographyia.com'; // must stay on this domain for Hostinger mail
 
 header('Content-Type: application/json; charset=utf-8');
 
