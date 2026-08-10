@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import clsx from 'clsx'
 import { BY_ID, type Photo as PhotoData } from '@/data/photos.generated'
+import { useRemotePortfolio } from '@/data/portfolio-remote'
 
 type Props = {
   /** Id from the generated manifest. */
@@ -25,11 +26,19 @@ function srcSet(photo: PhotoData) {
  * and cross-fades to the real file once decoded.
  */
 export function Photo({ id, alt, sizes, className, imgClassName, priority }: Props) {
-  const photo = BY_ID[id]
+  // The build-time manifest first, then anything published from the gallery
+  // dashboard. Local wins on an id collision, which is the safe way round: a
+  // photograph that ships with the site is the one that was chosen deliberately.
+  const remote = useRemotePortfolio()
+  const photo = BY_ID[id] ?? remote.byId[id]
   const [loaded, setLoaded] = useState(false)
 
   if (!photo) {
-    if (import.meta.env.DEV) console.warn(`Photo "${id}" is not in the manifest.`)
+    // Only worth warning once the remote manifest has actually been consulted —
+    // before that, a remote id is legitimately unknown rather than missing.
+    if (import.meta.env.DEV && remote.loaded) {
+      console.warn(`Photo "${id}" is in neither manifest.`)
+    }
     return null
   }
 

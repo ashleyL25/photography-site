@@ -3,6 +3,7 @@ import { Link, Navigate, useParams } from 'react-router-dom'
 import { motion } from 'motion/react'
 import { PORTFOLIO_FILTERS } from '@/data/site'
 import { SHOOTS_BY_DATE, SHOOT_BY_SLUG, photosFor } from '@/data/shoots'
+import { useRemotePortfolio } from '@/data/portfolio-remote'
 import type { Photo as PhotoData } from '@/data/photos.generated'
 import { Photo } from '@/components/Photo'
 import { PageHero } from '@/components/PageHero'
@@ -28,12 +29,21 @@ function columnize(photos: PhotoData[], columns: number): PhotoData[][] {
 
 export default function ShootPage() {
   const { slug } = useParams()
-  const shoot = slug ? SHOOT_BY_SLUG[slug] : undefined
+
+  // A hand-curated session first, then one published from the gallery dashboard.
+  const remote = useRemotePortfolio()
+  const shoot = slug
+    ? (SHOOT_BY_SLUG[slug] ?? remote.shoots.find((s) => s.slug === slug))
+    : undefined
 
   const columns = useColumnCount()
   const [openIndex, setOpenIndex] = useState<number | null>(null)
 
-  const photos = useMemo(() => (shoot ? photosFor(shoot) : []), [shoot])
+  const photos = useMemo(() => {
+    if (!shoot) return []
+    const local = photosFor(shoot)
+    return local.length > 0 ? local : (remote.bySlug[shoot.slug] ?? [])
+  }, [shoot, remote.bySlug])
   const grid = useMemo(() => columnize(photos, columns), [photos, columns])
   const ids = useMemo(() => photos.map((p) => p.id), [photos])
 
@@ -42,7 +52,10 @@ export default function ShootPage() {
     shoot?.story,
   )
 
-  if (!shoot) return <Navigate to="/portfolio" replace />
+  // Only redirect once the remote manifest has been consulted. Redirecting
+  // earlier would bounce a perfectly valid published-album URL — a link someone
+  // was sent, or a reload — straight back to the index.
+  if (!shoot) return remote.loaded ? <Navigate to="/portfolio" replace /> : null
 
   // Only the fields that were actually filled in get a row.
   const facts = [
@@ -54,8 +67,13 @@ export default function ShootPage() {
     { term: 'Delivered', detail: `${photos.length} frames in this gallery` },
   ].filter((f) => Boolean(f.detail))
 
-  const order = SHOOTS_BY_DATE.findIndex((s) => s.slug === shoot.slug)
-  const next = SHOOTS_BY_DATE[(order + 1) % SHOOTS_BY_DATE.length]
+  // Walks the merged list so a remote session is not a dead end.
+  const all = [
+    ...SHOOTS_BY_DATE,
+    ...remote.shoots.filter((r) => !SHOOT_BY_SLUG[r.slug]),
+  ].sort((a, b) => b.sort.localeCompare(a.sort))
+  const order = all.findIndex((s) => s.slug === shoot.slug)
+  const next = all[(order + 1) % all.length]
 
   return (
     <>

@@ -4,26 +4,13 @@ import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
 import { PORTFOLIO, PORTFOLIO_FILTERS } from '@/data/site'
 import { SHOOTS_BY_DATE, photosFor } from '@/data/shoots'
+import { useRemotePortfolio } from '@/data/portfolio-remote'
 import { Photo } from '@/components/Photo'
 import { PageHero } from '@/components/PageHero'
 import { Reveal } from '@/components/motion'
 import { useDocumentMeta } from '@/lib/hooks'
 
-const LABELS = Object.fromEntries(PORTFOLIO_FILTERS.map((f) => [f.id, f.label]))
-
-/** Only offer filters that actually have a shoot behind them. */
-const FILTERS = PORTFOLIO_FILTERS.filter(
-  (f) => f.id === 'all' || SHOOTS_BY_DATE.some((s) => s.category === f.id),
-)
-
-const COUNTS = Object.fromEntries(
-  FILTERS.map((f) => [
-    f.id,
-    f.id === 'all'
-      ? SHOOTS_BY_DATE.length
-      : SHOOTS_BY_DATE.filter((s) => s.category === f.id).length,
-  ]),
-)
+const BASE_LABELS = Object.fromEntries(PORTFOLIO_FILTERS.map((f) => [f.id, f.label]))
 
 export default function Portfolio() {
   useDocumentMeta(
@@ -31,11 +18,55 @@ export default function Portfolio() {
     'Portrait sessions across the Des Moines metro and central Iowa: seniors, graduation, engagements, couples, families and pets.',
   )
 
+  /**
+   * Local shoots and anything published from the gallery dashboard, newest first.
+   *
+   * A remote album whose slug collides with a hand-curated one is dropped: the
+   * local entry has editorial copy behind it and is the better page.
+   */
+  const remote = useRemotePortfolio()
+
+  const shoots = useMemo(() => {
+    const localSlugs = new Set(SHOOTS_BY_DATE.map((s) => s.slug))
+    const extra = remote.shoots.filter((s) => !localSlugs.has(s.slug))
+    return [...SHOOTS_BY_DATE, ...extra].sort((a, b) => b.sort.localeCompare(a.sort))
+  }, [remote.shoots])
+
+  // Labels for categories the local filter list does not name — a group added in
+  // the dashboard, like Boudoir, arrives with its own label.
+  const labels = useMemo(
+    () => ({ ...Object.fromEntries(remote.categories.map((c) => [c.value, c.label])), ...BASE_LABELS }),
+    [remote.categories],
+  )
+
+  /** Only offer a filter that actually has a session behind it. */
+  const filters = useMemo(() => {
+    const present = new Set(shoots.map((s) => s.category))
+    const known = PORTFOLIO_FILTERS.filter((f) => f.id === 'all' || present.has(f.id))
+    // Categories from the dashboard that the hardcoded list never anticipated,
+    // appended so they are reachable rather than silently unfilterable.
+    const extra = [...present]
+      .filter((c) => !PORTFOLIO_FILTERS.some((f) => f.id === c))
+      .map((c) => ({ id: c, label: labels[c] ?? c }))
+    return [...known, ...extra]
+  }, [shoots, labels])
+
+  const counts = useMemo(
+    () =>
+      Object.fromEntries(
+        filters.map((f) => [
+          f.id,
+          f.id === 'all' ? shoots.length : shoots.filter((s) => s.category === f.id).length,
+        ]),
+      ),
+    [filters, shoots],
+  )
+
   // `?c=seniors` deep-links a category, so homepage session rows can land here
   // already filtered. The param stays in sync as you click through.
   const [params, setParams] = useSearchParams()
   const requested = params.get('c') ?? 'all'
-  const valid = FILTERS.some((f) => f.id === requested)
+  const valid = filters.some((f) => f.id === requested)
   const [filter, setFilter] = useState<string>(valid ? requested : 'all')
 
   useEffect(() => {
@@ -48,9 +79,8 @@ export default function Portfolio() {
   }
 
   const visible = useMemo(
-    () =>
-      filter === 'all' ? SHOOTS_BY_DATE : SHOOTS_BY_DATE.filter((s) => s.category === filter),
-    [filter],
+    () => (filter === 'all' ? shoots : shoots.filter((s) => s.category === filter)),
+    [filter, shoots],
   )
 
   return (
@@ -66,7 +96,7 @@ export default function Portfolio() {
           header's height, with a hair of overlap so nothing shows through. */}
       <div className="sticky top-16 z-40 border-y border-line bg-canvas/90 backdrop-blur-xl">
         <div className="shell flex gap-2 overflow-x-auto py-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {FILTERS.map((f) => {
+          {filters.map((f) => {
             const on = filter === f.id
             return (
               <button
@@ -80,7 +110,7 @@ export default function Portfolio() {
                 )}
               >
                 {f.label}
-                <span className="ml-2 text-[0.9em] opacity-50">{COUNTS[f.id]}</span>
+                <span className="ml-2 text-[0.9em] opacity-50">{counts[f.id]}</span>
               </button>
             )
           })}
@@ -98,7 +128,9 @@ export default function Portfolio() {
             transition={{ duration: 0.28 }}
           >
             {visible.map((shoot, i) => {
-              const count = photosFor(shoot).length
+              // Local shoots resolve through the generated manifest; remote ones
+              // through the fetched one, keyed on the same slug.
+              const count = (photosFor(shoot).length || remote.bySlug[shoot.slug]?.length) ?? 0
               return (
                 <motion.li
                   key={shoot.slug}
@@ -124,7 +156,7 @@ export default function Portfolio() {
                         className="pointer-events-none absolute inset-0 bg-charcoal/0 transition-colors duration-500 group-hover:bg-charcoal/15"
                       />
                       <span className="label absolute bottom-5 left-5 rounded-full bg-canvas/85 px-4 py-2 text-ink backdrop-blur-sm">
-                        {LABELS[shoot.category] ?? shoot.category}
+                        {labels[shoot.category] ?? shoot.category}
                       </span>
                     </div>
 
