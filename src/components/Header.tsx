@@ -68,46 +68,61 @@ function NavDropdown({
       }}
     >
       {children}
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            // The padding is the hover bridge. The header sits 1.5rem above its
-            // own bottom edge when unscrolled, and a panel that started at the
-            // card's top edge would leave a dead gap the pointer crosses — the
-            // panel closing halfway to the thing it was opened to reach.
-            className="absolute left-1/2 top-full z-10 -translate-x-1/2 pt-5"
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
-          >
-            {/* Its own palette rather than the header's. Over a photograph the
-                bar is light-on-dark, and inheriting that would put beige text on
-                the panel's own light background. */}
-            <ul
-              aria-label={label}
-              className="min-w-[15rem] border border-line bg-canvas py-2 shadow-[0_24px_70px_-40px_rgb(0_0_0/0.55)]"
-            >
-              {items.map((child) => (
-                <li key={child.to}>
-                  <Link
-                    to={child.to}
-                    aria-current={pathname === child.to ? 'page' : undefined}
-                    className={clsx(
-                      'label block px-5 py-3 transition-colors duration-300',
-                      pathname === child.to
-                        ? 'text-accent'
-                        : 'text-muted hover:bg-surface hover:text-ink',
-                    )}
-                  >
-                    {child.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
+
+      {/*
+        Always mounted and hidden with CSS, rather than conditionally rendered
+        inside an AnimatePresence like the mobile drawer below.
+
+        The reason is the keyboard path. This panel opens on focus, and focus can
+        only reach a link that is already in the tab order — a panel that mounts
+        when it opens can never be opened by tabbing to what is inside it. Keeping
+        it mounted makes "tab to Sessions, keep tabbing into the list" work
+        without a roving-tabindex or a keydown handler simulating one.
+
+        `pointer-events-none` is therefore part of the closed state rather than a
+        consequence of unmounting: the panel sits over the page at all times and
+        must not intercept clicks meant for what is beneath it.
+
+        Deliberately not `aria-hidden` or `inert` when closed — unlike the mobile
+        submenu, whose links are unreachable until its disclosure button is
+        pressed. Here they are the way in, and hiding a focusable element from the
+        accessibility tree is the contradiction screen readers report as an error.
+      */}
+      <div
+        // The padding is the hover bridge. The header sits 1.5rem above its own
+        // bottom edge when unscrolled, and a panel that started at the card's top
+        // edge would leave a dead gap the pointer crosses — the panel closing
+        // halfway to the thing it was opened to reach.
+        className={clsx(
+          'absolute left-1/2 top-full z-10 -translate-x-1/2 pt-5 transition-[opacity,transform] duration-300 ease-[var(--ease-out-expo)]',
+          open ? 'translate-y-0 opacity-100' : 'pointer-events-none -translate-y-2 opacity-0',
         )}
-      </AnimatePresence>
+      >
+        {/* Its own palette rather than the header's. Over a photograph the bar is
+            light-on-dark, and inheriting that would put beige text on the panel's
+            own light background. */}
+        <ul
+          aria-label={label}
+          className="min-w-[15rem] border border-line bg-canvas py-2 shadow-[0_24px_70px_-40px_rgb(0_0_0/0.55)]"
+        >
+          {items.map((child) => (
+            <li key={child.to}>
+              <Link
+                to={child.to}
+                aria-current={pathname === child.to ? 'page' : undefined}
+                className={clsx(
+                  'label block px-5 py-3 transition-colors duration-300',
+                  pathname === child.to
+                    ? 'text-accent'
+                    : 'text-muted hover:bg-surface hover:text-ink',
+                )}
+              >
+                {child.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   )
 }
@@ -299,15 +314,34 @@ export function Header() {
                       )}
                     </div>
 
-                    <AnimatePresence initial={false}>
-                      {children && expanded === item.to && (
-                        <motion.ul
-                          className="overflow-hidden"
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: 'auto', opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-                        >
+                    {/*
+                      Collapsed with CSS rather than unmounted, to match the
+                      desktop panel — `grid-template-rows: 0fr -> 1fr` animates to
+                      an auto height without measuring anything.
+
+                      `inert` is doing the real work. A collapsed list that stays
+                      mounted keeps its six links in the tab order, so a keyboard
+                      user would tab through a menu that is not open; `inert`
+                      takes the subtree out of the tab order and the accessibility
+                      tree without hiding it visually, so the collapse still
+                      animates on the way out instead of blinking away.
+
+                      Unlike the desktop panel, focus must NOT open this one —
+                      the disclosure button beside the label is what opens it,
+                      which is why these links are inert when closed and the
+                      desktop ones are not.
+                    */}
+                    {children && (
+                      <div
+                        inert={expanded !== item.to}
+                        className={clsx(
+                          'grid transition-[grid-template-rows,opacity] duration-500 ease-[var(--ease-out-expo)]',
+                          expanded === item.to
+                            ? 'grid-rows-[1fr] opacity-100'
+                            : 'grid-rows-[0fr] opacity-0',
+                        )}
+                      >
+                        <ul className="overflow-hidden">
                           {children.map((child) => (
                             <li key={child.to}>
                               <Link
@@ -319,9 +353,9 @@ export function Header() {
                               </Link>
                             </li>
                           ))}
-                        </motion.ul>
-                      )}
-                    </AnimatePresence>
+                        </ul>
+                      </div>
+                    )}
                   </motion.div>
                 )
               })}
