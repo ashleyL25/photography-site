@@ -541,6 +541,11 @@ export const PORTFOLIO_FILTERS = [
   { id: 'couples', label: 'Couples' },
   { id: 'family', label: 'Families' },
   { id: 'pets', label: 'Pets' },
+  // Still portraiture, which is why it sits with the portrait filters rather
+  // than beside `commercial` — the subject is one person and the job is a
+  // flattering likeness. It is also the one filter here people arrive already
+  // searching for by name.
+  { id: 'headshots', label: 'Headshots' },
   { id: 'wedding', label: 'Celebrations' },
   // Everything that is an occasion rather than a portrait session: graduation
   // parties, company outings, baby and bridal showers. Broad on purpose — the
@@ -552,6 +557,16 @@ export const PORTFOLIO_FILTERS = [
   // page and no prep guide behind it. Give it a SESSIONS entry only if it ever
   // becomes something with tiers and a booking flow.
   { id: 'events', label: 'Events' },
+  // A workplace rather than an occasion: manufacturing floors, offices, the
+  // photographs a business uses on its own site. Distinct from `events`, which
+  // is where a company Christmas party or a work dinner goes — those are an
+  // occasion with people at it, and belong beside a graduation party.
+  //
+  // Nothing on this site prices or books commercial work, so this filter shows
+  // the work without offering a way to commission it. That is a deliberate
+  // half-step; if it starts drawing enquiries it wants a session page with a day
+  // rate and licensing on it, not just a filter.
+  { id: 'commercial', label: 'Commercial' },
   { id: 'travel', label: 'Travel' },
 ] as const
 
