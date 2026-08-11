@@ -64,7 +64,10 @@ export default function ShootPage() {
     { term: 'Where', detail: shoot.location },
     { term: 'Conditions', detail: shoot.conditions },
     { term: 'Requests', detail: shoot.requests },
-    { term: 'Delivered', detail: `${photos.length} frames in this gallery` },
+    {
+      term: 'Delivered',
+      detail: `${photos.length} ${photos.length === 1 ? 'frame' : 'frames'} in this gallery`,
+    },
   ].filter((f) => Boolean(f.detail))
 
   // Walks the merged list so a remote session is not a dead end.
@@ -93,20 +96,26 @@ export default function ShootPage() {
         </Reveal>
       </PageHero>
 
-      {/* The story, with the session's particulars alongside. */}
+      {/* The story, with the session's particulars alongside.
+          A session published from the gallery dashboard may have no story written
+          for it. The heading is dropped with it — "About this session" over blank
+          space read as a page that had failed to load — and the facts widen to
+          fill the row rather than sitting in a column beside nothing. */}
       <section className="shell grid gap-14 py-20 md:py-28 lg:grid-cols-12 lg:gap-20">
-        <div className="lg:col-span-7">
-          <Reveal className="label text-accent">About this session</Reveal>
-          <Reveal
-            as="p"
-            delay={0.08}
-            className="mt-6 max-w-2xl text-[1.1rem] leading-[1.85] text-muted"
-          >
-            {shoot.story}
-          </Reveal>
-        </div>
+        {shoot.story && (
+          <div className="lg:col-span-7">
+            <Reveal className="label text-accent">About this session</Reveal>
+            <Reveal
+              as="p"
+              delay={0.08}
+              className="mt-6 max-w-2xl text-[1.1rem] leading-[1.85] text-muted"
+            >
+              {shoot.story}
+            </Reveal>
+          </div>
+        )}
 
-        <dl className="lg:col-span-4 lg:col-start-9">
+        <dl className={shoot.story ? 'lg:col-span-4 lg:col-start-9' : 'lg:col-span-6'}>
           <DrawRule />
           {facts.map((fact, i) => (
             <Reveal

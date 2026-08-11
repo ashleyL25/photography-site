@@ -48,6 +48,11 @@ interface ManifestAlbum {
   category: string
   categoryLabel: string
   date: number | null
+  /** Editorial copy, written per album in the gallery dashboard. Any may be null. */
+  story: string | null
+  location: string | null
+  conditions: string | null
+  requests: string | null
   photos: ManifestPhoto[]
 }
 
@@ -109,10 +114,13 @@ function toShoot(album: ManifestAlbum): Shoot {
       : '',
     // Sortable, and sorted against the local shoots' own `sort` keys.
     sort: when ? when.toISOString().slice(0, 10) : '0000-00-00',
-    // No story, location or conditions: those are written by hand per session and
-    // there is nowhere in the dashboard to write them. ShootPage drops blank
-    // fields, so the page reads correctly without them.
-    story: '',
+    // Written per album on the dashboard's Name & Cover tab. Anything left blank
+    // arrives null and ShootPage drops the row rather than printing an empty one —
+    // which is what it used to do with the story heading.
+    story: album.story ?? '',
+    location: album.location ?? undefined,
+    conditions: album.conditions ?? undefined,
+    requests: album.requests ?? undefined,
     cover: album.photos[0]?.id ?? '',
   }
 }
