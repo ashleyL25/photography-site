@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { BY_ID, type Photo as PhotoData } from '@/data/photos.generated'
+import { useRemotePortfolio } from '@/data/portfolio-remote'
 
 type Props = {
   /** Ordered ids the viewer can page through — usually the current filter. */
@@ -39,6 +40,14 @@ function Chevron({ dir }: { dir: 'prev' | 'next' }) {
  */
 export function Lightbox({ ids, index, onClose, onNavigate, caption }: Props) {
   const open = index !== null
+  // Sessions published from the gallery dashboard are not in the build-time
+  // manifest, so an id from one resolves only through the remote map. Without
+  // this the viewer opened onto nothing for those albums.
+  const remote = useRemotePortfolio()
+  const lookup = useCallback(
+    (id: string | undefined) => (id === undefined ? undefined : (BY_ID[id] ?? remote.byId[id])),
+    [remote.byId],
+  )
   const dialog = useRef<HTMLDivElement>(null)
   const opener = useRef<HTMLElement | null>(null)
 
@@ -101,16 +110,16 @@ export function Lightbox({ ids, index, onClose, onNavigate, caption }: Props) {
   useEffect(() => {
     if (index === null) return
     for (const delta of [1, -1]) {
-      const neighbor = BY_ID[ids[(index + delta + ids.length) % ids.length]]
+      const neighbor = lookup(ids[(index + delta + ids.length) % ids.length])
       if (!neighbor) continue
       const img = new Image()
       img.srcset = srcSet(neighbor)
       img.sizes = '100vw'
       img.src = `${neighbor.src}-${neighbor.widths[neighbor.widths.length - 1]}.webp`
     }
-  }, [index, ids])
+  }, [index, ids, lookup])
 
-  const photo = index === null ? undefined : BY_ID[ids[index]]
+  const photo = index === null ? undefined : lookup(ids[index])
 
   return (
     <AnimatePresence>
