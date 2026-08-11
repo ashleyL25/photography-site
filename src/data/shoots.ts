@@ -40,18 +40,11 @@ export type Shoot = {
 }
 
 export const SHOOTS: Shoot[] = [
-  {
-    slug: 'elise-graduation',
-    source: '2026-05-09-elise-grad-pictures',
-    title: 'Elise · Graduation',
-    category: 'graduation',
-    date: 'May 2026',
-    sort: '2026-05-09',
-    location: 'University of Northern Iowa, Cedar Falls',
-    story:
-      'Cap and gown across campus — the entrance sign, the campanile, the steps of Lang Hall and a garden trellis for the frames without the gown. Shot the weekend of the ceremony, and finished in black and white as well as color.',
-    cover: 'graduation-em-grad-233',
-  },
+  // The Elise · Graduation shoot used to sit here. It is now published from the
+  // gallery dashboard instead, so it arrives through the runtime manifest rather
+  // than this file — see portfolio-remote.ts. Four of its photographs stay in
+  // public/photos/graduation because site.ts and guides.ts reference them by id
+  // for the graduation session page, the Selected grid and the graduation guide.
   {
     slug: 'europe',
     source: '2025-06-10-europe',

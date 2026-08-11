@@ -243,6 +243,22 @@ export const SESSIONS: Session[] = [
   },
 ]
 
+/**
+ * Submenus for the primary nav, keyed by the parent item's `to`.
+ *
+ * Separate from `NAV` rather than nested inside it because `NAV` is declared
+ * above `SESSIONS` and reading it there would be a use-before-initialisation at
+ * module load. Keyed by path so the header stays data-driven: give another nav
+ * item an entry here and it gets a dropdown, with no change to the component.
+ *
+ * The parent link keeps working on its own — /sessions is a real page listing all
+ * six, and this only saves a click for someone who already knows which one they
+ * want.
+ */
+export const NAV_CHILDREN: Record<string, { label: string; to: string }[]> = {
+  '/sessions': SESSIONS.map((s) => ({ label: s.title, to: `/sessions/${s.id}` })),
+}
+
 /** Curated homepage gallery — `span` drives the asymmetric masonry rhythm. */
 export const FEATURED: { photoId: string; caption: string; span: 'tall' | 'wide' | 'std' }[] = [
   { photoId: 'seniors-elise-portrait-102', caption: 'Elise · Senior', span: 'tall' },
@@ -526,6 +542,16 @@ export const PORTFOLIO_FILTERS = [
   { id: 'family', label: 'Families' },
   { id: 'pets', label: 'Pets' },
   { id: 'wedding', label: 'Celebrations' },
+  // Everything that is an occasion rather than a portrait session: graduation
+  // parties, company outings, baby and bridal showers. Broad on purpose — the
+  // gallery dashboard's own album types are broader still, which is why an album
+  // published from there carries an explicit choice of the category it lands in
+  // here rather than having one inferred.
+  //
+  // Like `travel` and `wedding`, this is a portfolio category with no session
+  // page and no prep guide behind it. Give it a SESSIONS entry only if it ever
+  // becomes something with tiers and a booking flow.
+  { id: 'events', label: 'Events' },
   { id: 'travel', label: 'Travel' },
 ] as const
 

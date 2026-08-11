@@ -13,6 +13,8 @@ dist-ssr
 *.local
 
 # Untouched originals (~900 MB). Optimized WebPs in public/photos ship instead.
+# Note: the originals already committed before this rule was added stay tracked —
+# `git ls-files images/` lists them — so a deleted original is recoverable.
 images/
 
 # Editor directories and files
