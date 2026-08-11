@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { SESSIONS, SESSIONS_PAGE } from '@/data/site'
 import { ALWAYS_INCLUDED, fromPrice, headlineTier } from '@/data/packages'
 import { usePricingUnlocked } from '@/lib/pricing'
-import { SHOOTS_BY_DATE } from '@/data/shoots'
+import { useMergedShoots } from '@/data/portfolio-remote'
 import { Photo } from '@/components/Photo'
 import { PageHero } from '@/components/PageHero'
 import { Tick } from '@/components/TierCards'
@@ -16,6 +16,7 @@ import { useDocumentMeta } from '@/lib/hooks'
  */
 export default function SessionsPage() {
   const unlocked = usePricingUnlocked()
+  const allShoots = useMergedShoots()
 
   useDocumentMeta(
     'Sessions — Ashley Photography',
@@ -35,7 +36,9 @@ export default function SessionsPage() {
         <ul className="grid gap-x-8 gap-y-20 lg:grid-cols-2">
           {SESSIONS.map((session, i) => {
             const tier = headlineTier(session.id)
-            const shoots = SHOOTS_BY_DATE.filter((s) => s.category === session.filter)
+            // Published albums counted too, so the "N sessions" link does not
+            // undercount the moment something goes up from the dashboard.
+            const shoots = allShoots.filter((s) => s.category === session.filter)
 
             return (
               <Reveal as="li" key={session.id} delay={(i % 2) * 0.1}>

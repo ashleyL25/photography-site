@@ -2,8 +2,8 @@ import { useMemo, useState } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { motion } from 'motion/react'
 import { PORTFOLIO_FILTERS } from '@/data/site'
-import { SHOOTS_BY_DATE, SHOOT_BY_SLUG, photosFor } from '@/data/shoots'
-import { useRemotePortfolio } from '@/data/portfolio-remote'
+import { SHOOT_BY_SLUG, photosFor } from '@/data/shoots'
+import { useMergedShoots, useRemotePortfolio } from '@/data/portfolio-remote'
 import type { Photo as PhotoData } from '@/data/photos.generated'
 import { Photo } from '@/components/Photo'
 import { PageHero } from '@/components/PageHero'
@@ -32,6 +32,7 @@ export default function ShootPage() {
 
   // A hand-curated session first, then one published from the gallery dashboard.
   const remote = useRemotePortfolio()
+  const all = useMergedShoots()
   const shoot = slug
     ? (SHOOT_BY_SLUG[slug] ?? remote.shoots.find((s) => s.slug === slug))
     : undefined
@@ -71,10 +72,6 @@ export default function ShootPage() {
   ].filter((f) => Boolean(f.detail))
 
   // Walks the merged list so a remote session is not a dead end.
-  const all = [
-    ...SHOOTS_BY_DATE,
-    ...remote.shoots.filter((r) => !SHOOT_BY_SLUG[r.slug]),
-  ].sort((a, b) => b.sort.localeCompare(a.sort))
   const order = all.findIndex((s) => s.slug === shoot.slug)
   const next = all[(order + 1) % all.length]
 

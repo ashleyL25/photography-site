@@ -10,7 +10,7 @@ import {
   isPrivatePricing,
 } from '@/data/packages'
 import { GUIDES_BY_ID } from '@/data/guides'
-import { SHOOTS_BY_DATE } from '@/data/shoots'
+import { useMergedShoots } from '@/data/portfolio-remote'
 import { Photo } from '@/components/Photo'
 import { PageHero } from '@/components/PageHero'
 import { TierCards, Tick } from '@/components/TierCards'
@@ -26,6 +26,8 @@ export default function SessionPage() {
   const { id = '' } = useParams()
   const session = SESSIONS_BY_ID[id]
   const unlocked = usePricingUnlocked()
+  // Above the redirect below, because it is a hook and that is an early return.
+  const allShoots = useMergedShoots()
 
   useDocumentMeta(
     session ? `${session.title} — Ashley Photography` : 'Sessions — Ashley Photography',
@@ -42,7 +44,9 @@ export default function SessionPage() {
   const retouching = RETOUCHING[EDITING_STYLE[session.id] ?? 'natural']
   const set = PACKAGES_BY_SESSION[session.id]
   const guide = GUIDES_BY_ID[session.id]
-  const shoots = SHOOTS_BY_DATE.filter((s) => s.category === session.filter).slice(0, 3)
+  // Published albums included, so a session shot last month can be one of the
+  // three shown here without a redeploy.
+  const shoots = allShoots.filter((s) => s.category === session.filter).slice(0, 3)
 
   const position = SESSIONS.findIndex((s) => s.id === session.id)
   const previous = SESSIONS[(position - 1 + SESSIONS.length) % SESSIONS.length]

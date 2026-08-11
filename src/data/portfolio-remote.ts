@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { Photo as PhotoData } from './photos.generated'
-import type { Shoot } from './shoots'
+import { SHOOTS_BY_DATE, SHOOT_BY_SLUG, type Shoot } from './shoots'
 
 /**
  * Sessions published from the gallery dashboard, fetched at runtime.
@@ -176,4 +176,29 @@ export function useRemotePortfolio(): RemotePortfolio {
   }, [])
 
   return value
+}
+
+/**
+ * Every session the site knows about — local and published — newest first.
+ *
+ * This exists because getting it wrong is invisible. Three pages had assembled
+ * this list by hand and a fourth and fifth read `SHOOTS_BY_DATE` directly, so a
+ * published album appeared on the portfolio grid and had a working page of its own
+ * while `/sessions` and `/sessions/:id` went on counting only the local ones. That
+ * reads as a bug in the publishing pipeline, when it was only ever a page that had
+ * not been told the list had grown. Anything counting or listing sessions should
+ * call this rather than reach for the generated manifest.
+ *
+ * A remote album whose slug collides with a hand-curated one is dropped: the local
+ * entry has editorial copy behind it and is the better page.
+ */
+export function useMergedShoots(): Shoot[] {
+  const remote = useRemotePortfolio()
+  return useMemo(
+    () =>
+      [...SHOOTS_BY_DATE, ...remote.shoots.filter((s) => !SHOOT_BY_SLUG[s.slug])].sort((a, b) =>
+        b.sort.localeCompare(a.sort),
+      ),
+    [remote.shoots],
+  )
 }

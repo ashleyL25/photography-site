@@ -3,8 +3,8 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
 import { PORTFOLIO, PORTFOLIO_FILTERS } from '@/data/site'
-import { SHOOTS_BY_DATE, photosFor } from '@/data/shoots'
-import { useRemotePortfolio } from '@/data/portfolio-remote'
+import { photosFor } from '@/data/shoots'
+import { useMergedShoots, useRemotePortfolio } from '@/data/portfolio-remote'
 import { Photo } from '@/components/Photo'
 import { PageHero } from '@/components/PageHero'
 import { Reveal } from '@/components/motion'
@@ -18,19 +18,9 @@ export default function Portfolio() {
     'Portrait sessions across the Des Moines metro and central Iowa: seniors, graduation, engagements, couples, families and pets.',
   )
 
-  /**
-   * Local shoots and anything published from the gallery dashboard, newest first.
-   *
-   * A remote album whose slug collides with a hand-curated one is dropped: the
-   * local entry has editorial copy behind it and is the better page.
-   */
   const remote = useRemotePortfolio()
-
-  const shoots = useMemo(() => {
-    const localSlugs = new Set(SHOOTS_BY_DATE.map((s) => s.slug))
-    const extra = remote.shoots.filter((s) => !localSlugs.has(s.slug))
-    return [...SHOOTS_BY_DATE, ...extra].sort((a, b) => b.sort.localeCompare(a.sort))
-  }, [remote.shoots])
+  /** Local shoots and anything published from the dashboard, newest first. */
+  const shoots = useMergedShoots()
 
   // Labels for categories the local filter list does not name — a group added in
   // the dashboard, like Boudoir, arrives with its own label.
