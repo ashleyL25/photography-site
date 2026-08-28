@@ -22,6 +22,14 @@ const MANIFEST_URL =
   import.meta.env.VITE_LOCATIONS_MANIFEST_URL ??
   'https://pic.ashleyphotographyia.com/api/locations'
 
+/** Who took it, when it was not Ashley. Absent means it is hers. */
+export interface Credit {
+  name: string
+  url?: string
+  /** e.g. "These are pictures of me" — why somebody else was holding the camera. */
+  subject?: string
+}
+
 interface ManifestPhoto {
   id: string
   src: string
@@ -31,7 +39,11 @@ interface ManifestPhoto {
   aspect: number
   color: string
   lqip: string
+  credit?: Credit
 }
+
+/** A location photograph: the shape `Photo` renders, plus who took it. */
+export type LocationPhoto = PhotoData & { credit?: Credit }
 
 interface ManifestAlbum {
   slug: string
@@ -44,7 +56,7 @@ interface Manifest {
 
 export interface RemoteLocations {
   /** Photographs per location slug. Absent slug = no folder published. */
-  bySlug: Record<string, PhotoData[]>
+  bySlug: Record<string, LocationPhoto[]>
   loaded: boolean
 }
 
@@ -60,7 +72,7 @@ async function load(): Promise<void> {
     if (!res.ok) throw new Error(String(res.status))
     const data = (await res.json()) as Manifest
 
-    const bySlug: Record<string, PhotoData[]> = {}
+    const bySlug: Record<string, LocationPhoto[]> = {}
     for (const album of data.albums ?? []) {
       if (!album.slug || !album.photos?.length) continue
       bySlug[album.slug] = album.photos.map((p) => ({

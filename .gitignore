@@ -32,3 +32,6 @@ images/
 .env
 .env.local
 .env.*.local
+
+# Location renditions bound for the Cloudflare bucket, not for git.
+.locations-build

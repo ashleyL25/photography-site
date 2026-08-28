@@ -2,8 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
 import type { Location } from '@/data/locations'
-import { useRemoteLocations } from '@/data/locations-remote'
-import type { Photo as PhotoData } from '@/data/photos.generated'
+import { useRemoteLocations, type LocationPhoto } from '@/data/locations-remote'
 import { Photo } from './Photo'
 import { Reveal } from './motion'
 
@@ -68,7 +67,7 @@ function LocationCard({
   onOpen,
 }: {
   location: Location
-  cover?: PhotoData
+  cover?: LocationPhoto
   count: number
   onOpen?: () => void
 }) {
@@ -131,7 +130,7 @@ function LocationModal({
   onClose,
 }: {
   location: Location
-  photos: PhotoData[]
+  photos: LocationPhoto[]
   onClose: () => void
 }) {
   const [index, setIndex] = useState(0)
@@ -205,12 +204,19 @@ function LocationModal({
             className="h-full max-h-[45svh] w-full lg:max-h-none"
           />
 
+          {photo.credit && <CreditLine credit={photo.credit} />}
+
           {photos.length > 1 && (
             <>
               <SliderButton side="left" onClick={() => go(-1)} />
               <SliderButton side="right" onClick={() => go(1)} />
 
-              <div className="absolute inset-x-0 bottom-4 flex justify-center gap-2">
+              <div
+                className={clsx(
+                  'absolute inset-x-0 flex justify-center gap-2',
+                  photo.credit ? 'bottom-12' : 'bottom-4',
+                )}
+              >
                 {photos.map((p, i) => (
                   <button
                     key={p.id}
@@ -282,6 +288,38 @@ function LocationModal({
         </button>
       </motion.div>
     </motion.div>
+  )
+}
+
+/**
+ * Attribution for a photograph somebody else took. Present only when the file
+ * came out of a photographer's subfolder — see scripts/build-locations.mjs.
+ * Crediting is the whole point, so it is on the image itself rather than
+ * tucked into the write-up beside it.
+ */
+function CreditLine({ credit }: { credit: NonNullable<LocationPhoto['credit']> }) {
+  const label = `Photo by ${credit.name}`
+  return (
+    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[rgb(var(--scrim))]/85 to-transparent px-5 pt-10 pb-4">
+      <p className="label text-beige/90">
+        {credit.url ? (
+          <a
+            href={credit.url}
+            target="_blank"
+            rel="noreferrer noopener"
+            className="transition-colors hover:text-champagne"
+          >
+            {label}
+            <span aria-hidden className="ml-2 text-[0.8em] text-beige/60">↗</span>
+          </a>
+        ) : (
+          label
+        )}
+      </p>
+      {credit.subject && (
+        <p className="mt-1.5 text-[0.78rem] leading-snug text-beige/65 italic">{credit.subject}</p>
+      )}
+    </div>
   )
 }
 
