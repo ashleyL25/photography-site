@@ -330,31 +330,37 @@ export default function SessionPage() {
 
       {/* Close. */}
       <section className="border-t border-line py-24 md:py-32">
-        <div className="shell max-w-2xl">
-          <Reveal className="label text-accent">Bookings open</Reveal>
-          <MaskText
-            text={`Let’s plan your ${session.title.toLowerCase()}.`}
-            className="display mt-6 text-[clamp(2.2rem,5.4vw,4rem)] text-ink"
-          />
-          <Reveal delay={0.15} className="mt-8 text-[1.04rem] leading-[1.9] text-muted">
-            Tell me roughly when, and where you picture it. If you are not sure which tier fits,
-            describe what you want and I will tell you — including when the cheaper one is the right
-            answer.
-          </Reveal>
-          <Reveal delay={0.22} className="mt-10 flex flex-wrap gap-4">
-            <Link
-              to={`/contact?session=${session.id}`}
-              className="label rounded-full border border-ink px-9 py-4 text-ink transition-colors duration-400 hover:border-accent hover:bg-accent hover:text-canvas"
-            >
-              Inquire about this
-            </Link>
-            <Link
-              to="/sessions"
-              className="label rounded-full border border-line px-9 py-4 text-muted transition-colors duration-400 hover:border-accent hover:text-accent"
-            >
-              All six sessions
-            </Link>
-          </Reveal>
+        {/* The measure is capped on an inner element rather than on `shell`
+            itself: `shell` carries `margin-inline: auto` alongside its
+            max-width, so narrowing it directly also re-centres the block and
+            pulls it off the gutter every other section lines up with. */}
+        <div className="shell">
+          <div className="max-w-2xl">
+            <Reveal className="label text-accent">Bookings open</Reveal>
+            <MaskText
+              text={`Let’s plan your ${session.title.toLowerCase()}.`}
+              className="display mt-6 text-[clamp(2.2rem,5.4vw,4rem)] text-ink"
+            />
+            <Reveal delay={0.15} className="mt-8 text-[1.04rem] leading-[1.9] text-muted">
+              Tell me roughly when, and where you picture it. If you are not sure which tier fits,
+              describe what you want and I will tell you — including when the cheaper one is the right
+              answer.
+            </Reveal>
+            <Reveal delay={0.22} className="mt-10 flex flex-wrap gap-4">
+              <Link
+                to={`/contact?session=${session.id}`}
+                className="label rounded-full border border-ink px-9 py-4 text-ink transition-colors duration-400 hover:border-accent hover:bg-accent hover:text-canvas"
+              >
+                Inquire about this
+              </Link>
+              <Link
+                to="/sessions"
+                className="label rounded-full border border-line px-9 py-4 text-muted transition-colors duration-400 hover:border-accent hover:text-accent"
+              >
+                All six sessions
+              </Link>
+            </Reveal>
+          </div>
         </div>
       </section>
     </>
