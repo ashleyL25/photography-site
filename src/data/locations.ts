@@ -75,6 +75,16 @@ export const LOCATION_SUGGESTIONS: Location[] = [
     bestFor: 'Late afternoon into golden hour',
   },
   {
+    slug: 'deer-ridge-park',
+    name: 'Deer Ridge Park',
+    area: 'Urbandale',
+    address: '13900 Buena Vista Dr, Urbandale, IA 50323',
+    blurb: 'Old wood fences, a winding path under tall trees, and swings.',
+    detail:
+      'The most varied stop close to home, and everything in it is within a short walk of everything else — weathered wood fences, a long winding path with the trees leaning right over it, a pond, and old brick walls. There are swings too, which are there purely for the fun of it and reliably produce better frames than anything posed.',
+    bestFor: 'Late afternoon, once the light is coming through the trees',
+  },
+  {
     slug: 'court-avenue',
     name: 'Court Avenue',
     area: 'Downtown Des Moines',
@@ -123,7 +133,7 @@ export const LOCATION_SUGGESTIONS: Location[] = [
     address: 'Historic Valley Junction, 5th St, West Des Moines, IA 50265',
     blurb: 'Fifth Street — murals, painted brick and shopfronts.',
     detail:
-      'Five blocks of colour: murals, awnings, painted brick and a string of doorways that each read as a different backdrop. The most varied city stop per minute of walking, and there is somewhere to sit down every thirty feet.',
+      'Five blocks of color: murals, awnings, painted brick and a string of doorways that each read as a different backdrop. The most varied city stop per minute of walking, and there is somewhere to sit down every thirty feet.',
     bestFor: 'Midday shade, or the hour before sunset',
   },
 ]
