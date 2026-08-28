@@ -83,8 +83,10 @@ function readCredit(dir) {
   const text = fs.readFileSync(file, 'utf8')
   const name = field(text, 'Name') ?? path.basename(dir)
   const credit = { name }
+  // Written without a protocol as often as with one, and a bare host in an
+  // href resolves as a relative path — a credit link that goes nowhere.
   const url = field(text, 'Website')
-  if (url) credit.url = url
+  if (url) credit.url = /^https?:\/\//i.test(url) ? url : `https://${url}`
   const subject = field(text, 'People/subject') ?? field(text, 'Subject')
   if (subject) credit.subject = subject
   return credit
@@ -166,6 +168,7 @@ if (!BASE_URL) {
 }
 
 const known = knownSlugs()
+const unknown = []
 const albums = []
 let count = 0
 let credited = 0
@@ -175,9 +178,8 @@ for (const entry of fs.readdirSync(SRC, { withFileTypes: true })) {
 
   const slug = slugify(entry.name)
   if (!known.has(slug)) {
-    console.error(`\n"${entry.name}" slugifies to "${slug}", which is not in locations.ts.`)
-    console.error(`Known: ${[...known].join(', ')}`)
-    process.exit(1)
+    unknown.push({ folder: entry.name, slug })
+    continue
   }
 
   const photos = collect(path.join(SRC, entry.name))
@@ -200,3 +202,14 @@ fs.writeFileSync(path.join(OUT_DIR, 'locations.json'), JSON.stringify({ albums }
 console.log(`\n${count} photographs across ${albums.length} locations, ${credited} credited.`)
 console.log(`Written to ${path.relative(ROOT, OUT_DIR)}/`)
 console.log('Upload its contents to the bucket, keeping the folder structure.')
+
+if (unknown.length) {
+  console.error('\n' + '='.repeat(64))
+  console.error('NOT BUILT — these folders match no location in locations.ts:')
+  for (const u of unknown) console.error(`  "${u.folder}"  ->  ${u.slug}`)
+  console.error('\nEither rename the folder to match a location, or add the')
+  console.error('location to src/data/locations.ts with that slug.')
+  console.error(`\nKnown slugs: ${[...known].join(', ')}`)
+  console.error('='.repeat(64))
+  process.exit(1)
+}
