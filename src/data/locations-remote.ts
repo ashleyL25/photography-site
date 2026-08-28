@@ -18,9 +18,16 @@ import type { Photo as PhotoData } from './photos.generated'
  * thing as far as the guide is concerned, and none of them show an error.
  */
 
+/**
+ * The R2 bucket's public development URL. Rate-limited and, in Cloudflare's own
+ * words, not for production — bind a custom domain to `img-ashleyphotography`
+ * and change this one line when there is time. `scripts/build-locations.mjs`
+ * has to be run with the same `--base` so the manifest's `src` values match.
+ */
+const BUCKET = 'https://pub-31f3e07e7a4c4a348198cf29a3f07859.r2.dev'
+
 const MANIFEST_URL =
-  import.meta.env.VITE_LOCATIONS_MANIFEST_URL ??
-  'https://pic.ashleyphotographyia.com/api/locations'
+  import.meta.env.VITE_LOCATIONS_MANIFEST_URL ?? `${BUCKET}/locations.json`
 
 /** Who took it, when it was not Ashley. Absent means it is hers. */
 export interface Credit {
@@ -68,6 +75,9 @@ const listeners = new Set<(value: RemoteLocations) => void>()
 
 async function load(): Promise<void> {
   try {
+    // Cross-origin, so the bucket needs a CORS policy allowing this site.
+    // Without one this throws and every location quietly falls back to a text
+    // card — which is why absence has to stay a supported state.
     const res = await fetch(MANIFEST_URL)
     if (!res.ok) throw new Error(String(res.status))
     const data = (await res.json()) as Manifest

@@ -52,7 +52,12 @@ const SRC =
   '/Volumes/T7/Clients/AM/Photography Site/Locations'
 
 /** Where the bucket serves these from. `src` in the manifest is absolute. */
-const BASE_URL = (argOf('--base') ?? process.env.LOCATIONS_BASE_URL ?? '').replace(/\/$/, '')
+const BASE_URL = (
+  argOf('--base') ??
+  process.env.LOCATIONS_BASE_URL ??
+  // Must match BUCKET in src/data/locations-remote.ts.
+  'https://pub-31f3e07e7a4c4a348198cf29a3f07859.r2.dev'
+).replace(/\/$/, '')
 
 const slugify = (s) =>
   s
@@ -161,10 +166,6 @@ if (!fs.existsSync(SRC)) {
   console.error(`Source folder not found: ${SRC}`)
   console.error('Pass one with --src, or set LOCATIONS_SRC.')
   process.exit(1)
-}
-if (!BASE_URL) {
-  console.warn('! No --base / LOCATIONS_BASE_URL given.')
-  console.warn('  `src` will be a bucket-relative path; set it before uploading.\n')
 }
 
 const known = knownSlugs()
