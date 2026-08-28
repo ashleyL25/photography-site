@@ -4,8 +4,14 @@ import { BY_ID, type Photo as PhotoData } from '@/data/photos.generated'
 import { useRemotePortfolio } from '@/data/portfolio-remote'
 
 type Props = {
-  /** Id from the generated manifest. */
-  id: string
+  /** Id from the generated manifest. Ignored when `data` is supplied. */
+  id?: string
+  /**
+   * A photograph resolved somewhere other than the two portfolio manifests —
+   * the location suggestions, which come from their own runtime feed. Same
+   * shape, so everything below is identical either way.
+   */
+  data?: PhotoData
   alt: string
   /** Responsive `sizes` hint — get this right or the browser over-downloads. */
   sizes: string
@@ -25,18 +31,18 @@ function srcSet(photo: PhotoData) {
  * space from the intrinsic ratio, paints the 20px blur placeholder immediately,
  * and cross-fades to the real file once decoded.
  */
-export function Photo({ id, alt, sizes, className, imgClassName, priority }: Props) {
+export function Photo({ id, data, alt, sizes, className, imgClassName, priority }: Props) {
   // The build-time manifest first, then anything published from the gallery
   // dashboard. Local wins on an id collision, which is the safe way round: a
   // photograph that ships with the site is the one that was chosen deliberately.
   const remote = useRemotePortfolio()
-  const photo = BY_ID[id] ?? remote.byId[id]
+  const photo = data ?? (id ? (BY_ID[id] ?? remote.byId[id]) : undefined)
   const [loaded, setLoaded] = useState(false)
 
   if (!photo) {
     // Only worth warning once the remote manifest has actually been consulted —
     // before that, a remote id is legitimately unknown rather than missing.
-    if (import.meta.env.DEV && remote.loaded) {
+    if (import.meta.env.DEV && remote.loaded && id) {
       console.warn(`Photo "${id}" is in neither manifest.`)
     }
     return null

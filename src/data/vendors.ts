@@ -4,17 +4,16 @@
  *
  * IMPORTANT, READ BEFORE LAUNCH
  *
- * These are real, well-regarded businesses in the Des Moines metro, gathered
- * from public listings and other photographers' vendor pages. They are NOT
- * people Ashley has worked with, because I have no way of knowing who those
- * are. The copy is therefore written as "places in the metro that do this
- * well", never as "my people" — which is true as written, but is not as useful
- * to a client as a real endorsement.
+ * HAIR_AND_MAKEUP is Ashley's own list — she chose these five and supplied the
+ * addresses and links. The one-line `does` on the three newest is a placeholder
+ * written from their websites, not from experience: replace them with her words,
+ * and add a `note` wherever she has a relationship worth mentioning.
  *
- * So: cross off anyone you would not send a seventeen-year-old to, add the
- * stylists and MUAs you actually trust, and put a `note` on the ones you have
- * a relationship with. Phone numbers and links are deliberately absent rather
- * than guessed — add them as you confirm each one.
+ * LUNCH_STOPS and LOCATIONS are still researched rather than endorsed — real,
+ * well-regarded places in the metro pulled from public listings, written as
+ * "places that do this well" rather than "my people". Cross off anyone she would
+ * not send a seventeen-year-old to. Phone numbers are absent rather than
+ * guessed.
  */
 
 export type Vendor = {
@@ -35,41 +34,34 @@ export const HAIR_AND_MAKEUP: Vendor[] = [
     area: 'East Village, Des Moines',
     address: '400 E Locust St, Suite 2',
     does: 'Hair, makeup and nails in one building, which saves you a morning of driving.',
+    url: 'https://salonspaw.com/',
   },
   {
-    name: 'Powder Studio',
-    area: 'Des Moines',
-    does: 'Styling and makeup application aimed specifically at photoshoots and events rather than everyday wear.',
-    url: 'https://www.powderstudioia.com/makeup',
+    name: 'Vanity & Glamour Cosmetics',
+    area: 'Clive',
+    address: '8350 Hickman Rd #12',
+    does: 'Makeup and lashes, with packages put together specifically for senior pictures.',
+    url: 'https://vgcosmetics.com/',
   },
   {
-    name: 'S & K Glam',
-    area: 'Travels to you, metro-wide',
-    does: 'Airbrush makeup and hair on location — the easy option if you would rather not drive anywhere before we start.',
+    name: 'Ivy Boyd Makeup',
+    area: 'Urbandale',
+    does: 'Makeup artistry from a private studio in Urbandale, with a booking option for seniors.',
+    url: 'https://www.ivyboyd.com/seniors',
   },
   {
-    name: 'J Michaels Salon',
-    area: 'Ingersoll, Des Moines',
-    address: '2801 Ingersoll Avenue',
-    does: 'Starts with a consultation, which is the right way round if you are not certain what you want yet.',
-  },
-  {
-    name: 'Trixie’s Salon',
-    area: 'Beaverdale, Des Moines',
-    address: '4118 University Avenue',
-    does: 'Strong with color and with textured or curly hair. Good if your look is less classic and more specific.',
-  },
-  {
-    name: 'Allegory Salon',
-    area: 'East Village, Des Moines',
-    address: '521 E Locust St, #101',
-    does: 'Cuts, color and treatments. Book the treatment two weeks out, not the morning of.',
-  },
-  {
-    name: 'Oliver + James',
+    name: 'Ivory & Stone Artistry',
     area: 'Downtown Des Moines',
-    address: '1417 Walnut St, Suite C',
-    does: 'Blow-outs and styling that hold up to four hours outdoors in an Iowa summer.',
+    address: '900 Keosauqua Way, Ste 255',
+    does: 'Hair and makeup from a downtown studio.',
+    url: 'https://www.ivoryandstoneartistry.com/',
+  },
+  {
+    name: 'After Glow Pro Studio',
+    area: 'Ingersoll, Des Moines',
+    address: '1905 Ingersoll Ave, Unit 101',
+    does: 'Hair and makeup studio on Ingersoll.',
+    url: 'https://afterglowprostudio.com/',
   },
 ]
 

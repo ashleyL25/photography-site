@@ -3,6 +3,7 @@ import clsx from 'clsx'
 import type { Block } from '@/data/guides'
 import { Reveal } from './motion'
 import { Tick } from './TierCards'
+import { LocationCards } from './LocationCards'
 
 /* ------------------------------------------------------------------ *
  * Checklist
@@ -282,6 +283,9 @@ export function GuideBlock({ block, storageKey }: { block: Block; storageKey: st
           ))}
         </div>
       )
+
+    case 'locationCards':
+      return <LocationCards items={block.items} />
 
     case 'locations':
       return (

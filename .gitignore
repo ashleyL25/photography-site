@@ -27,3 +27,8 @@ images/
 *.njsproj
 *.sln
 *.sw?
+
+# Local env overrides (VITE_* manifest URLs, etc.)
+.env
+.env.local
+.env.*.local

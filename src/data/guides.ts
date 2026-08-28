@@ -15,8 +15,9 @@
  * knowing what is in it. Add a block kind here and a case in the renderer.
  */
 
+import { LOCATION_SUGGESTIONS, type Location } from './locations'
 import { RESCHEDULE_NOTE, RETOUCHING, weatherColumns, type EditingStyle } from './policy'
-import { HAIR_AND_MAKEUP, LOCATIONS, LUNCH_STOPS, type Vendor } from './vendors'
+import { HAIR_AND_MAKEUP, LOCATIONS, type Vendor } from './vendors'
 
 export type Block =
   /** Body copy. One string per paragraph. */
@@ -29,8 +30,14 @@ export type Block =
   | { kind: 'vendors'; items: Vendor[] }
   /** Two to four short titled paragraphs, side by side. */
   | { kind: 'columns'; items: { title: string; body: string }[] }
-  /** Grouped location suggestions. */
+  /** Grouped location suggestions, as plain text. */
   | { kind: 'locations'; items: typeof LOCATIONS }
+  /**
+   * Location suggestions as cards, each opening a modal with a slider. The
+   * photographs come from the gallery dashboard at runtime, so a location with
+   * no folder published renders as a text card — see components/LocationCards.
+   */
+  | { kind: 'locationCards'; items: Location[] }
   /** Side-by-side yes / no lists. */
   | { kind: 'compare'; yes: { title: string; items: string[] }; no: { title: string; items: string[] } }
   /** Numbered countdown, e.g. two weeks out → the morning of. */
@@ -349,7 +356,7 @@ export const GUIDES: Guide[] = [
           },
           {
             kind: 'note',
-            text: 'Send me photos of the options a week before and I will tell you honestly which will photograph best at the locations we have picked. This is the single most useful thing you can do in advance, and almost nobody does it.',
+            text: 'If you want a hand with any of it, send me photos of what you are considering a week or so before and we can plan it out together — which look suits which location, and what order to wear them in. Completely optional. Plenty of people turn up with three things they love and we work it out on the day.',
           },
         ],
       },
@@ -368,6 +375,13 @@ export const GUIDES: Guide[] = [
             ],
           },
           {
+            kind: 'prose',
+            text: [
+              'These are the ones I keep going back to. Tap any of them to see what a session there actually looks like.',
+            ],
+          },
+          { kind: 'locationCards', items: LOCATION_SUGGESTIONS },
+          {
             kind: 'note',
             text: 'A few places charge admission or need a permit — the Botanical Garden and Salisbury House among them. Tell me if one of those is on your list and I will check the current rules and cost before we commit to it. Anywhere in the Des Moines metro is included; a campus or other spot outside that drive has a travel fee, and I will quote it before you decide.',
           },
@@ -384,10 +398,9 @@ export const GUIDES: Guide[] = [
             text: [
               'Halfway through the afternoon we stop and eat, and that stop is a location rather than a break. We shoot outside it, we shoot inside it, and you change there — so it is doing three jobs at once and it is often the most fun twenty minutes of the day.',
               'It also solves the problem of everyone looking slightly stiff. It is very hard to be self-conscious while eating a milkshake, and the frames from lunch are almost always the ones people are still using as profile pictures two years later.',
-              'So choose somewhere you genuinely like rather than somewhere that looks impressive. What I am looking for is an exterior worth standing in front of, window light indoors, somewhere to change, and food you will actually eat while being photographed. Here are places that tick all four — but your own suggestion beats every one of them.',
+              'So choose somewhere you genuinely like rather than somewhere that looks impressive. What I am looking for is an exterior worth standing in front of, window light indoors, somewhere to change, and food you will actually eat while being photographed. Send me an idea and I will tell you whether it ticks all four — and your own suggestion beats anything I would pick for you.',
             ],
           },
-          { kind: 'vendors', items: LUNCH_STOPS },
           {
             kind: 'note',
             text: 'Tell me your pick a week out so I can build the driving loop around it. And bring a friend or a parent along for this part if you like — they are useful for holding things, and they will tell you when your collar is wrong.',
@@ -406,16 +419,13 @@ export const GUIDES: Guide[] = [
               'All three outfits, on hangers, in the order you plan to wear them',
               'Shoes for each — including the pair you can actually walk in',
               'Every prop: letter jacket, instrument, ball, helmet, trophy, book, keys to the truck',
-              'The dog, if the dog is coming, plus lead, treats and water',
               'A friend or a parent, if you want one there',
-              'Water. More than you think — we are out for four hours',
+              'A water bottle',
               'Lip balm, powder or blotting papers, and whatever you use to fix your hair',
-              'Hair ties on your wrist, not in the frame',
+              'Hair ties, if you bring them — keep them in a bag or a pocket rather than on your wrist, where they end up in every photograph',
               'A jacket or cardigan to layer over an outfit',
               'A brush and a small mirror',
               'Bug spray between June and September if we are going anywhere green',
-              'A phone charger, or you will run flat before golden hour',
-              'The balance, if you have not already sorted it',
             ],
           },
           {
