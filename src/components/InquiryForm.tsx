@@ -2,13 +2,11 @@ import { useState, type ReactNode } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
-import { INQUIRY, SESSIONS_BY_ID, SITE } from '@/data/site'
-import { PACKAGES_BY_SESSION, isPrivatePricing } from '@/data/packages'
-import { usePricingUnlocked } from '@/lib/pricing'
+import { useInquirySettings, useSite, useSiteInfo } from '@/lib/site'
 import { Reveal } from './motion'
 
-/** Where the form posts. The bundled PHP handler works as-is on Hostinger. */
-const ENDPOINT = '/php/contact.php'
+/** Where the form posts: stored, then emailed, by the site's own API. */
+const ENDPOINT = '/api/inquiry'
 
 type Status = 'idle' | 'sending' | 'sent' | 'error'
 
@@ -76,13 +74,18 @@ export function InquiryForm({
 }) {
   const [status, setStatus] = useState<Status>('idle')
   const [error, setError] = useState('')
-  const unlocked = usePricingUnlocked()
+  const { sessions } = useSite()
+  const site = useSiteInfo()
+  const INQUIRY = useInquirySettings()
 
   // A session page links here as /contact?session=seniors, so the first select
   // arrives already answered.
   const [params] = useSearchParams()
-  const preset = SESSIONS_BY_ID[params.get('session') ?? '']?.title ?? ''
-  const [session, setSession] = useState(preset)
+  const preset = sessions.find((s) => s.slug === params.get('session'))?.title ?? ''
+  const [chosen, setSession] = useState<string | null>(null)
+  // The sessions arrive with the site payload, which may land after this form
+  // mounts — so the preset is read live until somebody picks something.
+  const session = chosen ?? preset
 
   const t = TONE[tone]
 
@@ -93,14 +96,14 @@ export function InquiryForm({
 
   // The tier select only makes sense once a real session type is chosen, and
   // its options come from that session's own ladder.
-  const sessionId = INQUIRY.sessionIdFor(session)
-  const tiers = sessionId ? PACKAGES_BY_SESSION[sessionId]?.tiers : undefined
-  const hidePrices = isPrivatePricing(sessionId ?? '', unlocked)
+  const picked = INQUIRY.sessionFor(session)
+  const tiers = picked && picked.tiers.length > 0 ? picked.tiers : undefined
+  const hidePrices = picked ? !picked.pricesShown : true
 
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     const form = e.currentTarget
-    const data = Object.fromEntries(new FormData(form))
+    const data: Record<string, unknown> = { ...Object.fromEntries(new FormData(form)), sourcePath: window.location.pathname }
 
     // Honeypot: bots fill hidden fields, humans never see them.
     if (data.website) return
@@ -113,7 +116,10 @@ export function InquiryForm({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       })
-      if (!res.ok) throw new Error(`Server responded ${res.status}`)
+      if (!res.ok) {
+        const body = (await res.json().catch(() => null)) as { error?: string } | null
+        throw new Error(body?.error ?? `Server responded ${res.status}`)
+      }
       setStatus('sent')
       form.reset()
       setSession('')
@@ -135,12 +141,8 @@ export function InquiryForm({
             t.panel,
           )}
         >
-          <p className={clsx('display text-[clamp(2rem,4vw,3rem)]', t.heading)}>Message sent.</p>
-          <p className={clsx('mx-auto mt-5 max-w-sm leading-relaxed', t.body)}>
-            Thank you — I will get back to you within a couple of days with dates and a
-            straight answer on which tier fits. If it is urgent, a DM on Instagram is the fastest
-            way to reach me.
-          </p>
+          <p className={clsx('display text-[clamp(2rem,4vw,3rem)]', t.heading)}>{INQUIRY.sentHeading}</p>
+          <p className={clsx('mx-auto mt-5 max-w-sm leading-relaxed', t.body)}>{INQUIRY.sentBody}</p>
         </motion.div>
       ) : (
         <motion.form
@@ -320,15 +322,13 @@ export function InquiryForm({
               <span className="absolute inset-0 origin-bottom scale-y-0 bg-[var(--sweep)] transition-transform duration-500 ease-[var(--ease-out-expo)] group-hover:scale-y-100" />
             </button>
 
-            <p className={clsx('text-[0.82rem]', t.hint)}>
-              Reply within 48 hours. Nothing is committed by asking.
-            </p>
+            <p className={clsx('text-[0.82rem]', t.hint)}>{INQUIRY.hint}</p>
 
             {status === 'error' && (
               <p role="alert" className={clsx('text-[0.85rem]', t.note)}>
                 Could not send ({error}). Email{' '}
-                <a className="underline" href={`mailto:${SITE.email}`}>
-                  {SITE.email}
+                <a className="underline" href={`mailto:${site.email}`}>
+                  {site.email}
                 </a>{' '}
                 instead.
               </p>

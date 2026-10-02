@@ -2,26 +2,17 @@ import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
-import { NAV, NAV_CHILDREN, SITE } from '@/data/site'
 import { useScrolled } from '@/lib/hooks'
+import { useOverPhoto } from '@/lib/chrome'
+import { useSiteInfo } from '@/lib/site'
 import { ThemeToggle } from './ThemeToggle'
 import { Wordmark } from './Brand'
 
-const MOBILE_NAV = [...NAV, { label: 'Contact', to: '/contact' }]
-
 /**
- * The header is light-on-photo only where it actually sits on one — the
- * homepage hero and the interior page mastheads, both of which are scrimmed
- * images. Everywhere else it uses the palette.
+ * The header is light-on-photo only where it actually sits on one — a hero or
+ * an interior masthead, both scrimmed photographs. Each page reports whether it
+ * opens on one (see lib/chrome); everywhere else the header uses the palette.
  */
-const PHOTO_BACKED = (pathname: string) =>
-  pathname === '/' ||
-  pathname === '/about' ||
-  pathname === '/contact' ||
-  pathname === '/experience' ||
-  pathname.startsWith('/sessions') ||
-  pathname.startsWith('/guides') ||
-  pathname.startsWith('/portfolio')
 
 /**
  * A nav item that keeps its own link and gains a panel of children.
@@ -130,11 +121,15 @@ function NavDropdown({
 export function Header() {
   const { pathname } = useLocation()
   const scrolled = useScrolled(80)
+  const site = useSiteInfo()
+  const photoBacked = useOverPhoto()
+  const NAV = site.nav
+  const MOBILE_NAV = [...NAV, { label: 'Contact', to: '/contact', children: undefined }]
   const [open, setOpen] = useState(false)
   /** Which drawer item has its children showing — one at a time, or none. */
   const [expanded, setExpanded] = useState<string | null>(null)
 
-  const over = !scrolled && PHOTO_BACKED(pathname)
+  const over = !scrolled && photoBacked
 
   // Close the drawer whenever navigation happens.
   useEffect(() => setOpen(false), [pathname])
@@ -157,7 +152,7 @@ export function Header() {
 
   // Section roots stay lit on their children — /sessions/seniors keeps
   // "Sessions" marked as the current page.
-  const SECTION_ROOTS = ['/portfolio', '/sessions', '/guides']
+  const SECTION_ROOTS = ['/portfolio', '/sessions', '/guides', '/blog']
 
   const isActive = (to: string) =>
     to.startsWith('/#')
@@ -182,7 +177,7 @@ export function Header() {
         )}
       >
         <div className="shell flex items-center justify-between gap-6">
-          <Link to="/" className="shrink-0" aria-label={`${SITE.name} — home`}>
+          <Link to="/" className="shrink-0" aria-label={`${site.name} — home`}>
             <Wordmark />
           </Link>
 
@@ -209,8 +204,8 @@ export function Header() {
                 </Link>
               )
 
-              const children = NAV_CHILDREN[item.to]
-              if (!children) return <span key={item.to}>{link}</span>
+              const children = item.children
+              if (!children?.length) return <span key={item.to}>{link}</span>
 
               return (
                 <NavDropdown key={item.to} label={item.label} items={children} pathname={pathname}>
@@ -222,10 +217,10 @@ export function Header() {
 
           <div className="flex items-center gap-3">
             <Link
-              to="/contact"
+              to={site.headerCta.href}
               className="label hidden rounded-full border border-ink px-6 py-3 text-ink transition-colors duration-400 hover:border-accent hover:bg-accent hover:text-canvas group-data-[over=true]/head:border-beige/60 group-data-[over=true]/head:text-beige group-data-[over=true]/head:hover:border-champagne group-data-[over=true]/head:hover:bg-champagne group-data-[over=true]/head:hover:text-charcoal sm:inline-block"
             >
-              Inquire
+              {site.headerCta.label}
             </Link>
             <ThemeToggle />
             <button
@@ -271,7 +266,7 @@ export function Header() {
             <div className="m-auto w-full py-8">
             <nav className="flex flex-col gap-1" aria-label="Mobile">
               {MOBILE_NAV.map((item, i) => {
-                const children = NAV_CHILDREN[item.to]
+                const children = item.children?.length ? item.children : undefined
                 return (
                   <motion.div
                     key={item.to}
@@ -366,7 +361,7 @@ export function Header() {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}
             >
-              {SITE.serves}
+              {site.serves}
             </motion.p>
             </div>
           </motion.div>

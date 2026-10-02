@@ -1,12 +1,37 @@
 @import 'tailwindcss';
+@import './admin/admin.css';
 
 /* Theme is driven by a class on <html>, not the OS query, so the toggle wins. */
 @custom-variant dark (&:where(.dark, .dark *));
 
+/**
+ * Fonts and semantic colours are `inline`, which is load-bearing rather than a
+ * style preference.
+ *
+ * Without it Tailwind emits `--color-canvas: var(--canvas)` into `:root`, and a
+ * custom property is substituted where it is *declared* — so every utility
+ * would resolve against the root palette and a nested override would do
+ * nothing. The dashboard needs exactly that override: its own palette and Inter
+ * on a wrapper, with the live preview inside it put back to the site's. With
+ * `inline`, `bg-canvas` compiles to `var(--canvas)` and the nearest ancestor wins.
+ * The same lesson is written up in the sister sites' stylesheets.
+ */
+@theme inline {
+  --font-display: var(--font-display-face);
+  --font-body: var(--font-body-face);
+  --font-label: var(--font-label-face);
+
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-accent: var(--accent);
+  --color-line: var(--line);
+  --color-gilt: var(--gilt);
+}
+
 @theme {
-  --font-display: 'Italiana', 'Cormorant Garamond', Georgia, serif;
-  --font-body: 'Lora', Georgia, 'Times New Roman', serif;
-  --font-label: 'Oswald', 'Helvetica Neue', sans-serif;
 
   /* Brand constants — identical in both themes. */
   --color-charcoal: #222222;
@@ -16,21 +41,19 @@
   --color-champagne: #edd5cb;
   --color-sage: #5b7343;
 
-  /* Semantic tokens — remapped per theme below. */
-  --color-canvas: var(--canvas);
-  --color-surface: var(--surface);
-  --color-ink: var(--ink);
-  --color-muted: var(--muted);
-  --color-faint: var(--faint);
-  --color-accent: var(--accent);
-  --color-line: var(--line);
-
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-out-quart: cubic-bezier(0.76, 0, 0.24, 1);
 }
 
+:root {
+  --font-display-face: 'Italiana', 'Cormorant Garamond', Georgia, serif;
+  --font-body-face: 'Lora', Georgia, 'Times New Roman', serif;
+  --font-label-face: 'Oswald', 'Helvetica Neue', sans-serif;
+}
+
 :root,
-.light {
+.light,
+.light .site-preview {
   --canvas: #f0e8e1;
   --surface: #f7f1ea;
   --ink: #222222;
@@ -40,10 +63,12 @@
   --line: rgb(34 34 34 / 0.14);
   --grain: 0.035;
   --scrim: 34 34 34;
+  --gilt: var(--accent);
   color-scheme: light;
 }
 
-.dark {
+.dark,
+.dark .site-preview {
   --canvas: #16180f;
   --surface: #202318;
   --ink: #ece3da;
@@ -53,8 +78,10 @@
   --line: rgb(236 227 218 / 0.15);
   --grain: 0.05;
   --scrim: 10 12 8;
+  --gilt: var(--accent);
   color-scheme: dark;
 }
+
 
 html, body {
   margin: 0;
@@ -65,7 +92,7 @@ body {
   margin: 0;
   background-color: var(--canvas);
   color: var(--ink);
-  font-family: var(--font-body);
+  font-family: var(--font-body-face);
   font-size: 1rem;
   line-height: 1.7;
   overflow-x: clip;
@@ -119,7 +146,7 @@ header {
     margin: 0;
     background-color: var(--canvas);
     color: var(--ink);
-    font-family: var(--font-body);
+    font-family: var(--font-body-face);
     font-size: 1rem;
     line-height: 1.7;
     overflow-x: clip;
@@ -184,7 +211,7 @@ header {
 }
 
 @utility label {
-  font-family: var(--font-label);
+  font-family: var(--font-label-face);
   font-weight: 400;
   text-transform: uppercase;
   letter-spacing: 0.28em;
@@ -193,7 +220,7 @@ header {
 }
 
 @utility display {
-  font-family: var(--font-display);
+  font-family: var(--font-display-face);
   font-weight: 400;
   line-height: 0.92;
   letter-spacing: 0.005em;

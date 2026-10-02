@@ -27,3 +27,6 @@ images/
 *.njsproj
 *.sln
 *.sw?
+
+# Secrets
+.env

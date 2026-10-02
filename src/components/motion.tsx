@@ -11,12 +11,15 @@ export function Reveal({
   y = 28,
   className,
   as = 'div',
+  html,
 }: {
-  children: ReactNode
+  children?: ReactNode
   delay?: number
   y?: number
   className?: string
   as?: 'div' | 'p' | 'li' | 'span'
+  /** Sanitized rich text from the dashboard, rendered in place of children. */
+  html?: string
 }) {
   const Tag = motion[as]
   return (
@@ -26,10 +29,59 @@ export function Reveal({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={VIEWPORT}
       transition={{ duration: 0.9, delay, ease: [0.16, 1, 0.3, 1] }}
-    >
-      {children}
-    </Tag>
+      {...(html !== undefined ? { dangerouslySetInnerHTML: { __html: html } } : { children })}
+    />
   )
+}
+
+/**
+ * Rich text, one revealed paragraph at a time.
+ *
+ * The dashboard stores paragraphs as HTML; the hand-built site staggered each
+ * paragraph in on its own. Splitting the HTML back into its top-level blocks
+ * keeps that rhythm — and lists and headings in the copy still render as
+ * themselves, just revealed as one block each.
+ */
+export function RichParagraphs({
+  html,
+  className,
+  step = 0.12,
+  start = 0.1,
+}: {
+  html: string
+  className?: string
+  step?: number
+  start?: number
+}) {
+  const blocks = splitBlocks(html)
+  return (
+    <div className={className}>
+      {blocks.map((block, i) =>
+        block.tag === 'p' ? (
+          <Reveal key={i} as="p" delay={start + i * step} html={block.inner} className="rich" />
+        ) : (
+          <Reveal key={i} delay={start + i * step} html={block.outer} className="rich" />
+        ),
+      )}
+    </div>
+  )
+}
+
+export function splitBlocks(html: string): { tag: string; inner: string; outer: string }[] {
+  if (!html) return []
+  const out: { tag: string; inner: string; outer: string }[] = []
+  const re = /<(p|ul|ol|h2|h3|h4|blockquote)(\s[^>]*)?>([\s\S]*?)<\/\1>/gi
+  let match: RegExpExecArray | null
+  let last = 0
+  while ((match = re.exec(html))) {
+    const between = html.slice(last, match.index).trim()
+    if (between) out.push({ tag: 'p', inner: between, outer: `<p>${between}</p>` })
+    out.push({ tag: match[1].toLowerCase(), inner: match[3], outer: match[0] })
+    last = re.lastIndex
+  }
+  const tail = html.slice(last).trim()
+  if (tail) out.push({ tag: 'p', inner: tail, outer: `<p>${tail}</p>` })
+  return out.filter((b) => b.inner.replace(/<br\s*\/?>|&nbsp;|\s/g, '') !== '')
 }
 
 const wordVariants: Variants = {

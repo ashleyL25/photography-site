@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import clsx from 'clsx'
-import { PRICING_BY_REQUEST, type PackageSet } from '@/data/packages'
+import type { PublicTier } from '@shared/types'
 import { Reveal } from './motion'
 
 /** Small plus-tick used as the list bullet wherever inclusions are listed. */
@@ -16,7 +16,7 @@ export function Tick({ className }: { className?: string }) {
   )
 }
 
-const SPEC_LABELS = [
+const SPEC_LABELS: readonly (readonly ['time' | 'locations' | 'outfits' | 'images', string])[] = [
   ['time', 'Time'],
   ['locations', 'Locations'],
   ['outfits', 'Outfits'],
@@ -38,18 +38,23 @@ const SPEC_LABELS = [
  * "Most booked" badge is absolutely positioned and so is not one of them.
  */
 export function TierCards({
-  set,
+  tiers,
   cta,
   hidePrices = false,
+  featuredLabel = 'Most booked',
 }: {
-  set: PackageSet
+  tiers: PublicTier[]
   cta: { label: string; to?: string; href?: string }
-  /** Senior and engagement pricing is sent, not posted. See lib/pricing.ts. */
+  /**
+   * Senior and engagement pricing is sent, not posted. The server has already
+   * put "By request" in place of each price; this only switches the type size.
+   */
   hidePrices?: boolean
+  featuredLabel?: string
 }) {
   return (
     <div className="grid gap-px overflow-hidden bg-line md:grid-cols-3 md:grid-rows-[auto_auto_auto_auto_auto_1fr_auto]">
-      {set.tiers.map((tier, i) => (
+      {tiers.map((tier, i) => (
         <Reveal
           key={tier.id}
           delay={i * 0.1}
@@ -60,7 +65,7 @@ export function TierCards({
         >
           {tier.featured && (
             <span className="label absolute top-8 right-8 text-accent md:top-10 md:right-10">
-              Most booked
+              {featuredLabel}
             </span>
           )}
 
@@ -83,7 +88,7 @@ export function TierCards({
                   : 'text-[clamp(2.1rem,3.5vw,3.1rem)]',
               )}
             >
-              {hidePrices ? PRICING_BY_REQUEST.price : tier.price}
+              {tier.price}
             </span>
             <span className="label mt-3 block text-faint">{tier.unit}</span>
           </div>
@@ -93,7 +98,7 @@ export function TierCards({
               <div key={key} className="flex items-baseline justify-between gap-4">
                 <dt className="label shrink-0 text-faint">{label}</dt>
                 <dd className="text-right text-[0.9rem] leading-snug text-ink">
-                  {tier.spec[key]}
+                  {tier[key]}
                 </dd>
               </div>
             ))}

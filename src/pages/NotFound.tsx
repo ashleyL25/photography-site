@@ -1,16 +1,19 @@
+import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { setOverPhoto } from '@/lib/chrome'
 import { Photo } from '@/components/Photo'
 import { MaskText, Reveal } from '@/components/motion'
 import { useDocumentMeta } from '@/lib/hooks'
 
 export default function NotFound() {
   useDocumentMeta('Page not found — Ashley Photography')
+  useEffect(() => setOverPhoto(true), [])
 
   return (
     <section className="relative isolate flex min-h-[80svh] items-center overflow-hidden">
       <div className="absolute inset-0 -z-10">
         <Photo
-          id="backgrounds-italy-2025-320"
+          src="/photos/backgrounds/italy-2025-320-1440.webp"
           alt=""
           sizes="100vw"
           priority

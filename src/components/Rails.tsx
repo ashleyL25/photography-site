@@ -1,9 +1,36 @@
 import { motion, useScroll, useSpring } from 'motion/react'
 import clsx from 'clsx'
-import { SECTIONS, SITE } from '@/data/site'
+import { useMemo, useSyncExternalStore } from 'react'
 import { useActiveSection } from '@/lib/hooks'
+import { useSiteInfo } from '@/lib/site'
 
-const IDS = SECTIONS.map((s) => s.id)
+/**
+ * The rail's entries, set by the home page once its sections have loaded: every
+ * section with an anchor and a rail label, in page order. A module store rather
+ * than a context because the rail lives in the layout, above the page that
+ * knows what is on it.
+ */
+let railEntries: { id: string; label: string }[] = []
+const railListeners = new Set<() => void>()
+
+export function setRailEntries(entries: { id: string; label: string }[]) {
+  if (JSON.stringify(entries) === JSON.stringify(railEntries)) return
+  railEntries = entries
+  for (const listen of railListeners) listen()
+}
+
+function useRailEntries() {
+  return useSyncExternalStore(
+    (listener) => {
+      railListeners.add(listener)
+      return () => {
+        railListeners.delete(listener)
+      }
+    },
+    () => railEntries,
+    () => railEntries,
+  )
+}
 
 /**
  * Fixed left-hand index rail — the page's navigational signature. A hairline
@@ -11,7 +38,9 @@ const IDS = SECTIONS.map((s) => s.id)
  * warms to copper as you reach it, with the label revealed on hover or when active.
  */
 export function IndexRail() {
-  const active = useActiveSection(IDS)
+  const sections = useRailEntries()
+  const ids = useMemo(() => sections.map((s) => s.id), [sections])
+  const active = useActiveSection(ids)
   const { scrollYProgress } = useScroll()
   const progress = useSpring(scrollYProgress, { stiffness: 120, damping: 30, mass: 0.3 })
 
@@ -30,7 +59,7 @@ export function IndexRail() {
           style={{ scaleY: progress, height: 'calc(100% - 0.5rem)' }}
         />
 
-        {SECTIONS.map((section) => {
+        {sections.map((section) => {
           const on = active === section.id
           return (
             <a
@@ -65,6 +94,8 @@ export function IndexRail() {
 
 /** Right-hand counterweight: a vertical Instagram link that keeps the margins symmetrical. */
 export function SocialRail() {
+  const site = useSiteInfo()
+  if (!site.instagram) return null
   return (
     <motion.aside
       initial={{ opacity: 0, x: 16 }}
@@ -73,13 +104,13 @@ export function SocialRail() {
       className="fixed top-1/2 right-8 z-50 hidden -translate-y-1/2 xl:block"
     >
       <a
-        href={SITE.instagram}
+        href={site.instagram}
         target="_blank"
         rel="noreferrer noopener"
         className="label flex items-center gap-5 text-faint transition-colors duration-400 hover:text-accent [writing-mode:vertical-rl]"
       >
         <span className="h-16 w-px bg-line" />
-        {SITE.instagramHandle}
+        {site.instagramHandle}
       </a>
     </motion.aside>
   )

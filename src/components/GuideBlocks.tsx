@@ -1,8 +1,26 @@
 import { useCallback, useEffect, useState } from 'react'
 import clsx from 'clsx'
-import type { Block } from '@/data/guides'
-import { Reveal } from './motion'
+import type { Vendor } from '@/lib/site'
+import { Reveal, splitBlocks } from './motion'
 import { Tick } from './TierCards'
+
+/**
+ * The blocks a guide chapter is built from. Each one is a widget in the
+ * dashboard (`guide_prose`, `guide_timeline`…); the guide page maps a widget's
+ * content to one of these and this file draws it exactly as the hand-built
+ * guides did.
+ */
+export type Block =
+  /** Body copy, as rich-text HTML. */
+  | { kind: 'prose'; html: string }
+  | { kind: 'timeline'; items: { time: string; title: string; detail: string }[] }
+  | { kind: 'checklist'; items: string[] }
+  | { kind: 'vendors'; items: Vendor[] }
+  | { kind: 'columns'; items: { title: string; body: string }[] }
+  | { kind: 'locations'; items: { group: string; blurb: string; places: string[] }[] }
+  | { kind: 'compare'; yes: { title: string; items: string[] }; no: { title: string; items: string[] } }
+  | { kind: 'steps'; items: { label: string; detail: string }[] }
+  | { kind: 'note'; text: string }
 
 /* ------------------------------------------------------------------ *
  * Checklist
@@ -74,7 +92,7 @@ function Checklist({ storageKey, items }: { storageKey: string; items: string[] 
 
       <ul className="mt-6">
         {items.map((item, i) => (
-          <li key={item} className="border-b border-line last:border-0">
+          <li key={`${item}-${i}`} className="border-b border-line last:border-0">
             <label className="group flex cursor-pointer items-start gap-5 py-4">
               <input
                 type="checkbox"
@@ -129,11 +147,13 @@ export function GuideBlock({ block, storageKey }: { block: Block; storageKey: st
     case 'prose':
       return (
         <div className="max-w-2xl space-y-6 text-[1.05rem] leading-[1.9] text-muted">
-          {block.text.map((paragraph, i) => (
-            <Reveal key={i} as="p" delay={i * 0.05}>
-              {paragraph}
-            </Reveal>
-          ))}
+          {splitBlocks(block.html).map((part, i) =>
+            part.tag === 'p' ? (
+              <Reveal key={i} as="p" delay={i * 0.05} html={part.inner} className="rich" />
+            ) : (
+              <Reveal key={i} delay={i * 0.05} html={part.outer} className="rich" />
+            ),
+          )}
         </div>
       )
 
@@ -143,7 +163,7 @@ export function GuideBlock({ block, storageKey }: { block: Block; storageKey: st
           {block.items.map((item, i) => (
             <Reveal
               as="li"
-              key={item.title}
+              key={`${item.title}-${i}`}
               delay={i * 0.05}
               className="grid gap-2 border-b border-line py-7 sm:grid-cols-[10rem_1fr] sm:gap-8"
             >

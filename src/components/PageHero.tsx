@@ -10,20 +10,24 @@ export function PageHero({
   eyebrow,
   heading,
   body,
-  photoId,
+  image,
   children,
+  id,
+  className,
 }: {
   eyebrow: string
   heading: string
   body?: string
-  photoId: string
+  image: string
   children?: ReactNode
+  id?: string
+  className?: string
 }) {
   return (
-    <section className="relative isolate overflow-hidden">
+    <section id={id} className={`relative isolate overflow-hidden ${className ?? ''}`}>
       {/* The whole plate drops out on paper — see the print block in index.css. */}
       <div className="absolute inset-0 -z-10 print:hidden">
-        <Photo id={photoId} alt="" sizes="100vw" priority className="h-full w-full" />
+        <Photo src={image} alt="" sizes="100vw" priority className="h-full w-full" />
         <div aria-hidden className="absolute inset-0 bg-[rgb(var(--scrim))]/68" />
         <div
           aria-hidden
@@ -32,10 +36,12 @@ export function PageHero({
       </div>
 
       <div className="shell pt-40 pb-20 text-beige md:pt-52 md:pb-28 print:pt-0 print:pb-6 print:text-ink">
-        <Reveal className="label flex items-center gap-4 text-champagne print:text-accent">
-          <span className="h-px w-10 bg-champagne print:bg-accent" />
-          {eyebrow}
-        </Reveal>
+        {eyebrow && (
+          <Reveal className="label flex items-center gap-4 text-champagne print:text-accent">
+            <span className="h-px w-10 bg-champagne print:bg-accent" />
+            {eyebrow}
+          </Reveal>
+        )}
 
         <MaskText
           as="h1"

@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import clsx from 'clsx'
-import { BY_ID, type Photo as PhotoData } from '@/data/photos.generated'
-import { useRemotePortfolio } from '@/data/portfolio-remote'
+import { getPhoto, usePhotoRegistry } from '@/lib/photos'
+import type { PhotoMeta } from '@shared/types'
 
 type Props = {
-  /** Id from the generated manifest. */
-  id: string
+  /** The photograph's URL, as stored in an image field. */
+  src: string | null | undefined
   alt: string
   /** Responsive `sizes` hint — get this right or the browser over-downloads. */
   sizes: string
@@ -16,55 +16,69 @@ type Props = {
   imgClassName?: string
 }
 
-function srcSet(photo: PhotoData) {
-  return photo.widths.map((w) => `${photo.src}-${w}.webp ${w}w`).join(', ')
+function srcSet(photo: PhotoMeta) {
+  return photo.widths.map((w) => `${photo.prefix}-${w}.webp ${w}w`).join(', ')
 }
 
 /**
- * Responsive image backed by the build-time manifest. Reserves exact layout
- * space from the intrinsic ratio, paints the 20px blur placeholder immediately,
- * and cross-fades to the real file once decoded.
+ * Responsive image. Reserves exact layout space from the intrinsic ratio,
+ * paints the 20px blur placeholder immediately, and cross-fades to the real
+ * file once decoded.
+ *
+ * What makes that possible is the photo registry: every response that mentions
+ * a photograph also carries its renditions, colour and placeholder, so the
+ * URL an image field stores is enough to draw it properly. A URL the registry
+ * does not know — pasted from somewhere else — still renders, just without the
+ * srcset and the blur-up.
  */
-export function Photo({ id, alt, sizes, className, imgClassName, priority }: Props) {
-  // The build-time manifest first, then anything published from the gallery
-  // dashboard. Local wins on an id collision, which is the safe way round: a
-  // photograph that ships with the site is the one that was chosen deliberately.
-  const remote = useRemotePortfolio()
-  const photo = BY_ID[id] ?? remote.byId[id]
+export function Photo({ src, alt, sizes, className, imgClassName, priority }: Props) {
+  usePhotoRegistry()
+  const photo = getPhoto(src)
   const [loaded, setLoaded] = useState(false)
 
+  if (!src) return null
+
   if (!photo) {
-    // Only worth warning once the remote manifest has actually been consulted —
-    // before that, a remote id is legitimately unknown rather than missing.
-    if (import.meta.env.DEV && remote.loaded) {
-      console.warn(`Photo "${id}" is in neither manifest.`)
-    }
-    return null
+    return (
+      <div className={clsx('relative overflow-hidden bg-surface', className)}>
+        <img
+          src={src}
+          alt={alt}
+          loading={priority ? 'eager' : 'lazy'}
+          decoding="async"
+          onLoad={() => setLoaded(true)}
+          className={clsx(
+            'relative h-full w-full object-cover transition-opacity duration-700 ease-[var(--ease-out-expo)]',
+            loaded ? 'opacity-100' : 'opacity-0',
+            imgClassName,
+          )}
+        />
+      </div>
+    )
   }
 
   const fallback = photo.widths[Math.min(2, photo.widths.length - 1)]
 
   return (
-    <div
-      className={clsx('relative overflow-hidden', className)}
-      style={{ backgroundColor: photo.color }}
-    >
+    <div className={clsx('relative overflow-hidden', className)} style={{ backgroundColor: photo.color }}>
+      {photo.lqip && (
+        <img
+          aria-hidden
+          src={photo.lqip}
+          alt=""
+          className={clsx(
+            'absolute inset-0 h-full w-full scale-110 object-cover blur-xl transition-opacity duration-700',
+            loaded ? 'opacity-0' : 'opacity-100',
+          )}
+        />
+      )}
       <img
-        aria-hidden
-        src={photo.lqip}
-        alt=""
-        className={clsx(
-          'absolute inset-0 h-full w-full scale-110 object-cover blur-xl transition-opacity duration-700',
-          loaded ? 'opacity-0' : 'opacity-100',
-        )}
-      />
-      <img
-        src={`${photo.src}-${fallback}.webp`}
+        src={`${photo.prefix}-${fallback}.webp`}
         srcSet={srcSet(photo)}
         sizes={sizes}
         alt={alt}
-        width={photo.width}
-        height={photo.height}
+        width={photo.width || undefined}
+        height={photo.height || undefined}
         loading={priority ? 'eager' : 'lazy'}
         decoding={priority ? 'sync' : 'async'}
         fetchPriority={priority ? 'high' : 'auto'}
@@ -77,4 +91,10 @@ export function Photo({ id, alt, sizes, className, imgClassName, priority }: Pro
       />
     </div>
   )
+}
+
+/** Width over height, for layouts that need it before the image loads. */
+export function aspectOf(src: string | null | undefined): number {
+  const photo = getPhoto(src)
+  return photo && photo.width && photo.height ? photo.width / photo.height : 1.5
 }

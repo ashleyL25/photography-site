@@ -1,9 +1,11 @@
 import { Link } from 'react-router-dom'
-import { NAV, SITE } from '@/data/site'
+import { useSiteInfo } from '@/lib/site'
 import { Monogram } from './Brand'
 
 export function Footer() {
   const year = new Date().getFullYear()
+  const SITE = useSiteInfo()
+  const NAV = SITE.nav
 
   return (
     // The bottom inset clears the home indicator, which overlaps the page
@@ -52,7 +54,7 @@ export function Footer() {
               to="/contact"
               className="label mt-4 inline-block w-max rounded-full border border-ink px-7 py-3 text-ink transition-colors duration-400 hover:border-accent hover:bg-accent hover:text-canvas"
             >
-              Inquire
+              {SITE.footerCta}
             </Link>
           </div>
         </div>
@@ -62,7 +64,7 @@ export function Footer() {
             © {year} {SITE.name}
           </p>
           <p className="label text-faint">
-            Every photograph on this site is my own work · Booking since {SITE.since}
+            {[SITE.footerNote, SITE.since && `Booking since ${SITE.since}`].filter(Boolean).join(' · ')}
           </p>
         </div>
       </div>

@@ -1,0 +1,265 @@
+/* ------------------------------------------------------------------ *
+ * The dashboard
+ *
+ * A working tool rather than the brand, so it is set in Inter — legible at
+ * small sizes, unambiguous in a form — and wears the photography palette
+ * underneath: beige paper, charcoal ink and copper for anything active, with a
+ * forest-dark mode for editing at night.
+ *
+ * Everything here is scoped to `.admin-ui`, and `.site-preview` puts the site's
+ * own palette and typefaces back for the live preview inside the page builder,
+ * so a preview always looks exactly like the page it previews.
+ * ------------------------------------------------------------------ */
+
+.admin-ui,
+.admin-ui[data-appearance='light'] {
+  --canvas: #f3ede6;
+  --surface: #fbf8f4;
+  --ink: #23201c;
+  --muted: #5c554c;
+  --faint: #8f867b;
+  --line: rgb(35 32 28 / 0.12);
+  --gilt: #9a562a;
+  --gilt-rgb: 154 86 42;
+  --accent: #b23c2a;
+  --rose: #c46a5a;
+  --grain: 0;
+  --scrim: 34 34 34;
+
+  --font-display-face: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-body-face: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-label-face: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --measure: 68ch;
+
+  font-family: var(--font-body-face);
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--ink);
+  background-color: var(--canvas);
+  color-scheme: light;
+  font-feature-settings: 'cv11', 'ss01';
+}
+
+.admin-ui[data-appearance='dark'] {
+  --canvas: #15170f;
+  --surface: #1d2017;
+  --ink: #ece5dc;
+  --muted: #b1a99e;
+  --faint: #7d776c;
+  --line: rgb(236 229 220 / 0.12);
+  --gilt: #d08e5c;
+  --gilt-rgb: 208 142 92;
+  --accent: #e0705a;
+  color-scheme: dark;
+}
+
+/* The labels and headings the dashboard borrows from the site, re-set for a tool. */
+:where(.admin-ui) .label {
+  font-family: var(--font-label-face);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  font-size: 0.68rem;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+:where(.admin-ui) .display {
+  font-family: var(--font-display-face);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.15;
+}
+
+:where(.admin-ui) .text-h1 {
+  font-size: 2.25rem;
+}
+:where(.admin-ui) .text-h2 {
+  font-size: 1.75rem;
+}
+:where(.admin-ui) .text-h3 {
+  font-size: 1.35rem;
+}
+:where(.admin-ui) .script {
+  font-family: var(--font-display-face);
+  font-style: italic;
+}
+:where(.admin-ui) .measure {
+  max-width: var(--measure);
+}
+:where(.admin-ui) .rule-gilt {
+  height: 1px;
+  background: var(--gilt);
+  opacity: 0.4;
+}
+
+/* ------------------------------------------------------------------ *
+ * The live preview — the site, exactly
+ * ------------------------------------------------------------------ */
+
+.site-preview {
+  --font-display-face: 'Italiana', 'Cormorant Garamond', Georgia, serif;
+  --font-body-face: 'Lora', Georgia, 'Times New Roman', serif;
+  --font-label-face: 'Oswald', 'Helvetica Neue', sans-serif;
+  font-family: var(--font-body-face);
+  font-size: 1rem;
+  line-height: 1.7;
+  background-color: var(--canvas);
+  color: var(--ink);
+}
+
+.site-preview .label {
+  font-weight: 400;
+  letter-spacing: 0.28em;
+  font-size: 0.6875rem;
+  line-height: 1;
+}
+
+.site-preview .display {
+  font-weight: 400;
+  line-height: 0.92;
+  letter-spacing: 0.005em;
+}
+
+/* ------------------------------------------------------------------ *
+ * Buttons
+ * ------------------------------------------------------------------ */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+  min-height: 40px;
+  padding: 0.7rem 1.15rem;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  font-family: var(--font-label-face);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background-color 0.25s var(--ease-out-expo),
+    color 0.25s var(--ease-out-expo),
+    border-color 0.25s var(--ease-out-expo);
+}
+
+.btn-primary {
+  background: var(--gilt);
+  color: #fbf8f4;
+  border-color: var(--gilt);
+}
+.btn-primary:hover {
+  background: color-mix(in srgb, var(--gilt) 86%, black);
+  border-color: color-mix(in srgb, var(--gilt) 86%, black);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--ink);
+  border-color: var(--line);
+}
+.btn-secondary:hover {
+  border-color: var(--gilt);
+  color: var(--gilt);
+}
+
+/* ------------------------------------------------------------------ *
+ * Rich text, as the editor shows it
+ * ------------------------------------------------------------------ */
+
+.prose {
+  max-width: var(--measure, 68ch);
+}
+.prose :where(p) {
+  margin: 0 0 1em;
+}
+.prose :where(p):last-child {
+  margin-bottom: 0;
+}
+.prose :where(h2, h3, h4) {
+  margin: 1.5em 0 0.5em;
+  font-weight: 600;
+}
+.prose :where(a) {
+  color: var(--gilt);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.prose :where(ul, ol) {
+  margin: 0 0 1em;
+  padding-left: 1.3em;
+}
+.prose :where(ul) {
+  list-style: disc;
+}
+.prose :where(ol) {
+  list-style: decimal;
+}
+.prose :where(li) {
+  margin-bottom: 0.35em;
+}
+.prose :where(blockquote) {
+  margin: 1.4em 0;
+  padding-left: 1em;
+  border-left: 2px solid var(--gilt);
+  font-style: italic;
+}
+
+/* ------------------------------------------------------------------ *
+ * The editor's sticky parts, which clear its own header bar
+ * ------------------------------------------------------------------ */
+
+.editor-sticky {
+  top: var(--editor-header, 0px);
+}
+
+@media (min-width: 64rem) {
+  .editor-panel {
+    position: sticky;
+    top: var(--editor-header, 0px);
+    height: calc(100dvh - var(--editor-header, 0px));
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * Rich text on the site
+ *
+ * Paragraphs render as themselves; a list or heading written into a body field
+ * in the dashboard renders as one revealed block, styled here to match.
+ * ------------------------------------------------------------------ */
+
+.rich :where(ul, ol) {
+  padding-left: 1.2em;
+}
+.rich :where(ul) {
+  list-style: disc;
+}
+.rich :where(ol) {
+  list-style: decimal;
+}
+.rich :where(li) {
+  margin-bottom: 0.4em;
+}
+.rich :where(h2, h3, h4) {
+  font-family: var(--font-display-face);
+  color: var(--ink);
+  font-size: 1.6em;
+  line-height: 1.1;
+}
+.rich :where(blockquote) {
+  border-left: 1px solid var(--accent);
+  padding-left: 1.5rem;
+  font-style: italic;
+}
+.rich a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-color: var(--line);
+  text-underline-offset: 4px;
+}
+
+.admin-ui {
+  --card-radius: 12px;
+}

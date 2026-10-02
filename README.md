@@ -1,489 +1,229 @@
-# Ashley Photography
+# Ashley Photography — site and dashboard
 
-Homepage for a central-Iowa portrait photographer. React 19 + Vite + Tailwind v4,
-built to deploy as a static folder on Hostinger shared hosting.
+Portrait photography in central Iowa. React 19 + Vite + Tailwind v4 on the
+front, Express + MariaDB on the back, Cloudflare R2 for uploaded photographs,
+deployed to Hostinger as a Node.js app.
+
+Every page, session, album and guide is editable at **`/dashboard`** with a page
+builder modeled on the one behind elisemariewrites.com. The site itself looks and
+behaves exactly as the hand-built version did: each section that used to be a
+component reading `src/data` is now a **widget** reading what was saved in the
+dashboard, and the seed script converted all of the old data so nothing was
+retyped.
+
+---
+
+## Getting it running
 
 ```bash
 npm install
-npm run images   # one-time: build web renditions from ./images
+cp .env.example .env     # then fill in the database credentials
+npm run db:migrate
+npm run db:seed
 npm run dev
 ```
 
-## Commands
+`npm run dev` starts the API on `:3000` and Vite on `:5173`; Vite proxies `/api`,
+so the browser only ever talks to one origin — the same as production, where one
+Express process serves both.
 
-| Command          | What it does                                                    |
-| ---------------- | --------------------------------------------------------------- |
-| `npm run dev`    | Dev server on :5173                                               |
-| `npm run build`  | Typecheck, then emit `dist/`                                      |
-| `npm run images` | Re-run the image pipeline (skips renditions already up to date)   |
-| `npm run lint`   | oxlint                                                            |
+The database is on Hostinger, so from your own machine `DB_HOST` is the remote
+host (`srv1562.hstgr.io`) and your IP has to be listed under hPanel → Databases →
+Remote MySQL for `u628890763_portfolio`. **There is no separate development
+database:** anything saved while `npm run dev` is running is saved for real.
 
-## Images
+| Command | What it does |
+| --- | --- |
+| `npm run dev` | API and web together |
+| `npm run build` | Client to `dist/client`, API to `dist/server` |
+| `npm start` | The production server |
+| `npm run typecheck` | Both halves, properly |
+| `npm run db:migrate` | Applies unrun files in `migrations/`. Idempotent. |
+| `npm run db:seed` | Fills an empty database from `scripts/seed-data`. Idempotent — adds nothing that exists. |
+| `npm run images` | Re-runs the image pipeline for photographs that ship with the site |
+| `echo -n 'pw' \| npm run hash-password` | A password hash, for the day the only way in is an `UPDATE` by hand |
 
-`scripts/optimize-images.mjs` reads the untouched originals in `./images`
-(6000×4000, ~20 MB each) and writes WebP renditions at 480/960/1440/2000/2600 px
-into `public/photos/<category>/`, plus a typed manifest at
-`src/data/photos.generated.ts` holding dimensions, average color and a 20 px
-inline blur placeholder for each frame.
+---
 
-Category comes from the source folder name — see the `CATEGORIES` map in the
-script. Drop a new shoot folder into `./images`, add it to the map, re-run
-`npm run images`, and reference the new ids from `src/data/site.ts`.
+## How it fits together
 
-The runtime site serves only the optimized files under `public/photos` (copied
-into `dist/photos` on build). Raw `images/` is gitignored — never push those
-originals to GitHub or Hostinger.
+```
+shared/       Definitions both halves read
+  widgets.ts    every widget and its fields — the page builder's whole vocabulary
+  settings.ts   the settings screens, a session's and a guide's fields, tier pricing
+  types.ts      the shapes the API sends
 
-## Pages
+server/       Express API. Public routes in routes/public.ts; everything else is
+              under /api/admin behind requireAuth.
 
-| Route               | File                        | Notes                                            |
-| ------------------- | --------------------------- | ------------------------------------------------ |
-| `/`                 | `src/pages/Home.tsx`        | Eight scrolling sections; the only one in the main bundle |
-| `/sessions`         | `src/pages/SessionsPage.tsx`| Index of the six session types                    |
-| `/sessions/:id`     | `src/pages/SessionPage.tsx` | One session type: long copy, its three tiers, its guide, real shoots of that kind |
-| `/experience`       | `src/pages/ExperiencePage.tsx` | What is true of **every** session: the arc from inquiry to album, what you receive, weather |
-| `/guides`           | `src/pages/GuidesPage.tsx`  | Index of the six client prep guides. Not in the nav — see below |
-| `/guides/:id`       | `src/pages/GuidePage.tsx`   | One prep guide — the page you send a client on booking |
-| `/portfolio`        | `src/pages/Portfolio.tsx`   | Grid of **sessions**, filterable. `?c=seniors` deep-links a category |
-| `/portfolio/:slug`  | `src/pages/ShootPage.tsx`   | One shoot: story, particulars, full gallery, lightbox |
-| `/about`            | `src/pages/AboutPage.tsx`   | Bio, milestones, design aside                     |
-| `/contact`          | `src/pages/ContactPage.tsx` | Inquiry form, pricing, FAQ, booking terms, gallery timeline. `?session=seniors` preselects the form |
-| anything else       | `src/pages/NotFound.tsx`    | 404                                               |
+src/
+  widgets/      one renderer per widget — the old section components
+  pages/        DynamicPage (any page built in the dashboard), SessionPage,
+                AlbumPage, GuidePage, BlogPost
+  admin/        the dashboard (one lazy chunk; visitors never download it)
 
-`:id` on both `/sessions` and `/guides` is a `SESSIONS` id from
-`src/data/site.ts` — `seniors`, `graduation`, `engagements`, `couples`,
-`families`, `pets`. An unknown id redirects to the index rather than 404ing,
-because it is nearly always a mistyped URL.
+scripts/seed-data/   the hand-built site's data files, kept as the seed's source
+```
 
-**The guides are deliberately absent from the nav.** They are documents for
-people who have already booked, so they are reached from the session pages, from
-the booking email, and from the "and once you have booked" link on the contact
-page. `/guides` still exists and still lists all six — it is just not something a
-first-time visitor is invited into. `/experience` is the public equivalent: the
-universal half of a session, readable before anybody has committed to a date.
+### What can be edited, and where it shows
 
-Routing is `react-router-dom` with `BrowserRouter`, so the `.htaccess` rewrite
-to `index.html` is what makes a direct hit on `/portfolio` work on the server.
-Every interior page is `React.lazy`-loaded, so a first visit to the homepage
-does not download the portfolio grid, the guides or the lightbox.
+| In the dashboard | What it is | Where it shows |
+| --- | --- | --- |
+| **Pages** | Home, Sessions, Experience, Portfolio, Guides, About, Contact, Journal | Built from widgets |
+| **Sessions** | Each session type: details, tiers, and its own page (widgets) | `/sessions/:slug`, the homepage list, the pricing tabs, the inquiry form |
+| **Albums** | One shoot each: photographs in order, cover, story, particulars | `/portfolio`, `/portfolio/:slug`, "sessions like yours" |
+| **Portfolio categories** | The portfolio filters | The filter bar; a session shows albums in its category |
+| **Guides** | The letter and the chapters (widgets) | `/guides/:slug`, the session's page |
+| **Journal** | Blog posts, with templates | `/blog`, `/blog/:slug` (not in the menu until you add it) |
+| **Media** | Every photograph | Every image field |
+| **Inquiries** | Everything sent through the form | — |
+| **Settings → Site** | Name, contact, the **menu**, footer, search defaults | Header, footer, every page |
+| **Settings → Pricing** | Rate card, private-pricing key, what every session includes, add-ons, booking steps | Every tier and the pricing block |
+| **Settings → Policies** | Editing levels, weather, moving a date | Pricing, every guide, the experience page |
+| **Settings → Recommendations** | Hair and makeup, lunch stops, locations | The guides |
+| **Settings → Inquiry form** | The form's options and what it says once sent | The contact form |
 
-`src/components/Layout.tsx` holds the shared chrome and the scroll manager: it
-resets to the top on navigation and honors `/#section` links (used by the
-"Sessions" and "Investment" nav items) once the destination has rendered.
+The connections are explicit: a session names its **guide** and its **portfolio
+category**; an album names its category; a guide names its session. Each session
+page's widgets read the session they sit on, so a new session gets a complete page
+the moment it is created.
 
-### Page transitions
+### The one idea worth knowing
 
-`usePageTransition` (`src/lib/hooks.ts`) and `PageCurtain`
-(`src/components/PageTransition.tsx`) put a curtain between pages: it falls from
-the top edge, the page is swapped underneath it, and it lifts back out through
-the top. `App.tsx` renders `<Routes location={rendered}>` against the deferred
-location the hook returns, which is what keeps the outgoing page on screen until
-the curtain has covered it. Everything inside `Routes` — Layout, Header, the
-scroll manager — reads the deferred location from `useLocation()` for free,
-because `<Routes location>` publishes it on the router's own context. A
-query-string or hash change is not covered, or the portfolio filter would drop
-the curtain on every click.
+**A page is an ordered list of widget instances**, and a widget is described once
+in `shared/widgets.ts`. That description drives the dashboard's form, what the
+server accepts (`server/lib/content.ts` cleans everything against it) and the
+defaults. Adding a field to a widget is a line there plus reading it in the
+renderer. The settings screens and the session and guide detail panels work the
+same way, from `shared/settings.ts`.
 
-`Layout` keys `<main>` on the pathname so each page is rebuilt rather than
-reconciled. That is not cosmetic: `MaskText` rides its words up from behind a
-mask on a one-shot IntersectionObserver, and when only a route param changed —
-one guide to the next, one session to the next — React reused the existing
-elements, nothing re-observed, and **the heading never appeared until you
-reloaded**. The remount happens under the curtain, so it also means every page
-replays its entrance animations.
+A guide's chapters are widgets too: a **Chapter** widget starts one and the blocks
+after it belong to it. The guide page groups them back into numbered chapters with
+the chapter index, so the chapters stay editable in the ordinary page builder.
 
-One thing to leave alone: the curtain's timings are plain `setTimeout`s rather
-than a wait on the next animation frame. Frames stop entirely in a background
-tab, and a curtain that will not lift until the tab is looked at again is a
-curtain that has covered the site.
+### Photographs
 
-## Shoots
+Every image field stores a plain URL. What the `Photo` component needs to draw a
+photograph well — the srcset, the average colour behind it, the 20px blur
+placeholder — is looked up in the `media` table and sent alongside every response
+as a `photos` map (`photoRegistry` in `server/lib/catalog.ts`). That is why an
+uploaded photograph and one that shipped with the site render identically.
 
-The portfolio is organized by **shoot**, not by loose photograph. Each source
-folder in `./images` is one shoot; the pipeline stamps its slug onto every
-photo as `shoot`, and [`src/data/shoots.ts`](src/data/shoots.ts) carries the
-editorial metadata for each one — title, date, category, cover, and the story.
+- **The photographs that shipped with the site** stay in `public/photos` and are
+  served by the app, as before. The seed gave each one a media row, so they are all
+  in the library.
+- **New uploads** never leave the browser at full size. A worker
+  (`src/admin/workers/rendition.worker.ts`, shared with pic) draws the original
+  down to five WebP widths plus the colour and placeholder, and those go straight
+  to the **img-ashleyphotography** R2 bucket on presigned URLs.
+- Uploading is off until the R2 keys and `R2_PUBLIC_URL` are set. The site works
+  without them.
 
-`location`, `conditions` and `requests` are optional and **mostly blank**. They
-render only when filled, so the pages read fine as they are, but they are the
-main thing worth filling in: they are what make a session page more than a
-gallery. I left them empty rather than invent a client's brief or the weather.
+### The pic.ashleyphotographyia.com connection is gone
 
-To add a shoot: drop the folder into `./images`, add it to `CATEGORIES` in the
-pipeline script, run `npm run images`, then add a `SHOOTS` entry whose `source`
-matches the generated `shoot` slug.
+The portfolio no longer fetches anything from the gallery dashboard at runtime.
+The two albums that used to arrive that way (Elise's Graduation, ISU Grads) were
+imported by the seed as ordinary albums; their photographs stay where they were
+in R2. From now on the portfolio changes when an album is published here. The
+gallery dashboard itself is untouched and carries on serving client galleries.
 
-## Content
+### Pricing
 
-Everything editable lives in `src/data/`, split by what it is. Components read
-from it and contain no prose of their own.
+The rate card (Settings → Pricing) holds seven session lengths and the album
+price. Each tier says **how** it is priced rather than carrying a typed figure:
 
-| File                                       | What is in it                                            |
-| ------------------------------------------ | -------------------------------------------------------- |
-| [`site.ts`](src/data/site.ts)              | Nav, the six `SESSIONS`, homepage copy, `/experience`, FAQ, form options |
-| [`packages.ts`](src/data/packages.ts)      | The tier ladder per session type, add-ons, booking terms  |
-| [`guides.ts`](src/data/guides.ts)          | The six client prep guides                                |
-| [`policy.ts`](src/data/policy.ts)          | Weather, reschedules and editing style — shared by the guides, the tier cards and `/experience` |
-| [`vendors.ts`](src/data/vendors.ts)        | Hair and makeup, lunch stops, locations                   |
-| [`shoots.ts`](src/data/shoots.ts)          | Editorial metadata for each real shoot                    |
-| `photos.generated.ts`                      | Written by the image pipeline. Never edit by hand.         |
+- **Rate card** — one length, or several added together for a bundle (Before The
+  Wedding is ninety minutes plus two and a half hours, plus the album).
+- **Fixed** — a hand-set figure. The senior collections and Every Year are fixed,
+  because they were never derived from the hours.
+- **Words** — "Quoted".
 
-### The copy is American English
+Change the rate card and every tier priced from it follows. The pricing screen
+shows what every tier costs right now.
 
-It was not originally, and an Iowa client reading "half seven", "jumper" or
-"Enquire" is a client wondering who wrote this. Everything was swept:
-color/favorite/realize/gray/center/traveling, "two weeks" not "fortnight",
-"backyard" not "back garden", "6:30" not "half six", "sweater" not "jumper",
-"fall" not "autumn", "lawyer" not "solicitor", "backpack" not "rucksack", and
-**inquire/inquiry everywhere, never enquire** — which is why the component is
-`InquiryForm`, the constant is `INQUIRY`, and the contact-page anchor is
-`#inquire`.
+**Private pricing is now an actual lock.** Sessions marked private show "By
+request", and their figures — and the rate card — are left out of the public
+response entirely. Arriving on `?pricing=<key>` (the key is in Settings → Pricing)
+returns them for the rest of that browser session. Change the key and every link
+already sent stops working.
 
-Write new copy the same way. The one thing deliberately left alone is the
-sentence rhythm — long clauses, em dashes, and no contractions ("it is" rather
-than "it's"). That is the voice, not a language slip, and changing it is a
-separate decision from spelling.
+### Roles
 
-## Client guides
+- **owner** — Ashley. Everything, plus managing accounts and deleting pages,
+  sessions, albums and guides.
+- **editor** — for anybody else trusted with the content.
 
-`/guides/<session>` is the page Ashley sends a client the day they book — how
-the day runs hour by hour, when to book hair and makeup and where, what to
-wear, where we shoot, what to bring, and what happens afterwards. The senior
-guide is the long one (ten chapters) because the senior session is the one with
-a fixed routine; the other five are shorter because those sessions are simpler.
+Publish, update and unpublish are press-and-hold buttons, separate from Save.
 
-A guide is a list of **chapters**, and a chapter is a list of **blocks**. Blocks
-are a tagged union in [`guides.ts`](src/data/guides.ts) —
-`prose`, `timeline`, `steps`, `checklist`, `vendors`, `columns`, `locations`,
-`compare`, `note` — rendered by `GuideBlock` in
-[`src/components/GuideBlocks.tsx`](src/components/GuideBlocks.tsx). To add a
-block kind, add it to the union and add a case to that switch; the compiler will
-tell you if you forget one.
-
-Two things worth knowing:
-
-- **Checklists persist.** Ticks are written to `localStorage` under
-  `guide:<guide>:<chapter>:<block>`, so a client can pack over two evenings.
-- **They print.** Every scroll-triggered element on this site starts at
-  `opacity: 0` as an inline style, which means a naive print gives you a stack of
-  blank pages. The `@media print` block in
-  [`src/index.css`](src/index.css) forces `opacity: 1 !important` on everything —
-  a stylesheet `!important` beats an inline style that lacks one — then drops the
-  images, the chrome and the dark palette. If you touch that block, print a guide
-  before you commit.
-
-Several chapters are shared across session types (hair and makeup, the gallery,
-the weather) and are built once as functions at the top of `guides.ts` rather
-than copied six times. Change the wording there and it changes everywhere.
+---
 
 ## Deploying to Hostinger
 
-1. `npm run build`
-2. Upload the **contents** of `dist/` into `public_html` — including the hidden
-   `.htaccess` (turn on "show hidden files" in the File Manager, or use SFTP).
-3. Send a test inquiry and confirm it arrives.
+This replaces the static upload to `public_html`. Set up once:
 
-`php/contact.php` needs no post-upload edit any more: `$TO` and `$FROM` ship set
-for this site. `$FROM` has to stay on `ashleyphotographyia.com` — Hostinger drops
-mail whose `From:` header is off-domain, and because that failure is silent, an
-edit-after-upload step was a standing way to break the contact form without
-noticing. Change it in the repo if it ever needs changing, not on the server.
+1. hPanel → Websites → ashleyphotographyia.com → **Node.js**: create the app from
+   the GitHub repo `ashleyL25/photography-site`, branch `main`, Node 22, build
+   command `npm run build`, entry file `server.js`.
+2. Environment variables — everything in `.env.example`, with `DB_HOST=localhost`.
+   **Leave `NODE_ENV` unset**: setting it to `production` makes npm skip
+   devDependencies on the server, the build toolchain is never installed, and the
+   result is a bare 503. Unset is treated as production. (`npm run env:push` sets
+   them through the Hostinger API — it is a full replace, so send all of them.)
+3. Once it builds, check **`/api/health`**. It is the only API route that answers
+   while configuration is broken, and it says exactly what is missing.
+4. Sign in at `/dashboard`, change the owner password under **Your account**.
 
-`.htaccess` forces HTTPS, sets long cache lifetimes on the fingerprinted assets
-while keeping `index.html` revalidating, and routes unknown paths back to
-`index.html` so client-side routing keeps working when more pages are added.
+`server.js` at the root is load-bearing: Hostinger starts whatever it names, and
+it loads `dist/server/index.js`.
 
-`dist/` is roughly 77 MB, almost all of it `photos/` — the full library at every
-size, ready for the portfolio pages. Browsers only fetch the one rendition they
-need, typically 30–100 KB per image.
-
-## Pricing structure
-
-Every session type has its own ladder of **three tiers**, defined in
-[`src/data/packages.ts`](src/data/packages.ts). Nothing is "tailored, ask me" any
-more: each tier states its time, locations, outfits and image count, and those
-four specs are rendered as a table on every card so a client can compare down a
-column and across a row.
-
-### One rate card decides every price
-
-`RATE_CARD` maps a session length to a price, and **every single-session tier is
-priced off it** — `money(RATE_CARD.two)` rather than a typed-in `'$575'`. Only
-the three multi-session bundles (Two Seasons, Before The Wedding, Every Year) are
-hand-set, and each carries a comment showing the arithmetic.
-
-This exists because the ladders had drifted out of step with the time they sell:
-a forty-five-minute pet session was $325 while a sixty-minute senior session was
-$450 — $130 for fifteen minutes — and no two session types agreed on what an hour
-was worth. Now the rate tapers cleanly ($375 for the first hour down to $224/hr
-across four), the four-hour senior afternoon stays anchored at $895, and
-everything else falls out of that.
-
-**To move the whole business up or down, change `RATE_CARD` and nothing else.**
-Do not type a price into a tier; if a tier needs a length the card does not have,
-add the length to the card.
-
-### Image counts follow from the editing style
-
-`EDITING_STYLE` in [`policy.ts`](src/data/policy.ts) marks each session type
-`retouched` or `natural`, and `RETOUCHING` holds the client-facing explanation of
-each. Senior, graduation and family photographs are fully retouched — Lightroom
-and then Photoshop frame by frame, so breakouts and sweat marks actually come
-out. Engagement, couples and pet sessions are finished in Lightroom with the
-small things fixed; major work on one of those is a per-photograph add-on.
-
-That is what sets the counts: roughly **forty delivered photos per hour** on a
-retouched session, **eighty** on a natural one. So a ninety-minute engagement
-session delivers 120+ while a four-hour senior afternoon delivers 150+, and the
-difference is not a mistake — it is the reason the retouched sessions cost more
-per hour. Every tier states a floor ("150+"), never an exact number.
-
-The same `RETOUCHING` copy renders in three places — the tier ladder, each prep
-guide's gallery chapter, and `/experience` — all from that one constant. If you
-change how you edit, change it there.
-
-### Senior and engagement prices are not public
-
-`PRIVATE_PRICING` lists the session types whose figures are withheld: `seniors`
-and `engagements`. Their cards show "By request" with the packages otherwise
-intact, and `fromPrice` returns "Pricing by request" wherever a from-figure would
-normally appear.
-
-To send a client the real list, append `?pricing=<PRICING_KEY>` to any URL:
-
-```
-https://ashleyphotographyia.com/sessions/seniors?pricing=iowa2026
-https://ashleyphotographyia.com/contact?pricing=iowa2026#investment
-```
-
-`usePricingUnlocked` ([`src/lib/pricing.ts`](src/lib/pricing.ts)) remembers it in
-`sessionStorage` for the rest of that browser session, so the client can click
-through to the contact page without the figures vanishing again. `sessionStorage`
-rather than `localStorage` on purpose: a shared machine forgets when the tab
-closes.
-
-Three things worth knowing. **It is a courtesy screen, not a lock** — the numbers
-ship in the JS bundle and anyone who opens devtools can read them, so do not put
-anything in `PACKAGE_SETS` that would genuinely matter if it leaked. **The
-`<meta name="description">` on a session page never uses the unlocked figure**,
-because search engines are exactly who the list is being kept from. And the tier
-select in the inquiry form normally labels options `Name — $895`; it drops the
-figure for private sessions, which is the one place it would otherwise leak.
-
-Change `PRICING_KEY` and every link you have already sent stops revealing
-anything, which is the point of having it be a constant.
-
-Eighteen cards is too many to show at once, so `src/sections/Investment.tsx` puts
-the session type on a tab and shows three at a time. Each session's own page
-carries the same ladder without the tabs, via the shared
-[`TierCards`](src/components/TierCards.tsx) component — so there is one card
-design, not two.
-
-Everything shared across sessions — the online gallery, print rights, the
-black-and-white selects, travel, the prep guide — lives in `ALWAYS_INCLUDED`
-rather than being repeated per card. `ADD_ONS` is a flat priced list so nothing
-is a surprise after the fact, and the gallery's twelve-month life with its 90-
-and 30-day reminders is its own section (`src/sections/Delivery.tsx`), which
-renders at the foot of the contact page.
-
-The gallery is a Pic-Time one, but the site never says so: "Pic-Time" means
-nothing to most clients, so every mention reads "online photo gallery" instead.
-Keep it that way if you add copy about delivery.
-
-`TierCards` uses `grid-rows-subgrid` to keep the name, price, spec table and CTA
-on the same baselines across all three cards. **The row span has to equal the
-number of children in flow** (seven: index, name, summary, price, spec,
-inclusions, CTA — the "Most booked" badge is absolutely positioned and does not
-count). A subgrid cannot create implicit tracks, so one child too many is crushed
-into the last row and the card box ends above its own content, which reads as the
-CTA floating loose in the middle of the card. Add a row to the template and the
-span together, or not at all.
-
-`fromPrice(sessionId)` and `headlineTier(sessionId)` are the two helpers index
-pages use, so a "From $450" figure can never drift from the cheapest tier.
-
-### Where the figures came from
-
-They are pitched against the central-Iowa market as it stood in mid-2026: budget
-shooters in the metro run $90–$200 an hour, mid-market senior collections start
-around $300, and the premium end of the Des Moines / Pella corridor opens at
-$850. The senior flagship — four hours, three locations, three outfits, a lunch
-stop and a sit-down review — is priced at that premium end, and the rest of the
-ladder is built around it. They are still figures somebody else chose. See the
-checklist below.
-
-## The inquiry form
-
-`src/components/InquiryForm.tsx` collects name, email, phone, session type,
-tier, timeframe, a location idea and how they found you. The **tier select is
-dependent**: pick a session and its options come from that session's own ladder,
-with "Not sure yet" first, because plenty of people genuinely do not know and
-that is a useful answer rather than a gap.
-
-A session page links to `/contact?session=seniors`, so the first select arrives
-already answered. `public/php/contact.php` validates and mails the new fields and
-skips the optional ones nobody filled in; the optional fields are still
-length-bounded, because anything unbounded that reaches a mail body is a spam
-vector.
+---
 
 ## Before going live
 
-Three of these are new and they are the important ones.
+- [ ] **R2** — the access keys for img-ashleyphotography and its public URL
+      (`R2_PUBLIC_URL`). Until then, uploads are off.
+- [ ] **Inquiry email** — `RESEND_API_KEY`. Pic already sends through Resend
+      from `send.ashleyphotographyia.com`, so its key works and `MAIL_FROM` must
+      stay on that subdomain. Until then inquiries are stored and listed under
+      Inquiries but not emailed.
+- [ ] Change the owner password after the first sign-in.
+- [ ] Add a **Journal** link to the menu (Settings → Site) when there is a post to
+      show. It is deliberately left out so the menu matches the old site.
+- [ ] Alt text — every library photograph shows a small "!" until it has some.
 
-- [ ] **Confirm the seven numbers in `RATE_CARD`** (`src/data/packages.ts`). Not
-      eighteen prices any more — seven, one per session length, and the eighteen
-      tiers are computed from them. The shape is right: it tapers, so a longer
-      session is better value per hour, and $895 for the four-hour senior
-      afternoon is the anchor everything hangs off. The *level* is still
-      researched market rates rather than your rates, and setting the whole ladder
-      consistently moved several tiers down by 10–20% from where they were. Read
-      the seven numbers once. If the whole thing should sit higher, add to every
-      row; if only one length is wrong, fix that row.
-- [ ] **Confirm `EDITING_STYLE`** (`src/data/policy.ts`). `seniors`,
-      `graduation` and `families` are `retouched` and `engagements` is `natural`
-      because you said so. `couples` and `pets` are `natural` **by inference** —
-      couples sessions are described everywhere as running exactly like an
-      engagement session, and retouching a dog means nothing. Flip either one if
-      that is wrong; the image counts on those tiers assume it.
-- [ ] **Confirm the two new add-on prices** in `ADD_ONS`: `$35` for major
-      retouching on a single photograph, and a printed album marked `Quoted`
-      because album pricing depends on size and page count. Both are figures I
-      picked; neither came from you.
-- [ ] **Set `PRICING_KEY`** (`src/data/packages.ts`) to something you are happy
-      putting in an email, then check the private links work — see "Senior and
-      engagement prices are not public" above. It ships as `iowa2026`.
-- [ ] **Confirm the vendor lists** in `src/data/vendors.ts`. `HAIR_AND_MAKEUP`
-      and `LUNCH_STOPS` are real, well-regarded businesses in the metro pulled
-      from public listings — they are **not** people you have worked with. The
-      copy is written as "places that do this well" rather than "my people",
-      which is true as written but far less useful to a client than a real
-      endorsement. Cross off anyone you would not send a seventeen-year-old to,
-      add the stylists and MUAs you actually trust, and use the `note` field on
-      the ones you have a relationship with. Links and phone numbers are absent
-      rather than guessed — add them as you confirm each one.
-- [ ] **Confirm the booking terms** in `BOOKING.terms` (`src/data/packages.ts`):
-      the `$150` retainer and the six-to-eight-week lead time. Both were written
-      the way most portrait photographers in this market write them, because they
-      were the only things on the contact page I could not derive from how the
-      business already runs.
-- [ ] **Name the second-reschedule fee.** The rule — first change free even the
-      day before, second change carries a small fee — is yours, and it is stated
-      in `RESCHEDULE_NOTE` (`src/data/policy.ts`) and in `BOOKING.terms`. Neither
-      names a figure, both promise you will say what it is before anything is
-      decided. Decide the number, then either put it in or keep the promise.
-- [ ] Set the real contact address (`SITE.email`, and `$TO`/`$FROM` in
-      `contact.php`).
-- [ ] Send a test inquiry and check the mail contains the new fields — session,
-      tier, timeframe, location, how they found you.
-- [ ] Print `/guides/seniors` and read it on paper. It is the document clients
-      will judge the whole operation by.
-- [ ] **Save the two new photographs of Ashley** into `images/Ashley/` as
-      `porch.jpg` and `bridal.jpg`, then run `npm run images`. The About page
-      resolves `ABOUT_PAGE.portraits` / `.secondary` against the manifest and
-      swaps them in automatically; until then it falls back to the 2019 photo.
-- [ ] Replace the placeholder monogram in `src/components/Brand.tsx` and
-      `public/favicon.svg` once a real logo exists.
-- [ ] Fill in `location`, `conditions` and `requests` for the shoots in
-      `src/data/shoots.ts` — currently blank on most of them.
-- [ ] Check the client names used as shoot titles in `src/data/shoots.ts`; they
-      come from the source folder names. Swap for initials if anyone would
-      rather not be named.
-- [ ] Set the travel fee, or the rule for it. The site says travel beyond the
-      Des Moines metro is quoted before you commit; it never names a number.
-- [ ] ~~Add the missing FAQ entries: booking lead time, deposit terms, weather /
-      reschedule policy.~~ Written, and living in `BOOKING.terms` rather than
-      `FAQ` so the still-to-confirm figures sit next to the comment warning about
-      them. Confirm them (see above) and this is done.
-- [ ] Check the "Celebrations" portfolio filter. It maps to the `wedding`
-      category — rehearsal-dinner and party coverage — and is named that way
-      because weddings are not an advertised service. Rename it in
-      `PORTFOLIO_FILTERS` if they should be.
+The checklist carried over from the static site still applies — confirm the rate
+card, the editing styles, the add-on prices, the booking terms, the vendor lists
+and the second-reschedule fee. All of them are now edited in Settings rather than
+in code.
 
-## Design notes
+---
 
-Palette, type scale and the `shell` container live in
-[`src/index.css`](src/index.css). Theme is a class on `<html>`, resolved by an
-inline script before first paint so there is no flash; the toggle wipes the new
-palette in with a View Transition where supported.
+## Copy and design notes
 
-Shared motion primitives (`Reveal`, `MaskText`, `Unveil`, `Parallax`,
-`DrawRule`) are in [`src/components/motion.tsx`](src/components/motion.tsx).
-One rule worth remembering: a scroll trigger must sit on an element that is not
-fully clipped by an `overflow: hidden` ancestor, or its IntersectionObserver
-never fires and the content stays hidden forever. That is why the mask-reveal
-components put `whileInView` on the wrapper and drive the clipped child through
-variants.
+### The copy is American English
+
+Inquire/inquiry everywhere, never enquire. Color, favorite, gray, center, fall,
+sweater, backyard, "6:30" not "half six". The sentence rhythm — long clauses, em
+dashes, no contractions — is the voice, not a slip.
+
+### The guides print
+
+Every scroll-triggered element starts at `opacity: 0` as an inline style, so the
+`@media print` block in `src/index.css` forces `opacity: 1 !important` on
+everything and drops the images and chrome. Print `/guides/seniors` after touching
+it. Checklist ticks persist in `localStorage` per guide and chapter.
 
 ### iPhone safe areas
 
-The viewport meta carries `viewport-fit=cover`, so the page fills the screen to
-the physical edges and `env(safe-area-inset-*)` returns real values. **Anything
-pinned to a screen edge has to pad past its inset.**
+`viewport-fit=cover` is on, so anything pinned to an edge pads past its inset: the
+header (`pt-[calc(…+env(safe-area-inset-top))]`), the mobile drawer, the sticky
+process cards and the guide's chapter island, and the footer. Change the header's
+padding and those offsets change with it.
 
-- `Header` — `top-0` plus `pt-[calc(<spacing>+env(safe-area-inset-top))]`, so the
-  bar's background and blur reach the top edge rather than leaving a strip the
-  page scrolls visibly through. Note it is `pt-`/`pb-`, not `py-`.
-- The mobile drawer — top inset, so its items clear the status bar.
-- The sticky cards in `sections/Process.tsx` and the chapter island's own offset —
-  both add `env(safe-area-inset-top)` on top of their clearance, because the
-  header they sit under is taller by that inset.
-- `Footer` — bottom inset, to clear the home indicator.
+### The dashboard's look
 
-If you change the header's padding, change those two offsets by the same amount.
-On anything without insets `env()` resolves to `0px`, so these are all no-ops off
-iOS.
-
-A note on history, so nobody re-litigates it: the header spent a while as a
-**bottom** bar on mobile, on the theory that pinning anything to the top of an
-iPhone screen fights Safari. It does — but the padding above is the accepted fix
-and the bottom bar was reverted for design reasons. If the strip above the header
-ever reappears, the bulletproof answer is to bleed the header's background
-upward past its own box (an `::before` with `inset: auto 0 100% 0`) rather than
-to move the bar again.
-
-### Secondary navigation on a phone
-
-A guide's chapter index is two different controls, in
-[`ChapterNav.tsx`](src/components/ChapterNav.tsx).
-
-Desktop keeps the full-width sticky strip — there is room for all ten chapters at
-once, so showing them is the right answer.
-
-Mobile gets a **glass island** instead, and deliberately is not the same control.
-A row of ten chips on a phone is a row you can see three of, with no hint the rest
-exist and no way to tell where you are; a horizontal scrollbar would announce that
-problem rather than solve it. So the island shows the two things that are useful
-while reading — which chapter you are in, and how far through you are, drawn as a
-progress ring around the chapter number — and holds the full list behind a tap, as
-a vertical menu where every title is legible.
-
-It is `sticky`, not `fixed`: it sits in the page where a chapter index belongs,
-under the letter, and is only picked up when you scroll down to it — same as the
-strip it replaced. Only the formatting changed. `STICKY_TOP` parks it clear of the
-scrolled header, so the two read as two stacked bars with air between them.
-
-Its corner radius is **one fixed value and is deliberately not animated**.
-`rounded-full` resolves to a radius of ~16,777,216px, so transitioning from that
-to a couple of rem spends almost the whole duration still looking like a pill and
-then appears to snap — which reads as lag on open. `2rem` is more than half the
-collapsed height, so the browser clamps it to a perfect stadium while closed and
-it is a well-proportioned corner once the list is out. Nothing interpolates.
-Don't reintroduce a `transition-[border-radius]` here.
-
-`useStuck` is what tells it when that has happened, by measuring the wrapper's
-distance from the top against its own resolved `top` (which is how the `env()` in
-that offset gets resolved for free). It reads the **wrapper**, not the pill inside:
-`getBoundingClientRect` includes transforms, and the pill is the thing the
-resulting state then moves. Getting stuck is also what triggers the shrink — a
-smaller, tighter, slightly higher state — so the change reads as the moment it
-takes over, rather than something that happened off screen.
-
-Being an *island* is the other half of the point: it is detached, so content
-passing behind it reads as intended rather than as the gap the old top-sealed bar
-produced. Any future secondary nav on mobile should follow the same rule — float
-it, do not seal it to an edge.
-
-`theme-color` is a single meta tag driven by the site's own palette — set in the
-pre-paint script and again in `useTheme` — rather than two tags keyed to
-`prefers-color-scheme`. Keyed to the media query, a visitor reading in light mode
-on a dark phone got dark browser chrome. Both values must match `--canvas`.
+Inter on the photography palette, light and dark, scoped to `.admin-ui`
+(`src/admin/admin.css`). The page builder's preview is wrapped in `.site-preview`,
+which puts the site's own typefaces and palette back, so a preview always looks
+exactly like the page. The colour tokens are `@theme inline` in `src/index.css`
+for that reason — see the comment there before changing it.

@@ -1,29 +1,29 @@
 import { lazy, Suspense } from 'react'
-import { Route, Routes } from 'react-router-dom'
+import { Route, Routes, useLocation } from 'react-router-dom'
 import { Layout } from '@/components/Layout'
 import { PageCurtain } from '@/components/PageTransition'
 import { usePageTransition } from '@/lib/hooks'
-import Home from '@/pages/Home'
+import DynamicPage, { PageFallback } from '@/pages/DynamicPage'
 
-// The homepage ships in the main bundle; the rest split out so a first visit
-// does not pay for the portfolio grid or the lightbox.
-const Portfolio = lazy(() => import('@/pages/Portfolio'))
-const ShootPage = lazy(() => import('@/pages/ShootPage'))
-const SessionsPage = lazy(() => import('@/pages/SessionsPage'))
+// Pages built in the dashboard ship in the main bundle; the rest split out so a
+// first visit does not pay for the lightbox or a guide's chapter index.
 const SessionPage = lazy(() => import('@/pages/SessionPage'))
-const GuidesPage = lazy(() => import('@/pages/GuidesPage'))
+const AlbumPage = lazy(() => import('@/pages/AlbumPage'))
 const GuidePage = lazy(() => import('@/pages/GuidePage'))
-const ExperiencePage = lazy(() => import('@/pages/ExperiencePage'))
-const AboutPage = lazy(() => import('@/pages/AboutPage'))
-const ContactPage = lazy(() => import('@/pages/ContactPage'))
-const NotFound = lazy(() => import('@/pages/NotFound'))
+const BlogPost = lazy(() => import('@/pages/BlogPost'))
 
-/** Holds the viewport height while a lazy page resolves, so nothing jumps. */
-function PageFallback() {
-  return <div className="min-h-[80svh]" />
+/** The dashboard is one lazy chunk: a visitor who only reads the site never downloads the editor. */
+const Dashboard = lazy(() => import('@/admin/AdminApp'))
+
+function lazyPage(Page: React.ComponentType) {
+  return (
+    <Suspense fallback={<PageFallback />}>
+      <Page />
+    </Suspense>
+  )
 }
 
-export default function App() {
+function Site() {
   // Routes render against the deferred location, so a page swap happens behind
   // the curtain rather than in front of the reader.
   const { rendered, phase } = usePageTransition()
@@ -34,89 +34,39 @@ export default function App() {
 
       <Routes location={rendered}>
         <Route element={<Layout />}>
-          <Route index element={<Home />} />
-          <Route
-            path="portfolio"
-            element={
-              <Suspense fallback={<PageFallback />}>
-                <Portfolio />
-              </Suspense>
-            }
-          />
-          <Route
-            path="portfolio/:slug"
-            element={
-              <Suspense fallback={<PageFallback />}>
-                <ShootPage />
-              </Suspense>
-            }
-          />
-          <Route
-            path="sessions"
-            element={
-              <Suspense fallback={<PageFallback />}>
-                <SessionsPage />
-              </Suspense>
-            }
-          />
-          <Route
-            path="sessions/:id"
-            element={
-              <Suspense fallback={<PageFallback />}>
-                <SessionPage />
-              </Suspense>
-            }
-          />
-          <Route
-            path="guides"
-            element={
-              <Suspense fallback={<PageFallback />}>
-                <GuidesPage />
-              </Suspense>
-            }
-          />
-          <Route
-            path="guides/:id"
-            element={
-              <Suspense fallback={<PageFallback />}>
-                <GuidePage />
-              </Suspense>
-            }
-          />
-          <Route
-            path="experience"
-            element={
-              <Suspense fallback={<PageFallback />}>
-                <ExperiencePage />
-              </Suspense>
-            }
-          />
-          <Route
-            path="about"
-            element={
-              <Suspense fallback={<PageFallback />}>
-                <AboutPage />
-              </Suspense>
-            }
-          />
-          <Route
-            path="contact"
-            element={
-              <Suspense fallback={<PageFallback />}>
-                <ContactPage />
-              </Suspense>
-            }
-          />
-          <Route
-            path="*"
-            element={
-              <Suspense fallback={<PageFallback />}>
-                <NotFound />
-              </Suspense>
-            }
-          />
+          {/* The fixed pages are reached by key, so renaming one in the
+              dashboard never breaks the route that leads to it. */}
+          <Route index element={<DynamicPage pageKey="home" />} />
+          <Route path="sessions" element={<DynamicPage pageKey="sessions" />} />
+          <Route path="portfolio" element={<DynamicPage pageKey="portfolio" />} />
+          <Route path="guides" element={<DynamicPage pageKey="guides" />} />
+          <Route path="blog" element={<DynamicPage pageKey="blog" />} />
+
+          <Route path="sessions/:slug" element={lazyPage(SessionPage)} />
+          <Route path="portfolio/:slug" element={lazyPage(AlbumPage)} />
+          <Route path="guides/:slug" element={lazyPage(GuidePage)} />
+          <Route path="blog/:slug" element={lazyPage(BlogPost)} />
+
+          {/* Everything else — About, Experience, Contact, and any page added
+              later — is looked up by its address. An unknown one is a 404. */}
+          <Route path=":slug" element={<DynamicPage />} />
+          <Route path="*" element={<DynamicPage pageKey="__missing__" />} />
         </Route>
       </Routes>
     </>
   )
+}
+
+export default function App() {
+  const { pathname } = useLocation()
+
+  if (pathname === '/dashboard' || pathname.startsWith('/dashboard/')) {
+    return (
+      <Suspense fallback={null}>
+        <Dashboard />
+      </Suspense>
+    )
+  }
+
+  return <Site />
 }

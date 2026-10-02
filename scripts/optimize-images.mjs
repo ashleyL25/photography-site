@@ -3,7 +3,7 @@
  *
  * Reads the untouched originals from ./images (6000x4000, ~20MB each), and emits
  * responsive WebP renditions into public/photos plus a typed manifest at
- * src/data/photos.generated.ts.
+ * scripts/seed-data/photos.generated.ts.
  *
  * Run with `npm run images`. Re-runs skip files that are already up to date.
  */
@@ -15,7 +15,7 @@ import { fileURLToPath } from 'node:url'
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const SRC_DIR = path.join(ROOT, 'images')
 const OUT_DIR = path.join(ROOT, 'public', 'photos')
-const MANIFEST = path.join(ROOT, 'src', 'data', 'photos.generated.ts')
+const MANIFEST = path.join(ROOT, 'scripts', 'seed-data', 'photos.generated.ts')
 
 const WIDTHS = [480, 960, 1440, 2000, 2600]
 const QUALITY = 78

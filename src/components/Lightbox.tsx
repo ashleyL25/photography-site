@@ -1,21 +1,28 @@
 import { useCallback, useEffect, useRef } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
-import { BY_ID, type Photo as PhotoData } from '@/data/photos.generated'
-import { useRemotePortfolio } from '@/data/portfolio-remote'
+import { getPhoto } from '@/lib/photos'
+import type { PhotoMeta } from '@shared/types'
+
+/** What the viewer draws: a photograph's URL with whatever the registry knows about it. */
+type Frame = { url: string; meta: PhotoMeta | undefined }
 
 type Props = {
-  /** Ordered ids the viewer can page through — usually the current filter. */
+  /** Ordered photograph URLs the viewer can page through. */
   ids: string[]
   /** Index into `ids`, or null when closed. */
   index: number | null
   onClose: () => void
   onNavigate: (index: number) => void
   /** Optional caption resolver, e.g. a category name. */
-  caption?: (photo: PhotoData) => string
+  caption?: (url: string) => string
 }
 
-function srcSet(photo: PhotoData) {
-  return photo.widths.map((w) => `${photo.src}-${w}.webp ${w}w`).join(', ')
+function srcSet(frame: Frame) {
+  return frame.meta ? frame.meta.widths.map((w) => `${frame.meta!.prefix}-${w}.webp ${w}w`).join(', ') : undefined
+}
+
+function largest(frame: Frame) {
+  return frame.meta ? `${frame.meta.prefix}-${frame.meta.widths[frame.meta.widths.length - 1]}.webp` : frame.url
 }
 
 function Chevron({ dir }: { dir: 'prev' | 'next' }) {
@@ -40,13 +47,9 @@ function Chevron({ dir }: { dir: 'prev' | 'next' }) {
  */
 export function Lightbox({ ids, index, onClose, onNavigate, caption }: Props) {
   const open = index !== null
-  // Sessions published from the gallery dashboard are not in the build-time
-  // manifest, so an id from one resolves only through the remote map. Without
-  // this the viewer opened onto nothing for those albums.
-  const remote = useRemotePortfolio()
   const lookup = useCallback(
-    (id: string | undefined) => (id === undefined ? undefined : (BY_ID[id] ?? remote.byId[id])),
-    [remote.byId],
+    (url: string | undefined): Frame | undefined => (url === undefined ? undefined : { url, meta: getPhoto(url) }),
+    [],
   )
   const dialog = useRef<HTMLDivElement>(null)
   const opener = useRef<HTMLElement | null>(null)
@@ -113,9 +116,10 @@ export function Lightbox({ ids, index, onClose, onNavigate, caption }: Props) {
       const neighbor = lookup(ids[(index + delta + ids.length) % ids.length])
       if (!neighbor) continue
       const img = new Image()
-      img.srcset = srcSet(neighbor)
+      const set = srcSet(neighbor)
+      if (set) img.srcset = set
       img.sizes = '100vw'
-      img.src = `${neighbor.src}-${neighbor.widths[neighbor.widths.length - 1]}.webp`
+      img.src = largest(neighbor)
     }
   }, [index, ids, lookup])
 
@@ -163,11 +167,11 @@ export function Lightbox({ ids, index, onClose, onNavigate, caption }: Props) {
           >
             <AnimatePresence mode="wait">
               <motion.img
-                key={photo.id}
-                src={`${photo.src}-${photo.widths[photo.widths.length - 1]}.webp`}
+                key={photo.url}
+                src={largest(photo)}
                 srcSet={srcSet(photo)}
                 sizes="100vw"
-                alt={caption?.(photo) ?? ''}
+                alt={caption?.(photo.url) ?? ''}
                 onClick={(e) => e.stopPropagation()}
                 drag="x"
                 dragConstraints={{ left: 0, right: 0 }}
@@ -212,7 +216,7 @@ export function Lightbox({ ids, index, onClose, onNavigate, caption }: Props) {
           </div>
 
           {caption && (
-            <p className="label px-6 pb-6 text-center text-beige/55 md:px-10">{caption(photo)}</p>
+            <p className="label px-6 pb-6 text-center text-beige/55 md:px-10">{caption(photo.url)}</p>
           )}
         </motion.div>
       )}
