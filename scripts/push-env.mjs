@@ -65,28 +65,21 @@ const KEYS = [
   'R2_BUCKET',
   'R2_PUBLIC_URL',
   'PUBLIC_BASE_URL',
-  'OWNER_PASSWORD',
   'RESEND_API_KEY',
   'MAIL_FROM',
   'MAIL_TO',
 ]
 
 /** Required for the app to boot at all — see `configErrors` in server/env.ts. */
-const REQUIRED = [
-  'SESSION_SECRET',
-  'DB_USER',
-  'DB_PASSWORD',
-  'DB_NAME',
-  'R2_ACCOUNT_ID',
-  'R2_ACCESS_KEY_ID',
-  'R2_SECRET_ACCESS_KEY',
-]
+const REQUIRED = ['SESSION_SECRET', 'DB_USER', 'DB_PASSWORD', 'DB_NAME']
 
 const env_vars = [
   // The app and the database share a host in production; `.env` points at the
   // remote hostname so that migrations can be run from a developer machine.
   { key: 'DB_HOST', value: 'localhost' },
 ]
+// `.env` carries the local origin; production always answers on the domain.
+process.env.PUBLIC_BASE_URL = `https://${DOMAIN}`
 
 for (const key of KEYS) {
   const value = process.env[key]
