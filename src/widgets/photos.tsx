@@ -182,6 +182,13 @@ export function Process({ content, styles }: WidgetProps) {
  * which CSS columns cannot do, and which is the difference between a gallery
  * and a list that happens to be in columns.
  */
+/** The hover treatment a card or photograph takes, from the widget's Hover effect. */
+export function hoverClasses(hover: string) {
+  if (hover === 'none') return { group: '', img: '' }
+  if (hover === 'lift') return { group: 'transition-transform duration-700 ease-[var(--ease-out-expo)] hover:-translate-y-1.5', img: 'transition-[filter] duration-700 group-hover:brightness-105' }
+  return { group: '', img: 'transition-transform duration-[1400ms] ease-[var(--ease-out-expo)] group-hover:scale-[1.045]' }
+}
+
 const GAP: Record<string, string> = { tight: 'gap-2 md:gap-3', normal: 'gap-5 md:gap-7', loose: 'gap-8 md:gap-12' }
 
 export function columnize(photos: string[], columns: number): string[][] {
@@ -200,13 +207,20 @@ export function MasonryGallery({
   caption,
   maxColumns = 3,
   gap = 'normal',
+  drift = false,
+  lightbox = true,
+  hover = 'zoom',
 }: {
   photos: string[]
   title: string
   caption?: string
   maxColumns?: number
   gap?: string
+  drift?: boolean
+  lightbox?: boolean
+  hover?: string
 }) {
+  const fx = hoverClasses(hover)
   const gapClass = GAP[gap] ?? GAP.normal
   usePhotoRegistry()
   const columns = Math.min(useColumnCount(), maxColumns)
@@ -216,14 +230,15 @@ export function MasonryGallery({
   return (
     <>
       <div className={clsx('flex items-start', gapClass)}>
-        {grid.map((column, ci) => (
+        {grid.map((column, ci) => {
+          const col = (
           <div key={ci} className={clsx('flex min-w-0 flex-1 flex-col', gapClass)}>
             {column.map((photo, ri) => (
               <motion.button
                 key={`${photo}-${ri}`}
                 type="button"
-                onClick={() => setOpenIndex(photos.indexOf(photo))}
-                className="group relative block w-full cursor-zoom-in overflow-hidden"
+                onClick={() => lightbox && setOpenIndex(photos.indexOf(photo))}
+                className={clsx('group relative block w-full overflow-hidden', lightbox ? 'cursor-zoom-in' : 'cursor-default', fx.group)}
                 initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '0px 0px -8% 0px' }}
@@ -234,21 +249,32 @@ export function MasonryGallery({
                   alt={`${title} — photograph ${photos.indexOf(photo) + 1}`}
                   sizes="(min-width: 1024px) 31vw, (min-width: 640px) 46vw, 92vw"
                   className="w-full"
-                  imgClassName="transition-transform duration-[1400ms] ease-[var(--ease-out-expo)] group-hover:scale-[1.045]"
+                  imgClassName={fx.img}
                 />
-                <span
-                  aria-hidden
-                  className="pointer-events-none absolute inset-0 bg-charcoal/0 transition-colors duration-500 group-hover:bg-charcoal/15"
-                />
+                {hover !== 'none' && (
+                  <span
+                    aria-hidden
+                    className="pointer-events-none absolute inset-0 bg-charcoal/0 transition-colors duration-500 group-hover:bg-charcoal/15"
+                  />
+                )}
               </motion.button>
             ))}
           </div>
-        ))}
+          )
+          // Drift: each column travels at its own speed, the middle one against the others.
+          return drift ? (
+            <Parallax key={ci} speed={[0.06, -0.08, 0.12, -0.04][ci % 4]} className="min-w-0 flex-1">
+              {col}
+            </Parallax>
+          ) : (
+            col
+          )
+        })}
       </div>
 
       <Lightbox
         ids={photos}
-        index={openIndex}
+        index={lightbox ? openIndex : null}
         onClose={() => setOpenIndex(null)}
         onNavigate={setOpenIndex}
         caption={caption ? () => caption : undefined}
@@ -277,18 +303,23 @@ export function PhotoGallery({ content, styles }: WidgetProps) {
             {heading && <Heading content={content} className="display mt-6 text-[clamp(2rem,4.4vw,3.4rem)] text-ink" />}
           </div>
         )}
-        {layout === 'masonry' && (
+        {(layout === 'masonry' || layout === 'drift') && (
           <MasonryGallery
             photos={photos}
             title={heading || 'Gallery'}
             caption={text(content, 'caption') || undefined}
             maxColumns={Number(text(content, 'columns')) || 3}
             gap={text(content, 'gap')}
+            drift={layout === 'drift'}
+            lightbox={bool(content, 'lightbox', true)}
+            hover={text(content, 'hover') || 'zoom'}
           />
         )}
       </div>
-      {layout !== 'masonry' && (
+      {layout !== 'masonry' && layout !== 'drift' && (
         <CroppedGallery
+          lightbox={bool(content, 'lightbox', true)}
+          hover={text(content, 'hover') || 'zoom'}
           photos={photos}
           title={heading || 'Gallery'}
           caption={text(content, 'caption') || undefined}
@@ -315,6 +346,8 @@ function CroppedGallery({
   columns,
   shape,
   gap,
+  lightbox,
+  hover,
 }: {
   photos: string[]
   title: string
@@ -323,7 +356,10 @@ function CroppedGallery({
   columns: string
   shape: string
   gap: string
+  lightbox: boolean
+  hover: string
 }) {
+  const fx = hoverClasses(hover)
   const [openIndex, setOpenIndex] = useState<number | null>(null)
   const track = useRef<HTMLDivElement>(null)
   const gapClass = GAP[gap] ?? GAP.normal
@@ -335,8 +371,8 @@ function CroppedGallery({
     <motion.button
       key={`${photo}-${i}`}
       type="button"
-      onClick={() => setOpenIndex(i)}
-      className={clsx('group relative block cursor-zoom-in overflow-hidden', carousel && clsx('shrink-0 snap-start', cardWidth))}
+      onClick={() => lightbox && setOpenIndex(i)}
+      className={clsx('group relative block overflow-hidden', lightbox ? 'cursor-zoom-in' : 'cursor-default', fx.group, carousel && clsx('shrink-0 snap-start', cardWidth))}
       initial={{ opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '0px 0px -8% 0px' }}
@@ -348,7 +384,7 @@ function CroppedGallery({
         sizes={carousel ? '(min-width: 1024px) 30vw, 72vw' : '(min-width: 1024px) 31vw, (min-width: 640px) 46vw, 92vw'}
         className="w-full"
         style={ratio(shape)}
-        imgClassName="transition-transform duration-[1400ms] ease-[var(--ease-out-expo)] group-hover:scale-[1.045]"
+        imgClassName={fx.img}
       />
     </motion.button>
   ))
@@ -388,7 +424,7 @@ function CroppedGallery({
       )}
       <Lightbox
         ids={photos}
-        index={openIndex}
+        index={lightbox ? openIndex : null}
         onClose={() => setOpenIndex(null)}
         onNavigate={setOpenIndex}
         caption={caption ? () => caption : undefined}
@@ -406,31 +442,57 @@ const SHAPE: Record<string, string> = {
   arch: 'arch aspect-[3/4]',
   wide: 'aspect-[3/2]',
   portrait: 'aspect-[4/5]',
+  square: 'aspect-square',
+  tall: 'aspect-[2/3]',
+  cinema: 'aspect-[21/9]',
+}
+
+const FRAME: Record<string, string> = {
+  none: '',
+  hairline: 'border border-line p-0',
+  plate: 'border border-accent/35 p-2.5 md:p-3.5',
+  print: 'bg-[#fbf8f4] p-3 pb-10 shadow-[0_24px_60px_-28px_rgb(0_0_0/0.5)] md:p-5 md:pb-16',
 }
 
 export function ImageBlock({ content, styles }: WidgetProps) {
   const f = frame(styles)
   const width = text(content, 'width')
   const shape = text(content, 'shape') || 'auto'
+  const frameStyle = text(content, 'frame') || 'none'
+  const src = text(content, 'image')
+  const [open, setOpen] = useState(false)
+  const lightbox = bool(content, 'lightbox')
+
+  let picture = (
+    <Unveil className={shape === 'arch' ? 'arch' : undefined}>
+      <Photo
+        src={src}
+        alt={text(content, 'alt')}
+        sizes={width === 'full' ? '100vw' : width === 'narrow' ? '(min-width: 768px) 48rem, 92vw' : '92vw'}
+        className={clsx('w-full', SHAPE[shape])}
+        focus={text(content, 'focal') === 'top' ? 'center 20%' : text(content, 'focal') === 'bottom' ? 'center 80%' : undefined}
+      />
+    </Unveil>
+  )
+  if (bool(content, 'parallax')) picture = <Parallax speed={0.06}>{picture}</Parallax>
+  if (lightbox)
+    picture = (
+      <button type="button" onClick={() => setOpen(true)} className="block w-full cursor-zoom-in" aria-label="Open full size">
+        {picture}
+      </button>
+    )
 
   return (
     <section id={f.id} className={clsx('scroll-mt-24', f.pad, f.className)} style={f.style}>
       <figure className={clsx(width === 'full' ? 'w-full' : 'shell', width === 'narrow' && 'max-w-3xl')}>
-        <Unveil className={shape === 'arch' ? 'arch' : undefined}>
-          <Photo
-            src={text(content, 'image')}
-            alt={text(content, 'alt')}
-            sizes={width === 'full' ? '100vw' : width === 'narrow' ? '(min-width: 768px) 48rem, 92vw' : '92vw'}
-            className={clsx('w-full', SHAPE[shape])}
-            focus={text(content, 'focal') === 'top' ? 'center 20%' : text(content, 'focal') === 'bottom' ? 'center 80%' : undefined}
-          />
-        </Unveil>
+        <div className={FRAME[frameStyle]}>{picture}</div>
         {text(content, 'caption') && (
           <figcaption className={clsx('mt-4 text-[0.9rem] text-muted italic', width === 'full' && 'shell')}>
             {text(content, 'caption')}
           </figcaption>
         )}
       </figure>
+      {lightbox && <Lightbox ids={[src]} index={open ? 0 : null} onClose={() => setOpen(false)} onNavigate={() => {}} />}
     </section>
   )
 }
@@ -439,14 +501,23 @@ export function ImageBlock({ content, styles }: WidgetProps) {
  * Photograph and text
  * ------------------------------------------------------------------ */
 
+const SPLIT: Record<string, { text: string; image: string; imageLeft: string; textRight: string }> = {
+  small: { text: 'lg:col-span-7', image: 'lg:col-span-4 lg:col-start-9', imageLeft: 'lg:col-span-4 lg:col-start-1', textRight: 'lg:col-start-6' },
+  even: { text: 'lg:col-span-6', image: 'lg:col-span-5 lg:col-start-8', imageLeft: 'lg:col-span-5 lg:col-start-1', textRight: 'lg:col-start-7' },
+  large: { text: 'lg:col-span-5', image: 'lg:col-span-6 lg:col-start-7', imageLeft: 'lg:col-span-6 lg:col-start-1', textRight: 'lg:col-start-8' },
+}
+
 export function ImageText({ content, styles }: WidgetProps) {
   const f = frame(styles, { rule: true })
   const left = text(content, 'side') === 'left'
+  const split = SPLIT[text(content, 'split')] ?? SPLIT.even
+  const overlap = bool(content, 'overlap')
+  const parallax = bool(content, 'parallax', true)
 
   return (
     <section id={f.id} className={clsx('scroll-mt-24', f.className)}>
       <div className={clsx('shell grid items-center gap-14 lg:grid-cols-12 lg:gap-16', f.pad)} style={f.style}>
-        <div className={clsx('lg:col-span-6', left && 'lg:order-2 lg:col-start-7')}>
+        <div className={clsx(split.text, left && clsx('lg:order-2', split.textRight), overlap && 'relative z-[1] lg:bg-canvas/90 lg:p-10 lg:backdrop-blur-sm', overlap && (left ? 'lg:-ml-16' : 'lg:-mr-16'))}>
           {text(content, 'eyebrow') && (
             <Reveal className={EYEBROW}>
               <span className="h-px w-10 bg-accent" />
@@ -467,8 +538,8 @@ export function ImageText({ content, styles }: WidgetProps) {
           </Reveal>
         </div>
 
-        <div className={clsx('lg:col-span-5', left ? 'lg:order-1 lg:col-start-1' : 'lg:col-start-8')}>
-          <Parallax speed={0.05}>
+        <div className={clsx(left ? clsx('lg:order-1', split.imageLeft) : split.image)}>
+          <Parallax speed={parallax ? 0.05 : 0}>
             <Unveil className={bool(content, 'arch', true) ? 'arch' : undefined}>
               <Photo
                 src={text(content, 'image')}

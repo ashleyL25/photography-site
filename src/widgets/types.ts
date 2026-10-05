@@ -107,6 +107,13 @@ export function frame(styles: Record<string, unknown>, d: FrameDefaults = {}) {
   const layout = g(s.layout)
   const scheme = typeof bg.scheme === 'string' ? bg.scheme : 'auto'
   const painted = scheme !== 'auto' || Boolean(bg.image)
+  // Anything layered behind the content needs the widget's own band out of the
+  // way, so the wrapper paints that band and the layers sit on top of it.
+  const decorated =
+    Boolean(bg.texture) ||
+    (g(s.decor).preset !== undefined && g(s.decor).preset !== 'none') ||
+    (g(s.particles).style !== undefined && g(s.particles).style !== 'none') ||
+    Boolean(g(s.watermark).motif)
 
   // The designed raised band stays unless the Style tab picks something else;
   // anything else is painted by the section wrapper (see StyledSection).
@@ -138,7 +145,7 @@ export function frame(styles: Record<string, unknown>, d: FrameDefaults = {}) {
       ),
     centered: align === 'center',
     className: clsx(
-      surface && 'bg-surface',
+      surface && (decorated ? 'designed-surface' : 'bg-surface'),
       rule && 'border-t border-line',
       painted && 'bg-transparent',
       s.hide_desktop === true && 'lg:hidden',

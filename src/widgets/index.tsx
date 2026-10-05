@@ -36,6 +36,7 @@ import { BlogGrid, BlogListing } from './blog'
 import { InquiryCta, InquiryFormWidget } from './contact'
 import {
   AlbumGrid,
+  AuthorCard,
   BeforeAfter,
   Cards,
   CtaBand,
@@ -50,29 +51,47 @@ import {
 import { frame, text, type WidgetProps } from './types'
 import { StyledSection } from './StyledSection'
 import type { Section as SectionData } from '@shared/types'
+import { swatchCss } from '@shared/palette'
+import { ArtworkSvg } from '@/components/Decor'
 
 function Divider({ content, styles }: WidgetProps) {
   const f = frame(styles, { pad: 'py-6' })
   const style = text(content, 'style') || 'line'
+  const width = text(content, 'width') || 'full'
+  const colour = swatchCss(text(content, 'swatch') || 'accent')
+  const measure = width === 'short' ? 'mx-auto max-w-xs' : width === 'wide' ? 'mx-auto max-w-3xl' : ''
+  const ornament = (child: React.ReactNode) => (
+    <div className={clsx('flex items-center gap-6', measure)} style={{ color: colour }}>
+      <span className="h-px flex-1 bg-line" />
+      {child}
+      <span className="h-px flex-1 bg-line" />
+    </div>
+  )
   return (
     <div id={f.id} className={clsx(f.pad, f.className)} style={f.style}>
       <div className="shell">
         {style === 'arch' ? (
-          <div className="flex items-center gap-6 text-accent">
-            <span className="h-px flex-1 bg-line" />
+          ornament(
             <svg viewBox="0 0 24 30" className="h-7 w-6 shrink-0" aria-hidden>
               <path d="M1 29V12a11 11 0 0 1 22 0v17" fill="none" stroke="currentColor" strokeWidth="1.3" />
-            </svg>
-            <span className="h-px flex-1 bg-line" />
-          </div>
+            </svg>,
+          )
+        ) : style === 'motif' ? (
+          ornament(<ArtworkSvg slug={text(content, 'motif') || 'sprig'} className="h-12 w-12 shrink-0" weight={1.3} />)
+        ) : style === 'asterism' ? (
+          <p aria-hidden className="text-center text-[1.4rem] tracking-[0.6em]" style={{ color: colour }}>
+            ⁂
+          </p>
         ) : style === 'dots' ? (
-          <div className="flex justify-center gap-3 text-accent" aria-hidden>
+          <div className="flex justify-center gap-3" style={{ color: colour }} aria-hidden>
             {[0, 1, 2].map((i) => (
               <span key={i} className="h-1.5 w-1.5 rounded-full bg-current" />
             ))}
           </div>
         ) : (
-          <DrawRule />
+          <div className={measure}>
+            <DrawRule />
+          </div>
         )}
       </div>
     </div>
@@ -82,7 +101,15 @@ function Divider({ content, styles }: WidgetProps) {
 function Spacer({ content, styles }: WidgetProps) {
   const f = frame(styles, { pad: '' })
   const size = text(content, 'size')
-  return <div id={f.id} aria-hidden className={clsx(size === 'sm' ? 'h-12' : size === 'lg' ? 'h-40' : 'h-24', f.className)} />
+  const exact = typeof content.height === 'number' && content.height > 0 ? content.height : 0
+  return (
+    <div
+      id={f.id}
+      aria-hidden
+      className={clsx(!exact && (size === 'sm' ? 'h-12' : size === 'lg' ? 'h-40' : 'h-24'), f.className)}
+      style={exact ? { height: exact } : undefined}
+    />
+  )
 }
 
 /**
@@ -153,6 +180,7 @@ const REGISTRY: Record<string, ComponentType<WidgetProps>> = {
   two_column: TwoColumn,
   map: MapEmbed,
   instagram: Instagram,
+  author_card: AuthorCard,
 
   divider: Divider,
   spacer: Spacer,

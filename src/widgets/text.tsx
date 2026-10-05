@@ -16,6 +16,7 @@ import { DrawRule, MaskText, Parallax, Reveal, RichParagraphs, Unveil } from '@/
 import { Tick } from '@/components/TierCards'
 import { useReducedMotion } from '@/lib/hooks'
 import { useSiteInfo } from '@/lib/site'
+import { swatchCss } from '@shared/palette'
 import { ArrowLink, Buttons, type ButtonValue } from './links'
 import { EYEBROW, bool, columns, fill, frame, list, text, useHostSession, type WidgetProps } from './types'
 
@@ -52,12 +53,23 @@ function Separator({ kind, size }: { kind: string; size: string }) {
   )
 }
 
-function Track({ words, size, separator }: { words: string[]; size: string; separator: string }) {
+const MARQUEE_FACE: Record<string, string> = {
+  display: 'display',
+  italic: 'font-serif italic',
+  label: 'label tracking-[0.3em]',
+}
+
+function Track({ words, size, separator, face, outline }: { words: string[]; size: string; separator: string; face: string; outline: boolean }) {
   return (
     <span className="flex shrink-0 items-center">
       {words.map((word, i) => (
         <span key={`${word}-${i}`} className="flex items-center">
-          <span className={clsx('display whitespace-nowrap', MARQUEE_SIZE[size] ?? MARQUEE_SIZE.lg)}>{word}</span>
+          <span
+            className={clsx('whitespace-nowrap', MARQUEE_FACE[face] ?? MARQUEE_FACE.display, MARQUEE_SIZE[size] ?? MARQUEE_SIZE.lg)}
+            style={outline ? { color: 'transparent', WebkitTextStroke: '1px var(--ink)' } : undefined}
+          >
+            {word}
+          </span>
           <Separator kind={separator} size={size} />
         </span>
       ))}
@@ -82,6 +94,9 @@ export function Marquee({ content, styles }: WidgetProps) {
   const separator = text(content, 'separator') || 'arch'
   const speed = MARQUEE_SPEED[text(content, 'speed')] ?? MARQUEE_SPEED.normal
   const reactive = bool(content, 'react_to_scroll', true)
+  const face = text(content, 'face') || 'display'
+  const outline = bool(content, 'outline')
+  const heading = text(content, 'direction') === 'right' ? -1 : 1
 
   const { scrollY } = useScroll()
   const velocity = useVelocity(scrollY)
@@ -90,7 +105,7 @@ export function Marquee({ content, styles }: WidgetProps) {
 
   useAnimationFrame((_, delta) => {
     if (reduced) return
-    let move = direction.current * speed * (delta / 1000)
+    let move = direction.current * heading * speed * (delta / 1000)
     const v = reactive ? factor.get() : 0
     if (v < 0) direction.current = -1
     else if (v > 0) direction.current = 1
@@ -108,8 +123,8 @@ export function Marquee({ content, styles }: WidgetProps) {
     >
       <motion.div className="flex w-max" style={reduced ? undefined : { x }}>
         {/* Two identical tracks so the 50% wrap is invisible. */}
-        <Track words={words} size={size} separator={separator} />
-        <Track words={words} size={size} separator={separator} />
+        <Track words={words} size={size} separator={separator} face={face} outline={outline} />
+        <Track words={words} size={size} separator={separator} face={face} outline={outline} />
       </motion.div>
     </section>
   )
@@ -217,6 +232,7 @@ export function TextBlock({ content, styles }: WidgetProps) {
   const buttons = list<ButtonValue>(content, 'buttons')
   const eyebrow = text(content, 'eyebrow')
   const heading = text(content, 'heading')
+  const prose = clsx(bool(content, 'drop_cap') && 'drop-cap', text(content, 'text_columns') === '2' && 'md:columns-2 md:gap-12 [&>*]:break-inside-avoid')
 
   if (layout === 'split') {
     return (
@@ -235,7 +251,7 @@ export function TextBlock({ content, styles }: WidgetProps) {
           </div>
 
           <div className="max-w-xl space-y-6 text-[1.04rem] leading-[1.9] text-muted lg:col-span-6 lg:col-start-7">
-            <RichParagraphs html={text(content, 'body')} className="space-y-6" step={0.08} start={0} />
+            <RichParagraphs html={text(content, 'body')} className={clsx('space-y-6', prose)} step={0.08} start={0} />
             <Reveal delay={0.24}>
               <Buttons buttons={buttons} className="mt-4" />
             </Reveal>
@@ -256,7 +272,7 @@ export function TextBlock({ content, styles }: WidgetProps) {
           )}
           <RichParagraphs
             html={text(content, 'body')}
-            className="mt-8 space-y-6 text-[1.04rem] leading-[1.9] text-muted"
+            className={clsx('mt-8 space-y-6 text-[1.04rem] leading-[1.9] text-muted', prose)}
             start={0.15}
           />
           <Reveal delay={0.22}>
@@ -281,7 +297,7 @@ export function TextBlock({ content, styles }: WidgetProps) {
           {heading && <Heading content={content} className="display mt-6 text-[clamp(2rem,4.4vw,3.4rem)] text-ink" />}
           <RichParagraphs
             html={text(content, 'body')}
-            className="mt-8 space-y-6 text-[1.02rem] leading-[1.85] text-muted"
+            className={clsx('mt-8 space-y-6 text-[1.02rem] leading-[1.85] text-muted', prose)}
             start={0.15}
           />
           <Reveal delay={0.22}>
@@ -307,18 +323,18 @@ export function AboutIntro({ content, styles }: WidgetProps) {
       <div className="shell grid items-center gap-16 lg:grid-cols-12 lg:gap-20">
         <div className={clsx('relative lg:col-span-5', right && 'lg:order-2')}>
           <Parallax speed={0.05}>
-            <Unveil className="arch" direction={right ? 'right' : 'left'}>
+            <Unveil className={text(content, 'shape') === 'arch' || !text(content, 'shape') ? 'arch' : undefined} direction={right ? 'right' : 'left'}>
               <Photo
                 src={text(content, 'image')}
                 alt={text(content, 'alt')}
                 sizes="(min-width: 1024px) 36vw, 88vw"
-                className="aspect-[4/5]"
+                className={text(content, 'shape') === 'square' ? 'aspect-square' : 'aspect-[4/5]'}
               />
             </Unveil>
           </Parallax>
 
           {/* Framing rule that overshoots the plate — a printed-page gesture. */}
-          <Reveal
+          {bool(content, 'frame_rule', true) && <Reveal
             delay={0.4}
             className={clsx(
               'pointer-events-none absolute -top-6 hidden h-[calc(100%+3rem)] w-[70%] border border-accent/40 lg:block',
@@ -326,7 +342,7 @@ export function AboutIntro({ content, styles }: WidgetProps) {
             )}
           >
             <span className="sr-only" />
-          </Reveal>
+          </Reveal>}
         </div>
 
         <div className="lg:col-span-7">
@@ -658,7 +674,8 @@ export function CtaClose({ content, styles }: WidgetProps) {
           itself: `shell` carries `margin-inline: auto`, so narrowing it
           re-centres the block off the gutter every other section lines up on. */}
       <div className={f.shell}>
-        <div className={f.measure('max-w-2xl')}>
+        <div className={text(content, 'layout') === 'split' ? 'grid items-end gap-10 lg:grid-cols-12' : f.measure('max-w-2xl')}>
+        <div className={text(content, 'layout') === 'split' ? 'lg:col-span-7' : undefined}>
         {bool(content, 'rule') && <DrawRule className="mb-14" />}
         {text(content, 'eyebrow') && <Reveal className="label text-accent">{text(content, 'eyebrow')}</Reveal>}
         <Heading
@@ -671,8 +688,13 @@ export function CtaClose({ content, styles }: WidgetProps) {
             {fill(text(content, 'body'), tokens)}
           </Reveal>
         )}
-        <Reveal delay={0.22}>
-          <Buttons buttons={list<ButtonValue>(content, 'buttons')} className={clsx('mt-10', f.centered && 'justify-center')} tokens={tokens} />
+        </div>
+        <Reveal delay={0.22} className={text(content, 'layout') === 'split' ? 'lg:col-span-5 lg:justify-self-end' : undefined}>
+          <Buttons
+            buttons={list<ButtonValue>(content, 'buttons')}
+            className={clsx(text(content, 'layout') === 'split' ? 'lg:justify-end' : 'mt-10', f.centered && 'justify-center')}
+            tokens={tokens}
+          />
         </Reveal>
         </div>
       </div>
@@ -687,21 +709,32 @@ export function CtaClose({ content, styles }: WidgetProps) {
 export function Quote({ content, styles }: WidgetProps) {
   const f = frame(styles)
   const aside = text(content, 'style') === 'aside'
+  const accent = swatchCss(text(content, 'swatch') || 'accent')
+  const marks = bool(content, 'marks')
+  const source = text(content, 'source')
   const image = text(content, 'image')
   const left = aside || f.align === 'left' || Boolean(image)
 
   const words = (
     <>
+      {marks && (
+        <span aria-hidden className="display block text-[5rem] leading-[0.6]" style={{ color: accent }}>
+          “
+        </span>
+      )}
       {aside ? (
-        <Reveal as="p" className="border-l border-accent pl-8 font-serif text-[clamp(1.4rem,2.6vw,2rem)] leading-[1.5] text-ink italic">
+        <div className="border-l pl-8" style={{ borderColor: accent }}>
+          <Reveal as="p" className="font-serif text-[clamp(1.4rem,2.6vw,2rem)] leading-[1.5] text-ink italic">
           {text(content, 'quote')}
         </Reveal>
+        </div>
       ) : (
         <MaskText as="p" text={text(content, 'quote')} className="display text-[clamp(1.9rem,4.4vw,3.4rem)] text-ink" />
       )}
-      {text(content, 'attribution') && (
-        <Reveal delay={0.2} className={clsx('label mt-8 text-accent', aside && 'pl-8')}>
-          {text(content, 'attribution')}
+      {(text(content, 'attribution') || source) && (
+        <Reveal delay={0.2} className={clsx('label mt-8', aside && 'pl-8')}>
+          <span style={{ color: accent }}>{text(content, 'attribution')}</span>
+          {source && <span className="ml-3 text-faint normal-case italic">{source}</span>}
         </Reveal>
       )}
     </>
@@ -784,7 +817,10 @@ function Question({
 export function Faq({ content, styles }: WidgetProps) {
   const f = frame(styles, { surface: true, rule: true })
   const items = list<{ q: string; a: string }>(content, 'items')
-  const [open, setOpen] = useState<number | null>(bool(content, 'open_first', true) ? 0 : null)
+  const single = bool(content, 'one_at_a_time', true)
+  const [openRows, setOpenRows] = useState<number[]>(bool(content, 'open_first', true) ? [0] : [])
+  const toggle = (i: number) =>
+    setOpenRows((rows) => (rows.includes(i) ? rows.filter((r) => r !== i) : single ? [i] : [...rows, i]))
   const stacked = text(content, 'layout') === 'stacked'
 
   return (
@@ -816,8 +852,8 @@ export function Faq({ content, styles }: WidgetProps) {
             <Question
               key={`${item.q}-${i}`}
               item={item}
-              open={open === i}
-              onToggle={() => setOpen(open === i ? null : i)}
+              open={openRows.includes(i)}
+              onToggle={() => toggle(i)}
             />
           ))}
         </div>

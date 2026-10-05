@@ -1,3 +1,4 @@
+import { SWATCHES } from '../../shared/palette.js'
 import { randomUUID } from 'node:crypto'
 import { execute, query } from '../db.js'
 import { sanitizeHtml, htmlToText } from './sanitize.js'
@@ -140,6 +141,11 @@ export function cleanAgainst(fields: readonly FieldDef[], input: unknown): Recor
         out[field.name] = Array.isArray(value)
           ? value.filter((v): v is string => typeof v === 'string' && v.length > 0).map((v) => v.slice(0, 768)).slice(0, 600)
           : []
+        break
+
+      case 'swatch':
+        out[field.name] =
+          typeof value === 'string' && SWATCHES.some((sw) => sw.value === value) ? value : (field.default ?? 'accent')
         break
 
       case 'sessions':

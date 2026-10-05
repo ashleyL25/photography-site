@@ -18,6 +18,8 @@
  * Field definitions
  * ------------------------------------------------------------------ */
 
+import { DECOR_PRESETS, ELEMENT_OPTIONS, MOTIF_OPTIONS, MOTIF_POSITIONS, PRESET_VALUES, TEXTURES } from './artwork.js'
+
 export type FieldType =
   | 'text'
   | 'textarea'
@@ -42,6 +44,8 @@ export type FieldType =
   | 'albums'
   /** One portfolio category, by slug. */
   | 'category'
+  /** One of the brand palette names — see shared/palette.ts. */
+  | 'swatch'
 
 export interface VisibleWhen {
   field: string
@@ -55,8 +59,14 @@ export interface FieldDef {
   default?: unknown
   help?: string
   placeholder?: string
-  /** The permitted values for `choice` and `multichoice`, which the server also enforces. */
+  /**
+   * The permitted values for `choice` and `multichoice`, which the server also
+   * enforces. On an `image` field they are built-in artwork offered beside the
+   * media library instead — a suggestion, not a constraint.
+   */
   options?: readonly { readonly value: string; readonly label: string }[]
+  /** On a `choice` field, show the options as the drawings they name. */
+  artwork?: 'motifs'
   min?: number
   max?: number
   step?: number
@@ -247,6 +257,25 @@ export const STYLE_FIELDS: readonly FieldDef[] = [
         ],
         visibleWhen: { field: 'image', equals: ['__truthy__'] },
       },
+      {
+        name: 'texture',
+        label: 'Texture',
+        type: 'choice',
+        default: '',
+        help: 'A fine surface laid over the colour — film grain, paper, linen — so a flat band reads as a material.',
+        options: TEXTURES,
+      },
+      {
+        name: 'texture_opacity',
+        label: 'Texture strength',
+        type: 'number',
+        default: 30,
+        min: 5,
+        max: 100,
+        step: 5,
+        suffix: '%',
+        visibleWhen: { field: 'texture', equals: ['__truthy__'] },
+      },
     ],
   },
   {
@@ -300,6 +329,215 @@ export const STYLE_FIELDS: readonly FieldDef[] = [
     ],
   },
   {
+    name: 'decor',
+    label: 'Floating elements',
+    type: 'group',
+    help: 'Drawings or prints scattered into the margins, drifting at different speeds as the page scrolls. They keep clear of the text and are hidden on phones.',
+    children: [
+      {
+        name: 'preset',
+        label: 'Arrangement',
+        type: 'choice',
+        default: 'none',
+        options: DECOR_PRESETS.map((p) => ({ value: p.value, label: p.label })),
+      },
+      {
+        name: 'density',
+        label: 'How many',
+        type: 'choice',
+        default: 'balanced',
+        options: [
+          { value: 'sparse', label: 'Two' },
+          { value: 'balanced', label: 'Four' },
+          { value: 'generous', label: 'All' },
+        ],
+        visibleWhen: { field: 'preset', equals: PRESET_VALUES },
+      },
+      {
+        name: 'swatch',
+        label: 'Colour of the drawings',
+        type: 'swatch',
+        default: 'accent',
+        visibleWhen: { field: 'preset', equals: [...PRESET_VALUES, 'custom'] },
+      },
+      {
+        name: 'opacity',
+        label: 'Strength',
+        type: 'number',
+        default: 70,
+        min: 10,
+        max: 100,
+        step: 5,
+        suffix: '%',
+        visibleWhen: { field: 'preset', equals: [...PRESET_VALUES, 'custom'] },
+      },
+      {
+        name: 'layer',
+        label: 'Depth',
+        type: 'choice',
+        default: 'behind',
+        options: [
+          { value: 'behind', label: 'Behind the content' },
+          { value: 'front', label: 'In front' },
+        ],
+        visibleWhen: { field: 'preset', equals: [...PRESET_VALUES, 'custom'] },
+      },
+      {
+        name: 'items',
+        label: 'Choose the elements yourself',
+        type: 'repeater',
+        itemLabel: 'Element',
+        wide: true,
+        default: [],
+        maxItems: 10,
+        visibleWhen: { field: 'preset', equals: [...PRESET_VALUES, 'custom'] },
+        help: 'Add one and it replaces the arrangement above. Across and Down are measured from the top left of the section, so 50 / 50 is dead centre.',
+        children: [
+          {
+            name: 'src',
+            label: 'Element',
+            type: 'image',
+            default: '',
+            options: ELEMENT_OPTIONS,
+            help: 'One of the drawings, a print of a session photograph, or any photograph from your library.',
+          },
+          { name: 'print', label: 'Show a photograph as a print, with a white border', type: 'boolean', default: true },
+          { name: 'x', label: 'Across', type: 'number', default: 50, min: -10, max: 110, step: 1, suffix: '%' },
+          { name: 'y', label: 'Down', type: 'number', default: 50, min: -10, max: 110, step: 1, suffix: '%' },
+          { name: 'size', label: 'Size', type: 'number', default: 180, min: 60, max: 420, step: 10, suffix: 'px' },
+          { name: 'speed', label: 'Drift speed', type: 'number', default: 1, min: 0, max: 2, step: 0.05, suffix: '×' },
+          { name: 'rotate', label: 'Rotation', type: 'number', default: 0, min: -45, max: 45, step: 1, suffix: '°' },
+          { name: 'opacity', label: 'Strength', type: 'number', default: 100, min: 10, max: 100, step: 5, suffix: '%' },
+          { name: 'flip', label: 'Face the other way', type: 'boolean', default: false },
+          { name: 'desktopOnly', label: 'Only on wide screens', type: 'boolean', default: false },
+        ],
+      },
+    ],
+  },
+  {
+    name: 'particles',
+    label: 'Light in the air',
+    type: 'group',
+    children: [
+      {
+        name: 'style',
+        label: 'Effect',
+        type: 'choice',
+        default: 'none',
+        options: [
+          { value: 'none', label: 'None' },
+          { value: 'dust', label: 'Dust motes rising through the light' },
+          { value: 'bokeh', label: 'Bokeh — soft out-of-focus circles' },
+          { value: 'sparkle', label: 'Sparkle — tiny points that twinkle' },
+        ],
+      },
+      {
+        name: 'count',
+        label: 'How many',
+        type: 'number',
+        default: 30,
+        min: 5,
+        max: 80,
+        step: 5,
+        visibleWhen: { field: 'style', equals: ['dust', 'bokeh', 'sparkle'] },
+      },
+      {
+        name: 'from',
+        label: 'Starting from',
+        type: 'number',
+        default: 40,
+        min: 0,
+        max: 90,
+        step: 5,
+        suffix: '% down',
+        visibleWhen: { field: 'style', equals: ['dust', 'bokeh', 'sparkle'] },
+      },
+      {
+        name: 'speed',
+        label: 'Speed',
+        type: 'number',
+        default: 100,
+        min: 25,
+        max: 250,
+        step: 25,
+        suffix: '%',
+        visibleWhen: { field: 'style', equals: ['dust', 'bokeh', 'sparkle'] },
+      },
+      {
+        name: 'swatch',
+        label: 'Colour',
+        type: 'swatch',
+        default: 'champagne',
+        visibleWhen: { field: 'style', equals: ['dust', 'bokeh', 'sparkle'] },
+      },
+    ],
+  },
+  {
+    name: 'watermark',
+    label: 'Background motif',
+    type: 'group',
+    children: [
+      {
+        name: 'motif',
+        label: 'Motif',
+        type: 'choice',
+        default: '',
+        artwork: 'motifs',
+        help: 'A large line drawing set faintly behind the section, painted in a palette colour.',
+        options: MOTIF_OPTIONS,
+      },
+      {
+        name: 'position',
+        label: 'Position',
+        type: 'choice',
+        default: 'right',
+        options: MOTIF_POSITIONS,
+        visibleWhen: { field: 'motif', equals: ['__truthy__'] },
+      },
+      {
+        name: 'size',
+        label: 'Size',
+        type: 'number',
+        default: 460,
+        min: 160,
+        max: 900,
+        step: 20,
+        suffix: 'px',
+        visibleWhen: { field: 'motif', equals: ['__truthy__'] },
+      },
+      {
+        name: 'opacity',
+        label: 'Strength',
+        type: 'number',
+        default: 10,
+        min: 2,
+        max: 40,
+        step: 1,
+        suffix: '%',
+        visibleWhen: { field: 'motif', equals: ['__truthy__'] },
+      },
+      {
+        name: 'weight',
+        label: 'Line weight',
+        type: 'number',
+        default: 1.2,
+        min: 0.5,
+        max: 3,
+        step: 0.1,
+        suffix: 'px',
+        visibleWhen: { field: 'motif', equals: ['__truthy__'] },
+      },
+      {
+        name: 'swatch',
+        label: 'Colour',
+        type: 'swatch',
+        default: 'accent',
+        visibleWhen: { field: 'motif', equals: ['__truthy__'] },
+      },
+      { name: 'drift', label: 'Drifts as the page scrolls', type: 'boolean', default: true, visibleWhen: { field: 'motif', equals: ['__truthy__'] } },
+    ],
+  },
+  {
     name: 'animation',
     label: 'Entrance',
     type: 'group',
@@ -316,6 +554,9 @@ export const STYLE_FIELDS: readonly FieldDef[] = [
           { value: 'rise', label: 'Rise up' },
           { value: 'scale', label: 'Settle in from slightly larger' },
           { value: 'curtain', label: 'Unveil from the bottom' },
+          { value: 'slide-left', label: 'Slide in from the left' },
+          { value: 'slide-right', label: 'Slide in from the right' },
+          { value: 'blur', label: 'Come into focus' },
         ],
       },
       {
@@ -327,7 +568,19 @@ export const STYLE_FIELDS: readonly FieldDef[] = [
         max: 1,
         step: 0.1,
         suffix: 's',
-        visibleWhen: { field: 'type', equals: ['fade', 'rise', 'scale', 'curtain'] },
+        visibleWhen: { field: 'type', equals: ['fade', 'rise', 'scale', 'curtain', 'slide-left', 'slide-right', 'blur'] },
+      },
+      {
+        name: 'duration',
+        label: 'Duration',
+        type: 'choice',
+        default: 'normal',
+        options: [
+          { value: 'quick', label: 'Quick' },
+          { value: 'normal', label: 'Normal' },
+          { value: 'slow', label: 'Slow' },
+        ],
+        visibleWhen: { field: 'type', equals: ['fade', 'rise', 'scale', 'curtain', 'slide-left', 'slide-right', 'blur'] },
       },
     ],
   },
@@ -390,6 +643,14 @@ const BASE_WIDGETS: readonly WidgetDef[] = [
       { ...heading('The portfolio'), help: 'This is the page’s main heading, so there should be one per page.' },
       { name: 'body', label: 'Intro', type: 'textarea', default: '' },
       image('image', 'Photograph'),
+      BUTTONS([]),
+      { name: 'height', label: 'Height', type: 'choice', default: 'auto', options: [{ value: 'auto', label: 'As designed' }, { value: 'medium', label: 'Half the screen' }, { value: 'tall', label: 'Three quarters' }, { value: 'full', label: 'Full screen' }] },
+      { name: 'align', label: 'Text alignment', type: 'choice', default: 'left', options: [{ value: 'left', label: 'Left' }, { value: 'center', label: 'Centred' }] },
+      { name: 'vertical', label: 'Text sits', type: 'choice', default: 'bottom', options: [{ value: 'bottom', label: 'Low' }, { value: 'center', label: 'In the middle' }], visibleWhen: { field: 'height', equals: ['medium', 'tall', 'full'] } },
+      { name: 'overlay', label: 'Darken the photograph', type: 'number', default: 68, min: 0, max: 95, step: 5, suffix: '%' },
+      { name: 'focal', label: 'Keep in frame', type: 'choice', default: 'center', options: [{ value: 'center', label: 'Centre' }, { value: 'top', label: 'Top' }, { value: 'bottom', label: 'Bottom' }, { value: 'left', label: 'Left' }, { value: 'right', label: 'Right' }] },
+      { name: 'slow_zoom', label: 'Photograph zooms in slowly', type: 'boolean', default: false },
+      { name: 'scroll_cue', label: 'Show a scroll cue', type: 'boolean', default: false },
     ],
   },
   {
@@ -442,6 +703,9 @@ const BASE_WIDGETS: readonly WidgetDef[] = [
       { name: 'size', label: 'Size', type: 'choice', default: 'lg', options: [{ value: 'sm', label: 'Small' }, { value: 'md', label: 'Medium' }, { value: 'lg', label: 'Large' }] },
       { name: 'separator', label: 'Between the words', type: 'choice', default: 'arch', options: [{ value: 'arch', label: 'Arch' }, { value: 'dot', label: 'Dot' }, { value: 'star', label: 'Star' }, { value: 'none', label: 'Nothing' }] },
       { name: 'react_to_scroll', label: 'Speed up and reverse with the scroll', type: 'boolean', default: true },
+      { name: 'direction', label: 'Direction', type: 'choice', default: 'left', options: [{ value: 'left', label: 'Right to left' }, { value: 'right', label: 'Left to right' }] },
+      { name: 'face', label: 'Typeface', type: 'choice', default: 'display', options: [{ value: 'display', label: 'Display' }, { value: 'italic', label: 'Italic' }, { value: 'label', label: 'Small capitals' }] },
+      { name: 'outline', label: 'Outlined letters', type: 'boolean', default: false },
     ],
   },
   {
@@ -498,6 +762,8 @@ const BASE_WIDGETS: readonly WidgetDef[] = [
           { value: 'close', label: 'Closing — a large heading, then the buttons' },
         ],
       },
+      { name: 'drop_cap', label: 'Drop cap on the first paragraph', type: 'boolean', default: false },
+      { name: 'text_columns', label: 'Text columns', type: 'choice', default: '1', options: [{ value: '1', label: 'One' }, { value: '2', label: 'Two' }] },
     ],
   },
   {
@@ -516,6 +782,8 @@ const BASE_WIDGETS: readonly WidgetDef[] = [
       { name: 'signature', label: 'Signature', type: 'text', default: 'Ashley' },
       { name: 'show_instagram', label: 'Show the Instagram link', type: 'boolean', default: true },
       { name: 'image_side', label: 'Photograph on the', type: 'choice', default: 'left', options: [{ value: 'left', label: 'Left' }, { value: 'right', label: 'Right' }] },
+      { name: 'shape', label: 'Photograph shape', type: 'choice', default: 'arch', options: [{ value: 'arch', label: 'Arched top' }, { value: 'portrait', label: 'Portrait' }, { value: 'square', label: 'Square' }] },
+      { name: 'frame_rule', label: 'Show the framing line', type: 'boolean', default: true },
     ],
   },
   {
@@ -671,6 +939,7 @@ const BASE_WIDGETS: readonly WidgetDef[] = [
         { label: 'All six sessions', href: '/sessions', style: 'secondary' },
       ]),
       { name: 'rule', label: 'Draw a rule above it', type: 'boolean', default: false },
+      { name: 'layout', label: 'Layout', type: 'choice', default: 'stacked', options: [{ value: 'stacked', label: 'Stacked' }, { value: 'split', label: 'Heading left, buttons right' }] },
     ],
   },
 
@@ -686,6 +955,9 @@ const BASE_WIDGETS: readonly WidgetDef[] = [
       { name: 'attribution', label: 'Attribution', type: 'text', default: '' },
       { name: 'style', label: 'Style', type: 'choice', default: 'display', options: [{ value: 'display', label: 'Large, set in the display face' }, { value: 'aside', label: 'Italic, with a rule beside it' }] },
       { name: 'image', label: 'Portrait beside it', type: 'image', default: '' },
+      { name: 'source', label: 'Source', type: 'text', default: '', help: 'Where it came from — a review, a card, a session.' },
+      { name: 'marks', label: 'Show quotation marks', type: 'boolean', default: false },
+      { name: 'swatch', label: 'Accent colour', type: 'swatch', default: 'accent' },
     ],
   },
   {
@@ -714,6 +986,7 @@ const BASE_WIDGETS: readonly WidgetDef[] = [
         ],
       },
       { name: 'layout', label: 'Layout', type: 'choice', default: 'split', options: [{ value: 'split', label: 'Heading beside the questions' }, { value: 'stacked', label: 'Heading above the questions' }] },
+      { name: 'one_at_a_time', label: 'Only one open at a time', type: 'boolean', default: true },
     ],
   },
 
@@ -815,6 +1088,7 @@ const BASE_WIDGETS: readonly WidgetDef[] = [
           { value: 'masonry', label: 'Balanced columns — every photo uncropped' },
           { value: 'grid', label: 'Even grid — every photo the same shape' },
           { value: 'carousel', label: 'Carousel — a row you swipe through' },
+          { value: 'drift', label: 'Drift — columns move at different speeds' },
         ],
       },
       {
@@ -831,6 +1105,8 @@ const BASE_WIDGETS: readonly WidgetDef[] = [
         visibleWhen: { field: 'layout', equals: ['grid', 'carousel'] },
       },
       { name: 'gap', label: 'Space between', type: 'choice', default: 'normal', options: [{ value: 'tight', label: 'Tight' }, { value: 'normal', label: 'Normal' }, { value: 'loose', label: 'Loose' }] },
+      { name: 'lightbox', label: 'Open full size on click', type: 'boolean', default: true },
+      { name: 'hover', label: 'Hover effect', type: 'choice', default: 'zoom', options: [{ value: 'zoom', label: 'Slow zoom' }, { value: 'lift', label: 'Lift' }, { value: 'none', label: 'None' }] },
     ],
   },
   {
@@ -850,6 +1126,9 @@ const BASE_WIDGETS: readonly WidgetDef[] = [
         type: 'choice',
         default: 'auto',
         options: [
+          { value: 'square', label: 'Square' },
+          { value: 'tall', label: 'Tall — 2:3' },
+          { value: 'cinema', label: 'Cinematic — 21:9' },
           { value: 'auto', label: 'As the photograph is' },
           { value: 'arch', label: 'Arched top' },
           { value: 'wide', label: 'Wide — 3:2' },
@@ -868,6 +1147,9 @@ const BASE_WIDGETS: readonly WidgetDef[] = [
         ],
       },
       { name: 'focal', label: 'Keep in frame', type: 'choice', default: 'center', options: [{ value: 'center', label: 'Centre' }, { value: 'top', label: 'Top' }, { value: 'bottom', label: 'Bottom' }] },
+      { name: 'frame', label: 'Frame', type: 'choice', default: 'none', options: [{ value: 'none', label: 'None' }, { value: 'hairline', label: 'Hairline' }, { value: 'plate', label: 'Plate — an inset border, like a mounted print' }, { value: 'print', label: 'Print — a white border and a shadow' }] },
+      { name: 'parallax', label: 'Photograph drifts as you scroll', type: 'boolean', default: false },
+      { name: 'lightbox', label: 'Open full size on click', type: 'boolean', default: false },
     ],
   },
   {
@@ -896,6 +1178,9 @@ const BASE_WIDGETS: readonly WidgetDef[] = [
       },
       { name: 'arch', label: 'Arched top', type: 'boolean', default: true },
       { name: 'ratio', label: 'Shape', type: 'choice', default: '3/4', options: [{ value: '3/4', label: 'Tall — 3:4' }, { value: '4/5', label: 'Portrait — 4:5' }, { value: '1/1', label: 'Square' }, { value: '3/2', label: 'Landscape — 3:2' }] },
+      { name: 'split', label: 'Column split', type: 'choice', default: 'even', options: [{ value: 'small', label: 'Photograph smaller' }, { value: 'even', label: 'Even' }, { value: 'large', label: 'Photograph larger' }] },
+      { name: 'parallax', label: 'Photograph drifts as you scroll', type: 'boolean', default: true },
+      { name: 'overlap', label: 'Overlap the columns slightly', type: 'boolean', default: false },
     ],
   },
 
@@ -1154,6 +1439,15 @@ const BASE_WIDGETS: readonly WidgetDef[] = [
       { name: 'show_filters', label: 'Show the category filters', type: 'boolean', default: true },
       { name: 'show_count', label: 'Show how many photographs', type: 'boolean', default: true },
       { name: 'category', label: 'Only this category', type: 'category', default: '', help: 'Leave empty for everything.' },
+      { name: 'style', label: 'Listing style', type: 'choice', default: 'grid', options: [{ value: 'grid', label: 'Even grid' }, { value: 'masonry', label: 'Masonry — every cover uncropped' }, { value: 'index', label: 'Index — a typographic list' }] },
+      { name: 'hover', label: 'Hover effect', type: 'choice', default: 'zoom', options: [{ value: 'zoom', label: 'Slow zoom' }, { value: 'lift', label: 'Lift' }, { value: 'none', label: 'None' }] },
+      { name: 'per_page', label: 'Albums before “Load more”', type: 'number', default: 48, min: 3, max: 96, step: 3, suffix: '' },
+      { name: 'show_category', label: 'Show the category on each card', type: 'boolean', default: true },
+      { name: 'show_details', label: 'Show the date and place', type: 'boolean', default: true },
+      { name: 'show_search', label: 'Search field', type: 'boolean', default: false },
+      { name: 'default_sort', label: 'Order', type: 'choice', default: 'newest', options: [{ value: 'newest', label: 'Newest first' }, { value: 'oldest', label: 'Oldest first' }, { value: 'title', label: 'Title A–Z' }, { value: 'featured', label: 'Featured first' }] },
+      { name: 'filter_style', label: 'Filter style', type: 'choice', default: 'pills', options: [{ value: 'pills', label: 'Pills' }, { value: 'rail', label: 'A line of links' }, { value: 'dropdown', label: 'A dropdown' }] },
+      { name: 'more_label', label: 'Load more label', type: 'text', default: 'Load more' },
     ],
   },
 
@@ -1385,6 +1679,19 @@ const BASE_WIDGETS: readonly WidgetDef[] = [
     fields: [
       { name: 'all_label', label: 'Everything filter', type: 'text', default: 'Everything' },
       { name: 'empty', label: 'When there is nothing', type: 'text', default: 'Nothing here yet — check back soon.' },
+      { name: 'style', label: 'Listing style', type: 'choice', default: 'grid', options: [{ value: 'grid', label: 'Even grid' }, { value: 'editorial', label: 'Editorial — a large lead post, then a grid' }, { value: 'list', label: 'List — stacked rows' }, { value: 'index', label: 'Index — a typographic list' }] },
+      { name: 'columns', label: 'Columns on a wide screen', type: 'choice', default: '3', options: [{ value: '2', label: 'Two' }, { value: '3', label: 'Three' }] },
+      { name: 'ratio', label: 'Image shape', type: 'choice', default: '4/5', options: [{ value: '4/5', label: 'Portrait — 4:5' }, { value: '3/4', label: 'Tall — 3:4' }, { value: '2/3', label: 'Taller — 2:3' }, { value: '1/1', label: 'Square' }, { value: '3/2', label: 'Landscape — 3:2' }, { value: '16/9', label: 'Wide — 16:9' }] },
+      { name: 'per_page', label: 'Posts before “Load more”', type: 'number', default: 24, min: 3, max: 48, step: 3, suffix: '' },
+      { name: 'show_date', label: 'Date', type: 'boolean', default: true },
+      { name: 'show_category', label: 'Category', type: 'boolean', default: true },
+      { name: 'show_excerpt', label: 'Excerpt', type: 'boolean', default: true },
+      { name: 'show_reading_time', label: 'Reading time', type: 'boolean', default: true },
+      { name: 'show_search', label: 'Search field', type: 'boolean', default: false },
+      { name: 'show_categories', label: 'Category filter', type: 'boolean', default: true },
+      { name: 'default_sort', label: 'Order', type: 'choice', default: 'newest', options: [{ value: 'newest', label: 'Newest first' }, { value: 'oldest', label: 'Oldest first' }, { value: 'title', label: 'Title A–Z' }] },
+      { name: 'filter_style', label: 'Filter style', type: 'choice', default: 'pills', options: [{ value: 'pills', label: 'Pills' }, { value: 'rail', label: 'A line of links' }, { value: 'dropdown', label: 'A dropdown' }] },
+      { name: 'more_label', label: 'Load more label', type: 'text', default: 'More stories' },
     ],
   },
   {
@@ -1417,6 +1724,12 @@ const BASE_WIDGETS: readonly WidgetDef[] = [
         },
       },
       { name: 'columns', label: 'Columns on a wide screen', type: 'choice', default: '3', options: [{ value: '2', label: 'Two' }, { value: '3', label: 'Three' }] },
+      { name: 'layout', label: 'Layout', type: 'choice', default: 'grid', options: [{ value: 'grid', label: 'Even grid' }, { value: 'editorial', label: 'Editorial — a large lead post, then a grid' }, { value: 'list', label: 'List — stacked rows' }, { value: 'index', label: 'Index — a typographic list' }] },
+      { name: 'ratio', label: 'Image shape', type: 'choice', default: '4/5', options: [{ value: '4/5', label: 'Portrait — 4:5' }, { value: '3/4', label: 'Tall — 3:4' }, { value: '2/3', label: 'Taller — 2:3' }, { value: '1/1', label: 'Square' }, { value: '3/2', label: 'Landscape — 3:2' }, { value: '16/9', label: 'Wide — 16:9' }] },
+      { name: 'show_date', label: 'Show the date', type: 'boolean', default: true },
+      { name: 'show_category', label: 'Show the category', type: 'boolean', default: true },
+      { name: 'show_excerpt', label: 'Show the excerpt', type: 'boolean', default: true },
+      { name: 'show_reading_time', label: 'Show the reading time', type: 'boolean', default: true },
     ],
   },
 
@@ -1488,6 +1801,8 @@ const BASE_WIDGETS: readonly WidgetDef[] = [
         ],
       },
       { name: 'autoplay', label: 'Move on by itself', type: 'boolean', default: true, visibleWhen: { field: 'layout', equals: ['slider'] } },
+      { name: 'show_photos', label: 'Show the photographs', type: 'boolean', default: true },
+      { name: 'swatch', label: 'Accent colour', type: 'swatch', default: 'accent' },
     ],
   },
   {
@@ -1515,6 +1830,7 @@ const BASE_WIDGETS: readonly WidgetDef[] = [
       },
       COLUMNS('3'),
       { name: 'count_up', label: 'Count up as they appear', type: 'boolean', default: true },
+      { name: 'swatch', label: 'Colour of the figures', type: 'swatch', default: 'ink' },
     ],
   },
   {
@@ -1540,6 +1856,7 @@ const BASE_WIDGETS: readonly WidgetDef[] = [
           { name: 'body', label: 'Body', type: 'textarea', default: '' },
           { name: 'href', label: 'Link', type: 'link', default: '' },
           { name: 'link_label', label: 'Link label', type: 'text', default: '' },
+          { name: 'swatch', label: 'Card colour', type: 'swatch', default: 'beige' },
         ],
       },
       COLUMNS('3'),
@@ -1556,6 +1873,7 @@ const BASE_WIDGETS: readonly WidgetDef[] = [
           { value: 'none', label: 'No photographs — numbered text' },
         ],
       },
+      { name: 'card_style', label: 'Card style', type: 'choice', default: 'plain', options: [{ value: 'plain', label: 'Plain — a photograph and text' }, { value: 'bordered', label: 'Bordered' }, { value: 'filled', label: 'Filled with the card colour' }] },
     ],
   },
   {
@@ -1627,6 +1945,11 @@ const BASE_WIDGETS: readonly WidgetDef[] = [
           { value: '3/2', label: 'Landscape — 3:2' },
         ],
       },
+      { name: 'layout', label: 'Layout', type: 'choice', default: 'grid', options: [{ value: 'grid', label: 'Even grid' }, { value: 'masonry', label: 'Masonry — every cover uncropped' }, { value: 'carousel', label: 'Carousel' }, { value: 'index', label: 'Index — a typographic list' }] },
+      { name: 'show_category', label: 'Show the category', type: 'boolean', default: true },
+      { name: 'show_details', label: 'Show the date and place', type: 'boolean', default: true },
+      { name: 'show_count', label: 'Show how many photographs', type: 'boolean', default: false },
+      { name: 'hover', label: 'Hover effect', type: 'choice', default: 'zoom', options: [{ value: 'zoom', label: 'Slow zoom' }, { value: 'lift', label: 'Lift' }, { value: 'none', label: 'None' }] },
     ],
   },
   {
@@ -1640,6 +1963,7 @@ const BASE_WIDGETS: readonly WidgetDef[] = [
       eyebrow(),
       heading(),
       { name: 'url', label: 'Video link', type: 'link', default: '', help: 'A YouTube or Vimeo address, or a direct link to an .mp4 file.' },
+      { name: 'html', label: 'Or paste embed code', type: 'textarea', default: '', wide: true, help: 'From somewhere you trust — Instagram, TikTok, a booking widget. It runs in a sealed frame.' },
       image('poster', 'Still shown before it plays'),
       {
         name: 'ratio',
@@ -1679,6 +2003,7 @@ const BASE_WIDGETS: readonly WidgetDef[] = [
         ],
       },
       { name: 'muted', label: 'Soften them into the page', type: 'boolean', default: true },
+      { name: 'scroll', label: 'Scroll continuously', type: 'boolean', default: false },
     ],
   },
   {
@@ -1730,6 +2055,10 @@ const BASE_WIDGETS: readonly WidgetDef[] = [
       heading(),
       { name: 'left', label: 'Left column', type: 'richtext', default: '', wide: true },
       { name: 'right', label: 'Right column', type: 'richtext', default: '', wide: true },
+      { name: 'layout', label: 'Layout', type: 'choice', default: 'columns', options: [{ value: 'columns', label: 'Heading above two columns' }, { value: 'side', label: 'Heading held beside the text' }] },
+      { name: 'sticky', label: 'Heading stays put while the text scrolls', type: 'boolean', default: true, visibleWhen: { field: 'layout', equals: ['side'] } },
+      { name: 'split', label: 'Column split', type: 'choice', default: '40', options: [{ value: '33', label: 'A third / two thirds' }, { value: '40', label: 'Two fifths / three fifths' }, { value: '50', label: 'Even' }], visibleWhen: { field: 'layout', equals: ['side'] } },
+      BUTTONS([]),
     ],
   },
   {
@@ -1765,6 +2094,44 @@ const BASE_WIDGETS: readonly WidgetDef[] = [
   },
 
   {
+    type: 'author_card',
+    label: 'About me card',
+    description: 'A portrait, a few lines about you, and where to find you — for the end of a post or the side of a page.',
+    icon: 'author',
+    category: 'Contact',
+    hosts: ALL,
+    fields: [
+      image('portrait', 'Portrait'),
+      { name: 'name', label: 'Name', type: 'text', default: 'Ashley' },
+      { name: 'role', label: 'Role', type: 'text', default: 'Photographer · Des Moines, Iowa' },
+      { name: 'bio', label: 'A few lines', type: 'richtext', default: '', wide: true },
+      BUTTONS([{ label: 'Start an inquiry', href: '/contact', style: 'primary' }]),
+      { name: 'show_links', label: 'Show Instagram and email from Settings', type: 'boolean', default: true },
+      {
+        name: 'layout',
+        label: 'Layout',
+        type: 'choice',
+        default: 'side',
+        options: [
+          { value: 'side', label: 'Portrait beside the words' },
+          { value: 'stacked', label: 'Portrait above, centred' },
+        ],
+      },
+      {
+        name: 'shape',
+        label: 'Portrait shape',
+        type: 'choice',
+        default: 'circle',
+        options: [
+          { value: 'circle', label: 'Circle' },
+          { value: 'arch', label: 'Arched top' },
+          { value: 'portrait', label: 'Portrait' },
+        ],
+      },
+      { name: 'boxed', label: 'Set it in a bordered card', type: 'boolean', default: true },
+    ],
+  },
+  {
     type: 'divider',
     label: 'Rule',
     description: 'A hairline that draws itself across the page.',
@@ -1772,7 +2139,10 @@ const BASE_WIDGETS: readonly WidgetDef[] = [
     category: 'Structure',
     hosts: ALL,
     fields: [
-      { name: 'style', label: 'Style', type: 'choice', default: 'line', options: [{ value: 'line', label: 'Hairline' }, { value: 'arch', label: 'Arch ornament' }, { value: 'dots', label: 'Three dots' }] },
+      { name: 'style', label: 'Style', type: 'choice', default: 'line', options: [{ value: 'line', label: 'Hairline' }, { value: 'arch', label: 'Arch ornament' }, { value: 'dots', label: 'Three dots' }, { value: 'asterism', label: 'Asterism — three stars' }, { value: 'motif', label: 'One of the drawings' }] },
+      { name: 'motif', label: 'Drawing', type: 'choice', default: 'sprig', artwork: 'motifs', options: MOTIF_OPTIONS.slice(1), visibleWhen: { field: 'style', equals: ['motif'] } },
+      { name: 'width', label: 'Width', type: 'choice', default: 'full', options: [{ value: 'short', label: 'Short' }, { value: 'wide', label: 'Wide' }, { value: 'full', label: 'Full' }] },
+      { name: 'swatch', label: 'Colour', type: 'swatch', default: 'accent' },
     ],
   },
   {
@@ -1794,6 +2164,7 @@ const BASE_WIDGETS: readonly WidgetDef[] = [
           { value: 'lg', label: 'Large' },
         ],
       },
+      { name: 'height', label: 'Exact height (overrides the size)', type: 'number', default: 0, min: 0, max: 400, step: 8, suffix: 'px' },
     ],
   },
 ]

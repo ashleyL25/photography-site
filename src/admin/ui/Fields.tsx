@@ -10,6 +10,7 @@ import {
   Segmented,
   Select,
   Switch,
+  SwatchField,
   TextArea,
   TextInput,
 } from './controls'
@@ -17,6 +18,7 @@ import { RichTextEditor } from './RichTextEditor'
 import { MediaField, MediaListField } from './MediaPicker'
 import { CollectionPicker } from './CollectionPicker'
 import { CategorySelect, OrderedPicker } from './ContentPickers'
+import { ArtworkChoice, ElementField } from './ArtworkFields'
 
 /**
  * Renders a field schema as a form.
@@ -219,6 +221,10 @@ function Field({
       case 'choice': {
         const options = field.options ?? []
 
+        if (field.artwork) {
+          return <ArtworkChoice value={typeof value === 'string' ? value : ''} onChange={onChange} options={options} />
+        }
+
         // Two or three short options read better as a segmented control; more
         // than that, or anything wordy, belongs in a select.
         const short =
@@ -262,7 +268,15 @@ function Field({
         return <CategorySelect id={id} value={typeof value === 'string' ? value : ''} onChange={onChange} />
 
       case 'image':
-        return <MediaField value={typeof value === 'string' ? value : ''} onChange={onChange} />
+        // Options on an image field are built-in artwork offered beside the library.
+        return field.options ? (
+          <ElementField value={typeof value === 'string' ? value : ''} onChange={onChange} options={field.options} />
+        ) : (
+          <MediaField value={typeof value === 'string' ? value : ''} onChange={onChange} />
+        )
+
+      case 'swatch':
+        return <SwatchField value={typeof value === 'string' ? value : 'accent'} onChange={onChange} />
 
       case 'images':
         return (

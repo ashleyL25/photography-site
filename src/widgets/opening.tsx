@@ -5,7 +5,9 @@ import { PageHero } from '@/components/PageHero'
 import { Reveal } from '@/components/motion'
 import { useReducedMotion } from '@/lib/hooks'
 import { useSiteInfo } from '@/lib/site'
-import { fill, frame, text, useHost, type WidgetProps } from './types'
+import clsx from 'clsx'
+import { Buttons, type ButtonValue } from './links'
+import { bool, fill, frame, list, text, useHost, type WidgetProps } from './types'
 
 const INTRO_DELAY = 1.15
 
@@ -174,9 +176,28 @@ export function PageHeroWidget({ content, styles }: WidgetProps) {
       heading={text(content, 'heading')}
       body={text(content, 'body') || undefined}
       image={text(content, 'image')}
+      height={text(content, 'height') || 'auto'}
+      align={text(content, 'align') || 'left'}
+      vertical={text(content, 'vertical') || 'bottom'}
+      overlay={typeof content.overlay === 'number' ? content.overlay : 68}
+      focus={FOCUS[text(content, 'focal')]}
+      slowZoom={bool(content, 'slow_zoom')}
+      scrollCue={bool(content, 'scroll_cue')}
+      after={
+        list<ButtonValue>(content, 'buttons').length > 0 ? (
+          <Reveal delay={0.25}>
+            <Buttons
+              buttons={list<ButtonValue>(content, 'buttons')}
+              className={clsx('mt-10 [&_a]:border-beige/70 [&_a]:text-beige', text(content, 'align') === 'center' && 'justify-center')}
+            />
+          </Reveal>
+        ) : undefined
+      }
     />
   )
 }
+
+const FOCUS: Record<string, string | undefined> = { top: 'center 20%', bottom: 'center 80%', left: '20% center', right: '80% center' }
 
 /** A session's masthead, filled in from the session itself. */
 export function SessionHero({ content, styles }: WidgetProps) {

@@ -452,3 +452,93 @@ header {
   --canvas: #1d1f17;
   --surface: rgb(29 31 23 / 0.6);
 }
+
+/* ------------------------------------------------------------------ *
+ * Particles — the Style tab's "Light in the air"
+ *
+ * Pure CSS on the compositor; nothing runs on the main thread after the first
+ * paint. Dust rises, bokeh drifts slowly sideways, sparkle twinkles in place.
+ * ------------------------------------------------------------------ */
+
+@keyframes particle-dust {
+  0% { opacity: 0; transform: translate3d(0, 0, 0) scale(0); }
+  10% { opacity: var(--particle-peak, 0.6); transform: translate3d(2px, -10px, 0) scale(1); }
+  50% { transform: translate3d(-6px, -110px, 0) scale(0.9); }
+  90% { opacity: calc(var(--particle-peak, 0.6) * 0.5); }
+  100% { opacity: 0; transform: translate3d(4px, -220px, 0) scale(0.4); }
+}
+
+@keyframes particle-bokeh {
+  0% { opacity: 0; transform: translate3d(0, 0, 0) scale(0.7); }
+  25% { opacity: calc(var(--particle-peak, 0.6) * 0.7); }
+  50% { transform: translate3d(30px, -40px, 0) scale(1); }
+  75% { opacity: calc(var(--particle-peak, 0.6) * 0.5); }
+  100% { opacity: 0; transform: translate3d(60px, -80px, 0) scale(0.8); }
+}
+
+@keyframes particle-sparkle {
+  0%, 100% { opacity: 0; transform: scale(0.2); }
+  50% { opacity: var(--particle-peak, 0.6); transform: scale(1); }
+}
+
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0;
+  will-change: transform, opacity;
+  animation: particle-dust linear infinite;
+}
+.particle-bokeh {
+  animation-name: particle-bokeh;
+  animation-timing-function: ease-in-out;
+}
+.particle-sparkle {
+  animation-name: particle-sparkle;
+  animation-timing-function: ease-in-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .particle {
+    display: none;
+  }
+}
+
+/*
+ * A section with decorations behind it: the widget's own designed band is
+ * moved onto the wrapper so the decorations can sit between the two.
+ */
+.decorated:has(> .decor-content > .designed-surface),
+.decorated:has(> .decor-content > div > .designed-surface) {
+  background-color: var(--surface);
+}
+
+/* The Text widget's drop cap: the first letter of the first paragraph. */
+.drop-cap > :first-child::first-letter {
+  float: left;
+  margin: 0.08em 0.12em 0 0;
+  font-family: var(--font-display-face, serif);
+  font-size: 4.2em;
+  line-height: 0.8;
+  color: var(--accent);
+}
+
+/* The Featured-in widget's continuous scroll: two copies, moved by half. */
+@keyframes logo-scroll {
+  to { transform: translateX(-50%); }
+}
+.logo-scroll {
+  animation: logo-scroll 36s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .logo-scroll { animation: none; }
+}
+
+@keyframes slow-zoom {
+  from { transform: scale(1); }
+  to { transform: scale(1.12); }
+}
+@keyframes scroll-cue {
+  0% { transform: scaleY(0); }
+  50% { transform: scaleY(1); }
+  100% { transform: scaleY(0); transform-origin: bottom; }
+}

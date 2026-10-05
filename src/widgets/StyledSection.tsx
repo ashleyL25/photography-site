@@ -4,6 +4,7 @@ import clsx from 'clsx'
 import { Photo } from '@/components/Photo'
 import { DrawRule } from '@/components/motion'
 import { useReducedMotion } from '@/lib/hooks'
+import { FloatingElements, Particles, Texture, Watermark, decorationsOf } from '@/components/Decor'
 
 const g = (v: unknown) => (v && typeof v === 'object' ? (v as Record<string, unknown>) : {})
 
@@ -20,7 +21,12 @@ const ENTRANCE = {
   rise: { initial: { opacity: 0, y: 48 }, shown: { opacity: 1, y: 0 } },
   scale: { initial: { opacity: 0, scale: 1.04 }, shown: { opacity: 1, scale: 1 } },
   curtain: { initial: { clipPath: 'inset(100% 0 0 0)' }, shown: { clipPath: 'inset(0% 0 0 0)' } },
+  'slide-left': { initial: { opacity: 0, x: -60 }, shown: { opacity: 1, x: 0 } },
+  'slide-right': { initial: { opacity: 0, x: 60 }, shown: { opacity: 1, x: 0 } },
+  blur: { initial: { opacity: 0, filter: 'blur(14px)' }, shown: { opacity: 1, filter: 'blur(0px)' } },
 } as const
+
+const DURATION: Record<string, number> = { quick: 0.55, normal: 0.9, slow: 1.4 }
 
 /** The arch-and-rules ornament, the site's motif as a divider. */
 function ArchRule() {
@@ -61,7 +67,8 @@ export function StyledSection({ styles, children }: { styles: Record<string, unk
     rules.top !== 'line' &&
     rules.top !== 'arch' &&
     rules.bottom !== 'line' &&
-    rules.bottom !== 'arch'
+    rules.bottom !== 'arch' &&
+    !Object.values(decorationsOf(styles)).some((v) => v && typeof v !== 'number')
   // Nothing set: no wrapper at all, so an untouched page is exactly as built.
   if (plain) return <>{children}</>
   return <Painted styles={styles}>{children}</Painted>
@@ -83,6 +90,8 @@ function Painted({ styles, children }: { styles: Record<string, unknown>; childr
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end start'] })
   const drift = useTransform(scrollYProgress, [0, 1], ['-8%', '8%'])
 
+  const deco = decorationsOf(styles)
+  const layered = Boolean(deco.texture || deco.decor || deco.particles || deco.watermark)
   const overlay = typeof bg.overlay === 'number' ? bg.overlay : 55
   const parallax = bg.parallax !== false && !reduced
 
@@ -99,6 +108,7 @@ function Painted({ styles, children }: { styles: Record<string, unknown>; childr
       ref={ref}
       className={clsx(
         'relative',
+        layered && 'decorated isolate overflow-hidden',
         image ? 'scheme-photo isolate overflow-hidden' : scheme && `scheme-${scheme}`,
         (image || (scheme && scheme !== 'canvas')) && 'bg-canvas text-ink',
       )}
@@ -118,13 +128,19 @@ function Painted({ styles, children }: { styles: Record<string, unknown>; childr
         </div>
       )}
 
+      {deco.texture && <Texture value={deco.texture} strength={deco.textureStrength} />}
+      {deco.watermark && <Watermark config={deco.watermark} />}
+      {deco.particles && <Particles config={deco.particles} seed={String(styles.anchor || JSON.stringify(deco.particles))} />}
+      {deco.decor && <FloatingElements config={deco.decor} />}
+
+      <div className={layered ? 'decor-content relative z-[1]' : 'contents'}>
       {entrance && !reduced ? (
         <motion.div
           initial={ENTRANCE[entrance].initial}
           whileInView={ENTRANCE[entrance].shown}
           viewport={{ once: true, margin: '0px 0px -10% 0px' }}
           transition={{
-            duration: entrance === 'curtain' ? 1.2 : 0.9,
+            duration: (DURATION[String(animation.duration)] ?? 0.9) * (entrance === 'curtain' ? 1.3 : 1),
             delay: typeof animation.delay === 'number' ? animation.delay : 0,
             ease: [0.16, 1, 0.3, 1],
           }}
@@ -134,6 +150,7 @@ function Painted({ styles, children }: { styles: Record<string, unknown>; childr
       ) : (
         body
       )}
+      </div>
     </div>
   )
 }

@@ -104,19 +104,37 @@ the chapter index, so the chapters stay editable in the ordinary page builder.
 ### The Style tab
 
 Every widget has the same Style tab, applied by `src/widgets/StyledSection.tsx`
-around whatever the widget draws: a background (one of the brand colors, or a
-photograph with a darkening overlay and optional parallax), spacing above and
-below, content width and alignment, a hairline or arch rule at either edge, an
-entrance animation, an anchor and rail label, and hiding on phones or desktops.
-**As designed** is the default for all of them, so a section nobody has styled
-looks exactly as it did on the hand-built site. Widgets with a heading also get
-its size and its HTML level (H1–H4).
+around whatever the widget draws:
 
-Widgets added on top of the original sections: Kind words (testimonials, as a
-slider, a grid or one quote), Figures (count up as they appear, keeping the
-decimals typed), Cards, Before and after, Albums (latest, one category, featured
-or picked by hand), Video (YouTube, Vimeo or a file), Featured in, Banner,
-Two columns of text, Map and Instagram. They live in `src/widgets/extra.tsx`.
+- **Background** — a brand colour or a photograph (overlay, parallax, focal
+  point), and a texture laid over it: film grain, paper, linen, canvas, halftone.
+- **Spacing**, **width and alignment**, and **lines** (hairline or arch) above
+  and below.
+- **Floating elements** — line drawings or prints of your session photographs
+  scattered in the margins, drifting at different speeds. Pick an arrangement
+  (prints, meadow, golden hour, darkroom, wedding, night sky) or place each one
+  yourself: position, size, drift speed, rotation, strength, flip.
+- **Light in the air** — dust, bokeh or sparkle, with count, speed and colour.
+- **Background motif** — a large faint line drawing behind the section, with
+  position, size, strength, line weight and colour.
+- **Entrance** — fade, rise, settle, unveil, slide or come into focus, with a
+  delay and duration.
+- An anchor, a name in the homepage index, and hiding on phones or desktops.
+
+**As designed** is the default for all of it, so a section nobody has styled
+looks exactly as it did on the hand-built site.
+
+The drawings are SVG generated in `shared/artwork.ts` — no image files — and the
+decorative layers are drawn by `src/components/Decor.tsx`. They are this site's
+own artwork, not the stock cut-outs licensed for elisemariewrites.com.
+
+Inside the widgets, the options follow elisemariewrites.com wherever a widget
+has an equivalent: heading size and level, button styles, layouts (grid,
+masonry, drift, carousel, index, editorial, list), columns, crops, frames,
+hover effects, lightbox, which items to show and in what order, what each card
+shows, search, sort, filter style and load-more on the listings, drop caps and
+text columns, accent colours, and more. Widgets added on top of the original
+sections live in `src/widgets/extra.tsx`.
 
 ### Photographs
 
