@@ -214,7 +214,8 @@ export function TextBlock({ content, styles }: WidgetProps) {
   if (layout === 'close') {
     return (
       <section id={f.id} className={clsx('scroll-mt-24', f.pad, f.className)}>
-        <div className="shell max-w-2xl">
+        <div className="shell">
+          <div className="max-w-2xl">
           {eyebrow && <Reveal className="label text-accent">{eyebrow}</Reveal>}
           {heading && (
             <MaskText text={heading} className="display mt-6 text-[clamp(2.2rem,5.2vw,3.8rem)] text-ink" />
@@ -227,6 +228,7 @@ export function TextBlock({ content, styles }: WidgetProps) {
           <Reveal delay={0.22}>
             <Buttons buttons={buttons} className="mt-10" />
           </Reveal>
+          </div>
         </div>
       </section>
     )
@@ -614,7 +616,11 @@ export function CtaClose({ content, styles }: WidgetProps) {
 
   return (
     <section id={f.id} className={clsx('scroll-mt-24', f.pad, f.className)}>
-      <div className="shell max-w-2xl">
+      {/* The measure is capped on an inner element rather than on `shell`
+          itself: `shell` carries `margin-inline: auto`, so narrowing it
+          re-centres the block off the gutter every other section lines up on. */}
+      <div className="shell">
+        <div className="max-w-2xl">
         {bool(content, 'rule') && <DrawRule className="mb-14" />}
         {text(content, 'eyebrow') && <Reveal className="label text-accent">{text(content, 'eyebrow')}</Reveal>}
         <MaskText
@@ -629,6 +635,7 @@ export function CtaClose({ content, styles }: WidgetProps) {
         <Reveal delay={0.22}>
           <Buttons buttons={list<ButtonValue>(content, 'buttons')} className="mt-10" tokens={tokens} />
         </Reveal>
+        </div>
       </div>
     </section>
   )

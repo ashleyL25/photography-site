@@ -58,6 +58,7 @@ import {
 } from './seed-data/packages.ts'
 import { EDITING_STYLE, RESCHEDULE_NOTE, RETOUCHING, weatherColumns } from './seed-data/policy.ts'
 import { HAIR_AND_MAKEUP, LOCATIONS, LUNCH_STOPS } from './seed-data/vendors.ts'
+import { LOCATION_SUGGESTIONS } from './seed-data/locations.ts'
 import { GUIDES, GUIDES_INDEX, type Block, type Chapter } from './seed-data/guides.ts'
 import { SHOOTS, photosFor } from './seed-data/shoots.ts'
 
@@ -273,6 +274,18 @@ await seedSetting('library', {
   hair_and_makeup: HAIR_AND_MAKEUP.map(vendor),
   lunch_stops: LUNCH_STOPS.map(vendor),
   locations: LOCATIONS,
+  // Text cards for now: their photographs were never published, and they are
+  // added from the media library under Settings → Recommendations.
+  location_cards: LOCATION_SUGGESTIONS.map((l) => ({
+    name: l.name,
+    area: l.area,
+    address: l.address ?? '',
+    blurb: l.blurb,
+    detail: l.detail,
+    best_for: l.bestFor,
+    note: l.note ?? '',
+    photos: [],
+  })),
 })
 
 await seedSetting('inquiry', {
@@ -427,6 +440,9 @@ function blockSections(chapter: Chapter, guideId: string): SeedSection[] {
         break
       case 'locations':
         out.push({ type: 'guide_locations', content: {} })
+        break
+      case 'locationCards':
+        out.push({ type: 'guide_location_cards', content: {} })
         break
       case 'columns': {
         const style = EDITING_STYLE[guideId] ?? 'natural'

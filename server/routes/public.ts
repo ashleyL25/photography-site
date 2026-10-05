@@ -98,7 +98,7 @@ export async function buildSitePayload(opts: { published: boolean; unlocked: boo
   const publicPricing = opts.unlocked ? pricing : { ...pricing, rate_card: {} }
 
   const settings = { site, pricing: publicPricing, policy, library, inquiry }
-  const photos = await photoRegistry(collectUrls([sessions, guides, albums, site]))
+  const photos = await photoRegistry(collectUrls([sessions, guides, albums, site, library]))
 
   return {
     settings,

@@ -426,7 +426,7 @@ export const EXPERIENCE_PAGE = {
         time: 'A week or so out',
         title: 'We settle the details',
         detail:
-          'Locations, the meeting point, where to park. Send me photographs of your outfit options and I will tell you honestly which will work best where we are going — almost nobody does this, and it is the single most useful thing you can do in advance.',
+          'Locations, the meeting point, where to park. And if you would like help with outfits, send me photos of what you are considering and we can work out what to wear where — optional, and some people would rather keep it a surprise.',
       },
       {
         time: 'The evening before',

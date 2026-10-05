@@ -1127,6 +1127,15 @@ export const WIDGETS: readonly WidgetDef[] = [
     ],
   },
   {
+    type: 'guide_location_cards',
+    label: 'Location cards',
+    description: 'The suggested locations as cards, each opening a slider of its photographs — from Settings → Recommendations.',
+    icon: 'grid',
+    category: 'Guide',
+    hosts: ['guide'],
+    fields: [],
+  },
+  {
     type: 'guide_locations',
     label: 'Locations',
     description: 'The location suggestions, grouped by what they look like — from Settings.',

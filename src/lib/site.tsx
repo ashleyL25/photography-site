@@ -232,10 +232,40 @@ export interface Vendor {
 export function useLibrary() {
   const { settings } = useSite()
   const l = settings.library
+  type CardRow = {
+    name: string
+    area: string
+    address: string
+    blurb: string
+    detail: string
+    best_for: string
+    note: string
+    photos: { image: string; credit_name: string; credit_url: string; credit_subject: string }[]
+  }
   return {
     hair_and_makeup: list<Vendor>(l.hair_and_makeup),
     lunch_stops: list<Vendor>(l.lunch_stops),
     locations: list<{ group: string; blurb: string; places: string[] }>(l.locations),
+    locationCards: list<CardRow>(l.location_cards)
+      .filter((c) => c.name)
+      .map((c, i) => ({
+        slug: `${c.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${i}`,
+        name: c.name,
+        area: c.area,
+        address: c.address || undefined,
+        blurb: c.blurb,
+        detail: c.detail,
+        bestFor: c.best_for,
+        note: c.note || undefined,
+        photos: (c.photos ?? [])
+          .filter((p) => p.image)
+          .map((p) => ({
+            url: p.image,
+            credit: p.credit_name
+              ? { name: p.credit_name, url: p.credit_url || undefined, subject: p.credit_subject || undefined }
+              : undefined,
+          })),
+      })),
   }
 }
 

@@ -151,6 +151,7 @@ export const GUIDE_BLOCK_TYPES = new Set([
   'guide_note',
   'guide_vendors',
   'guide_locations',
+  'guide_location_cards',
   'guide_editing',
   'guide_weather',
 ])
@@ -209,6 +210,8 @@ function useBlocks(sections: Section[]): { block: Block; key: string }[][] {
           return [{ kind: 'vendors', items: text(c, 'list') === 'lunch_stops' ? library.lunch_stops : library.hair_and_makeup }]
         case 'guide_locations':
           return [{ kind: 'locations', items: library.locations }]
+        case 'guide_location_cards':
+          return [{ kind: 'locationCards', items: library.locationCards }]
         case 'guide_editing': {
           const level = retouching[style]
           return [

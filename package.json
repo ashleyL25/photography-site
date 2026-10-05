@@ -12,7 +12,7 @@
     "dev:web": "vite",
     "build": "npm run build:web && npm run build:api",
     "build:web": "vite build",
-    "//build:api": "`--noCheck` emits without type-checking. Hostinger's build container has killed a full `tsc` outright on the sister sites — checking belongs on a developer machine, and `npm run typecheck` still does it.",
+    "//build:api": "`--noCheck` emits without type-checking. Hostinger's build container has killed a full `tsc` outright on the sister sites \u2014 checking belongs on a developer machine, and `npm run typecheck` still does it.",
     "build:api": "tsc -p tsconfig.server.json --noCheck",
     "start": "node dist/server/index.js",
     "start:local": "node --env-file=.env dist/server/index.js",
@@ -22,9 +22,10 @@
     "db:seed": "tsx --env-file=.env scripts/seed.ts",
     "hash-password": "node scripts/hash-password.mjs",
     "env:push": "node scripts/push-env.mjs",
-    "images": "node scripts/optimize-images.mjs"
+    "images": "node scripts/optimize-images.mjs",
+    "locations": "node scripts/build-locations.mjs"
   },
-  "//dependencies": "Hostinger runs `npm install && npm run build` ON THE SERVER, and npm omits devDependencies when NODE_ENV=production. The build toolchain therefore has to be a real dependency or the deploy produces no dist/ and Passenger serves a bare 503 — the same lesson as pic and elise-portfolio.",
+  "//dependencies": "Hostinger runs `npm install && npm run build` ON THE SERVER, and npm omits devDependencies when NODE_ENV=production. The build toolchain therefore has to be a real dependency or the deploy produces no dist/ and Passenger serves a bare 503 \u2014 the same lesson as pic and elise-portfolio.",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1105.0",
     "@aws-sdk/s3-request-presigner": "^3.1105.0",

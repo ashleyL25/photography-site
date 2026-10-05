@@ -3,6 +3,7 @@ import clsx from 'clsx'
 import type { Vendor } from '@/lib/site'
 import { Reveal, splitBlocks } from './motion'
 import { Tick } from './TierCards'
+import { LocationCards, type Location } from './LocationCards'
 
 /**
  * The blocks a guide chapter is built from. Each one is a widget in the
@@ -18,6 +19,8 @@ export type Block =
   | { kind: 'vendors'; items: Vendor[] }
   | { kind: 'columns'; items: { title: string; body: string }[] }
   | { kind: 'locations'; items: { group: string; blurb: string; places: string[] }[] }
+  /** Location suggestions as cards, each opening a slider of its photographs. */
+  | { kind: 'locationCards'; items: Location[] }
   | { kind: 'compare'; yes: { title: string; items: string[] }; no: { title: string; items: string[] } }
   | { kind: 'steps'; items: { label: string; detail: string }[] }
   | { kind: 'note'; text: string }
@@ -302,6 +305,9 @@ export function GuideBlock({ block, storageKey }: { block: Block; storageKey: st
           ))}
         </div>
       )
+
+    case 'locationCards':
+      return <LocationCards items={block.items} />
 
     case 'locations':
       return (
