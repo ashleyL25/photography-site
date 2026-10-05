@@ -14,6 +14,8 @@ const BlogPost = lazy(() => import('@/pages/BlogPost'))
 
 /** The dashboard is one lazy chunk: a visitor who only reads the site never downloads the editor. */
 const Dashboard = lazy(() => import('@/admin/AdminApp'))
+/** The page builder's preview — the site at a true width, inside the dashboard. */
+const PreviewFrame = lazy(() => import('@/admin/preview/PreviewFrame'))
 
 function lazyPage(Page: React.ComponentType) {
   return (
@@ -59,6 +61,14 @@ function Site() {
 
 export default function App() {
   const { pathname } = useLocation()
+
+  if (pathname === '/dashboard/preview-frame') {
+    return (
+      <Suspense fallback={null}>
+        <PreviewFrame />
+      </Suspense>
+    )
+  }
 
   if (pathname === '/dashboard' || pathname.startsWith('/dashboard/')) {
     return (

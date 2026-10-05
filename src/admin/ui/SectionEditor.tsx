@@ -8,8 +8,8 @@ import {
   widgetDefaults,
   type WidgetHost,
 } from '@shared/widgets'
-import { renderPreview } from '@/widgets'
-import { HostContext, type HostValue } from '@/widgets/types'
+import type { HostValue } from '@/widgets/types'
+import { PreviewPane } from '../preview/PreviewPane'
 import { usePhotoLookup } from '../photos'
 import { FieldList } from './Fields'
 import { WidgetIcon } from './WidgetIcon'
@@ -176,8 +176,13 @@ export function SectionEditor({
       </div>
 
       {/* ------------------------------------------------------ Preview */}
-      <div className="min-w-0 flex-1 bg-canvas">
-        <div className="editor-sticky sticky z-20 flex items-center gap-4 border-b border-line bg-canvas/92 px-5 py-2.5 backdrop-blur-md">
+      {/**
+        * The page, in a frame of its own at a true width — see PreviewPane. The
+        * column is pinned below the editor's bar and as tall as what is left,
+        * so the page scrolls inside the frame the way it would in a browser.
+        */}
+      <div className="editor-sticky flex min-w-0 flex-1 flex-col bg-canvas lg:sticky lg:h-[calc(100dvh-var(--editor-header,0px))]">
+        <div className="flex shrink-0 items-center gap-4 border-b border-line bg-canvas px-5 py-2.5">
           <span className="label text-faint">Preview</span>
 
           <div className="ml-auto flex items-center gap-1">
@@ -204,23 +209,7 @@ export function SectionEditor({
           </div>
         </div>
 
-        {/**
-          * The page, and only the page.
-          *
-          * `site-preview` puts the theme's own colors back for this subtree, so
-          * what is previewed renders as the site does however the dashboard is
-          * set — the site has no light mode and a light preview would be a
-          * picture of a page that does not exist. The toolbar above stays on the
-          * dashboard's palette, because it belongs to the editor rather than to
-          * the page it is showing.
-          */}
-        <div
-          className={clsx(
-            'site-preview mx-auto origin-top transition-[max-width] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]',
-            viewport === 'mobile' && 'max-w-[430px] border-x border-line',
-          )}
-        >
-          <HostContext.Provider value={hostValue ?? { kind: 'page' }}>
+        <div className="relative h-[78vh] min-h-0 lg:h-auto lg:flex-1">
           {sections.length === 0 ? (
             <div className="px-6 py-24">
               <EmptyState
@@ -234,20 +223,17 @@ export function SectionEditor({
               />
             </div>
           ) : (
-            sections.map((section) => (
-              <PreviewSection
-                key={section.id}
-                section={section}
-                selected={section.id === selectedId}
-                guideSlug={hostValue?.kind === 'guide' ? hostValue.guide.slug : undefined}
-                onSelect={() => {
-                  setSelectedId(section.id)
-                  setTab('content')
-                }}
-              />
-            ))
+            <PreviewPane
+              sections={sections}
+              host={hostValue ?? { kind: 'page' }}
+              selectedId={selectedId}
+              viewport={viewport}
+              onSelect={(id) => {
+                setSelectedId(id)
+                setTab('content')
+              }}
+            />
           )}
-          </HostContext.Provider>
         </div>
       </div>
 
@@ -286,55 +272,6 @@ function ViewportButton({
     >
       {children}
     </button>
-  )
-}
-
-/**
- * One section in the preview, wrapped so it can be clicked and labeled.
- *
- * The overlay only appears on hover or when selected, so the preview reads as
- * the page rather than as a diagram of the page — which matters, because the
- * whole point of a live preview is judging how it looks.
- */
-function PreviewSection({
-  section,
-  selected,
-  onSelect,
-  guideSlug,
-}: {
-  section: Section
-  selected: boolean
-  onSelect: () => void
-  guideSlug?: string
-}) {
-  const def = getWidget(section.type)
-
-  return (
-    <div className={clsx('group relative', section.hidden && 'opacity-40')}>
-      {renderPreview(section, guideSlug)}
-
-      <button
-        type="button"
-        onClick={onSelect}
-        aria-label={`Edit ${def?.label ?? section.type}`}
-        className={clsx(
-          'absolute inset-0 z-10 transition-colors',
-          selected
-            ? 'ring-2 ring-gilt ring-inset'
-            : 'hover:bg-gilt/[0.06] hover:ring-1 hover:ring-gilt/50 hover:ring-inset',
-        )}
-      />
-
-      <span
-        className={clsx(
-          'label pointer-events-none absolute top-3 left-3 z-20 rounded-[2px] bg-canvas/90 px-2.5 py-1.5 text-gilt backdrop-blur-sm transition-opacity',
-          selected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100',
-        )}
-      >
-        {def?.label ?? section.type}
-        {section.hidden && ' · hidden'}
-      </span>
-    </div>
   )
 }
 

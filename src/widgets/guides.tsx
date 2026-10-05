@@ -277,6 +277,7 @@ export function GuideChapters({ sections, guideSlug }: { sections: Section[]; gu
         <section
           key={chapter.section.id}
           id={chapter.id}
+          data-section-id={chapter.section.id}
           className={`scroll-mt-[calc(12rem+env(safe-area-inset-top))] border-t border-line py-20 lg:scroll-mt-32 md:py-28 ${
             i % 2 === 1 ? 'bg-surface' : ''
           }`}
@@ -298,11 +299,15 @@ export function GuideChapters({ sections, guideSlug }: { sections: Section[]; gu
               </div>
 
               <div className="space-y-12 lg:col-span-8">
-                {chapter.blocks.flatMap((section) =>
-                  (byId.get(section.id) ?? []).map(({ block, key }) => (
-                    <GuideBlock key={key} block={block} storageKey={`guide:${guideSlug}:${chapter.id}:${key}`} />
-                  )),
-                )}
+                {/* One wrapper per block section, so the dashboard's preview can
+                    tell which block was clicked. */}
+                {chapter.blocks.map((section) => (
+                  <div key={section.id} data-section-id={section.id} className="space-y-12">
+                    {(byId.get(section.id) ?? []).map(({ block, key }) => (
+                      <GuideBlock key={key} block={block} storageKey={`guide:${guideSlug}:${chapter.id}:${key}`} />
+                    ))}
+                  </div>
+                ))}
               </div>
             </div>
           </div>
