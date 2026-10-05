@@ -1,3 +1,4 @@
+import { Heading } from './Heading'
 import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import clsx from 'clsx'
@@ -20,7 +21,7 @@ export function GuidesListing({ content, styles }: WidgetProps) {
 
   return (
     <section id={f.id} className={clsx('scroll-mt-24', f.className)}>
-      <div className={clsx('shell', f.pad)}>
+      <div className={clsx('shell', f.pad)} style={f.style}>
         <ul className="border-t border-line">
           {guides.map((guide, i) => {
             const session = sessions.find((s) => s.slug === guide.sessionSlug)
@@ -85,7 +86,7 @@ export function GuideLetter({ content, styles }: WidgetProps) {
 
   return (
     <section id={f.id} className={clsx('scroll-mt-24', f.className)}>
-      <div className={clsx('shell grid gap-14 lg:grid-cols-12 lg:gap-20', f.pad)}>
+      <div className={clsx('shell grid gap-14 lg:grid-cols-12 lg:gap-20', f.pad)} style={f.style}>
         <div className="lg:col-span-7">
           {text(content, 'eyebrow') && (
             <Reveal className={EYEBROW}>
@@ -329,11 +330,11 @@ export function GuideClose({ content, styles }: WidgetProps) {
   const others = guides.filter((g) => g.slug !== host.guide.slug)
 
   return (
-    <section id={f.id} className={clsx('scroll-mt-24', f.pad, f.className)}>
+    <section id={f.id} className={clsx('scroll-mt-24', f.pad, f.className)} style={f.style}>
       <div className="shell">
         <div className="max-w-2xl">
           {text(content, 'eyebrow') && <Reveal className="label text-accent">{text(content, 'eyebrow')}</Reveal>}
-          <MaskText text={text(content, 'heading')} className="display mt-6 text-[clamp(2.2rem,5.2vw,3.8rem)] text-ink" />
+          <Heading content={content} className="display mt-6 text-[clamp(2.2rem,5.2vw,3.8rem)] text-ink" />
           {text(content, 'body') && (
             <Reveal delay={0.15} className="mt-8 text-[1.04rem] leading-[1.9] text-muted">
               {text(content, 'body')}

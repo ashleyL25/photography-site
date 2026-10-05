@@ -16,6 +16,7 @@ import {
 import { RichTextEditor } from './RichTextEditor'
 import { MediaField, MediaListField } from './MediaPicker'
 import { CollectionPicker } from './CollectionPicker'
+import { CategorySelect, OrderedPicker } from './ContentPickers'
 
 /**
  * Renders a field schema as a form.
@@ -246,6 +247,19 @@ function Field({
             options={field.options ?? []}
           />
         )
+
+      case 'sessions':
+      case 'albums':
+        return (
+          <OrderedPicker
+            kind={field.type}
+            value={Array.isArray(value) ? (value as string[]) : []}
+            onChange={onChange}
+          />
+        )
+
+      case 'category':
+        return <CategorySelect id={id} value={typeof value === 'string' ? value : ''} onChange={onChange} />
 
       case 'image':
         return <MediaField value={typeof value === 'string' ? value : ''} onChange={onChange} />

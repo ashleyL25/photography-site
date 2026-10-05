@@ -1,3 +1,4 @@
+import { Heading } from './Heading'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'motion/react'
@@ -29,7 +30,7 @@ export function Investment({ content, styles }: WidgetProps) {
   const editing = session ? retouching[session.editingStyle] : null
 
   return (
-    <section id={f.id} className={clsx('relative scroll-mt-24', f.pad, f.className)}>
+    <section id={f.id} className={clsx('relative scroll-mt-24', f.pad, f.className)} style={f.style}>
       <div className="shell">
         <div className="flex flex-wrap items-end justify-between gap-8">
           <div>
@@ -39,8 +40,8 @@ export function Investment({ content, styles }: WidgetProps) {
                 {text(content, 'eyebrow')}
               </Reveal>
             )}
-            <MaskText
-              text={text(content, 'heading')}
+            <Heading
+              content={content}
               className="display mt-6 max-w-2xl text-[clamp(2.2rem,5.2vw,4.4rem)] text-ink"
             />
           </div>
@@ -238,7 +239,7 @@ export function FinishingLevels({ content, styles }: WidgetProps) {
   ]
 
   return (
-    <section id={f.id} className={clsx('scroll-mt-24', f.pad, f.className)}>
+    <section id={f.id} className={clsx('scroll-mt-24', f.pad, f.className)} style={f.style}>
       <div className="shell">
         <div className="max-w-2xl">
           {text(content, 'eyebrow') && (
@@ -247,7 +248,7 @@ export function FinishingLevels({ content, styles }: WidgetProps) {
               {text(content, 'eyebrow')}
             </Reveal>
           )}
-          <MaskText text={text(content, 'heading')} className="display mt-6 text-[clamp(2rem,4.4vw,3.4rem)] text-ink" />
+          <Heading content={content} className="display mt-6 text-[clamp(2rem,4.4vw,3.4rem)] text-ink" />
           {text(content, 'body') && (
             <Reveal delay={0.15} as="p" className="mt-8 text-[1.02rem] leading-[1.85] text-muted">
               {text(content, 'body')}
@@ -278,7 +279,7 @@ export function WeatherPolicy({ content, styles }: WidgetProps) {
   const f = frame(styles, { rule: true })
 
   return (
-    <section id={f.id} className={clsx('scroll-mt-24', f.pad, f.className)}>
+    <section id={f.id} className={clsx('scroll-mt-24', f.pad, f.className)} style={f.style}>
       <div className="shell">
         <div className="max-w-2xl">
           {text(content, 'eyebrow') && (
@@ -287,7 +288,7 @@ export function WeatherPolicy({ content, styles }: WidgetProps) {
               {text(content, 'eyebrow')}
             </Reveal>
           )}
-          <MaskText text={text(content, 'heading')} className="display mt-6 text-[clamp(2rem,4.4vw,3.4rem)] text-ink" />
+          <Heading content={content} className="display mt-6 text-[clamp(2rem,4.4vw,3.4rem)] text-ink" />
         </div>
 
         <div className="mt-14 grid gap-x-10 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">
@@ -349,7 +350,7 @@ export function GalleryTimeline({ content, styles }: WidgetProps) {
   const f = frame(styles, { id: 'delivery', pad: 'py-28 md:py-40', rule: true })
 
   return (
-    <section id={f.id} className={clsx('relative scroll-mt-24 overflow-hidden', f.pad, f.className)}>
+    <section id={f.id} className={clsx('relative scroll-mt-24 overflow-hidden', f.pad, f.className)} style={f.style}>
       <div className="shell">
         <div className="grid gap-12 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-6">
@@ -359,7 +360,7 @@ export function GalleryTimeline({ content, styles }: WidgetProps) {
                 {text(content, 'eyebrow')}
               </Reveal>
             )}
-            <MaskText text={text(content, 'heading')} className="display mt-6 text-[clamp(2rem,4.4vw,3.6rem)] text-ink" />
+            <Heading content={content} className="display mt-6 text-[clamp(2rem,4.4vw,3.6rem)] text-ink" />
           </div>
           {text(content, 'body') && (
             <Reveal

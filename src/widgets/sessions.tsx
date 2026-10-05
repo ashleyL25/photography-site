@@ -1,3 +1,4 @@
+import { Heading } from './Heading'
 import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AnimatePresence, motion, useMotionValue, useSpring } from 'motion/react'
@@ -10,6 +11,14 @@ import { usePricing, useRetouching, useSite } from '@/lib/site'
 import { ArrowLink, SmartLink } from './links'
 import { EYEBROW, frame, list, text, useHost, type WidgetProps } from './types'
 import type { PublicTier } from '@shared/types'
+
+/** The session types a widget was told to show, in that order — or all of them. */
+function usePickedSessions(content: Record<string, unknown>) {
+  const { sessions } = useSite()
+  const picked = list<string>(content, 'sessions')
+  if (picked.length === 0) return sessions
+  return picked.map((id) => sessions.find((s) => s.id === id)).filter((s): s is (typeof sessions)[number] => Boolean(s))
+}
 
 /** The tier marked featured, falling back to the middle of the ladder. */
 export function headlineTier(tiers: PublicTier[]): PublicTier | undefined {
@@ -27,7 +36,7 @@ export function headlineTier(tiers: PublicTier[]): PublicTier | undefined {
  * arch-topped cards, which is the better pattern there anyway.
  */
 export function SessionsIndex({ content, styles }: WidgetProps) {
-  const { sessions } = useSite()
+  const sessions = usePickedSessions(content)
   const reduced = useReducedMotion()
   const [hovered, setHovered] = useState<string | null>(null)
   const listRef = useRef<HTMLUListElement>(null)
@@ -48,7 +57,7 @@ export function SessionsIndex({ content, styles }: WidgetProps) {
   const active = sessions.find((s) => s.id === hovered)
 
   return (
-    <section id={f.id} className={clsx('relative scroll-mt-24', f.pad, f.className)}>
+    <section id={f.id} className={clsx('relative scroll-mt-24', f.pad, f.className)} style={f.style}>
       <div className="shell">
         <div className="flex flex-wrap items-end justify-between gap-6">
           <div>
@@ -58,7 +67,7 @@ export function SessionsIndex({ content, styles }: WidgetProps) {
                 {text(content, 'eyebrow')}
               </Reveal>
             )}
-            <MaskText text={text(content, 'heading')} className="display mt-6 text-[clamp(3rem,9vw,7.5rem)] text-ink" />
+            <Heading content={content} className="display mt-6 text-[clamp(3rem,9vw,7.5rem)] text-ink" />
           </div>
           {text(content, 'blurb') && (
             <Reveal delay={0.2} className="max-w-xs pb-4 text-[0.95rem] leading-relaxed text-muted">
@@ -185,12 +194,13 @@ export function SessionsIndex({ content, styles }: WidgetProps) {
  * ------------------------------------------------------------------ */
 
 export function SessionCards({ content, styles }: WidgetProps) {
-  const { sessions, albums } = useSite()
+  const { albums } = useSite()
+  const sessions = usePickedSessions(content)
   const f = frame(styles)
 
   return (
     <section id={f.id} className={clsx('scroll-mt-24', f.className)}>
-      <div className={clsx('shell', f.pad)}>
+      <div className={clsx('shell', f.pad)} style={f.style}>
         <ul className="grid gap-x-8 gap-y-20 lg:grid-cols-2">
           {sessions.map((session, i) => {
             const tier = headlineTier(session.tiers)
@@ -273,7 +283,7 @@ export function AlwaysIncluded({ content, styles }: WidgetProps) {
   const links = list<{ label: string; href: string }>(content, 'links').filter((l) => l.label && l.href)
 
   return (
-    <section id={f.id} className={clsx('scroll-mt-24', f.pad, f.className)}>
+    <section id={f.id} className={clsx('scroll-mt-24', f.pad, f.className)} style={f.style}>
       <div className="shell grid gap-14 lg:grid-cols-12 lg:gap-20">
         <div className="lg:col-span-5">
           {text(content, 'eyebrow') && (
@@ -282,7 +292,7 @@ export function AlwaysIncluded({ content, styles }: WidgetProps) {
               {text(content, 'eyebrow')}
             </Reveal>
           )}
-          <MaskText text={text(content, 'heading')} className="display mt-6 text-[clamp(2rem,4.4vw,3.4rem)] text-ink" />
+          <Heading content={content} className="display mt-6 text-[clamp(2rem,4.4vw,3.4rem)] text-ink" />
           {links.length > 0 && (
             <Reveal delay={0.16} className="mt-10 flex flex-col items-start gap-5">
               {links.map((link, i) => (
@@ -315,15 +325,15 @@ export function AlwaysIncluded({ content, styles }: WidgetProps) {
  * ------------------------------------------------------------------ */
 
 export function SessionLinks({ content, styles }: WidgetProps) {
-  const { sessions } = useSite()
+  const sessions = usePickedSessions(content)
   const f = frame(styles, { surface: true, rule: true })
   const closeHeading = text(content, 'close_heading')
 
   return (
-    <section id={f.id} className={clsx('scroll-mt-24', f.pad, f.className)}>
+    <section id={f.id} className={clsx('scroll-mt-24', f.pad, f.className)} style={f.style}>
       <div className="shell">
         <div className="flex flex-wrap items-end justify-between gap-6">
-          <MaskText text={text(content, 'heading')} className="display text-[clamp(2rem,4.4vw,3.2rem)] text-ink" />
+          <Heading content={content} className="display text-[clamp(2rem,4.4vw,3.2rem)] text-ink" />
           <Reveal delay={0.12}>
             <ArrowLink href={text(content, 'link_href')} label={text(content, 'link_label')} />
           </Reveal>
@@ -383,7 +393,7 @@ export function SessionOverview({ content, styles }: WidgetProps) {
 
   return (
     <section id={f.id} className={clsx('scroll-mt-24', f.className)}>
-      <div className={clsx('shell grid gap-14 lg:grid-cols-12 lg:gap-16', f.pad)}>
+      <div className={clsx('shell grid gap-14 lg:grid-cols-12 lg:gap-16', f.pad)} style={f.style}>
         <div className="lg:col-span-6">
           {text(content, 'eyebrow') && (
             <Reveal className={EYEBROW}>
@@ -445,7 +455,7 @@ export function SessionPricing({ content, styles }: WidgetProps) {
   const editing = retouching[session.editingStyle]
 
   return (
-    <section id={f.id} className={clsx('scroll-mt-24', f.pad, f.className)}>
+    <section id={f.id} className={clsx('scroll-mt-24', f.pad, f.className)} style={f.style}>
       <div className="shell">
         <div className="flex flex-wrap items-end justify-between gap-8">
           <div>
@@ -455,7 +465,7 @@ export function SessionPricing({ content, styles }: WidgetProps) {
                 {text(content, 'eyebrow')}
               </Reveal>
             )}
-            <MaskText text={text(content, 'heading')} className="display mt-6 text-[clamp(2.2rem,5vw,4rem)] text-ink" />
+            <Heading content={content} className="display mt-6 text-[clamp(2.2rem,5vw,4rem)] text-ink" />
           </div>
           {session.intro && (
             <Reveal delay={0.15} className="max-w-md pb-3 text-[0.97rem] leading-[1.8] text-muted">
@@ -527,7 +537,7 @@ export function SessionGuide({ content, styles }: WidgetProps) {
   if (!guide) return null
 
   return (
-    <section id={f.id} className={clsx('scroll-mt-24', f.pad, f.className)}>
+    <section id={f.id} className={clsx('scroll-mt-24', f.pad, f.className)} style={f.style}>
       <div className="shell grid gap-12 lg:grid-cols-12 lg:gap-20">
         <div className="lg:col-span-6">
           {text(content, 'eyebrow') && (
@@ -536,7 +546,7 @@ export function SessionGuide({ content, styles }: WidgetProps) {
               {text(content, 'eyebrow')}
             </Reveal>
           )}
-          <MaskText text={text(content, 'heading')} className="display mt-6 text-[clamp(2.2rem,5vw,3.8rem)] text-ink" />
+          <Heading content={content} className="display mt-6 text-[clamp(2.2rem,5vw,3.8rem)] text-ink" />
           {guide.subtitle && (
             <Reveal delay={0.15} className="mt-8 max-w-lg text-[1.04rem] leading-[1.9] text-muted">
               {guide.subtitle}
@@ -577,10 +587,10 @@ export function SessionAlbums({ content, styles }: WidgetProps) {
   if (shoots.length === 0) return null
 
   return (
-    <section id={f.id} className={clsx('scroll-mt-24', f.pad, f.className)}>
+    <section id={f.id} className={clsx('scroll-mt-24', f.pad, f.className)} style={f.style}>
       <div className="shell">
         <div className="flex flex-wrap items-end justify-between gap-6">
-          <MaskText text={text(content, 'heading')} className="display text-[clamp(2rem,4.4vw,3.2rem)] text-ink" />
+          <Heading content={content} className="display text-[clamp(2rem,4.4vw,3.2rem)] text-ink" />
           <Reveal delay={0.12}>
             <ArrowLink href={`/portfolio?c=${session.category}`} label={text(content, 'link_label')} />
           </Reveal>

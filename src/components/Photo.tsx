@@ -14,6 +14,10 @@ type Props = {
   priority?: boolean
   /** Applied to the <img> itself, e.g. for parallax or Ken Burns transforms. */
   imgClassName?: string
+  /** Inline styles for the frame — an aspect ratio picked in the dashboard, say. */
+  style?: React.CSSProperties
+  /** Where the crop keeps its focus, as CSS object-position. */
+  focus?: string
 }
 
 function srcSet(photo: PhotoMeta) {
@@ -31,7 +35,7 @@ function srcSet(photo: PhotoMeta) {
  * does not know — pasted from somewhere else — still renders, just without the
  * srcset and the blur-up.
  */
-export function Photo({ src, alt, sizes, className, imgClassName, priority }: Props) {
+export function Photo({ src, alt, sizes, className, imgClassName, priority, style, focus }: Props) {
   usePhotoRegistry()
   const photo = getPhoto(src)
   const [loaded, setLoaded] = useState(false)
@@ -40,13 +44,14 @@ export function Photo({ src, alt, sizes, className, imgClassName, priority }: Pr
 
   if (!photo) {
     return (
-      <div className={clsx('relative overflow-hidden bg-surface', className)}>
+      <div className={clsx('relative overflow-hidden bg-surface', className)} style={style}>
         <img
           src={src}
           alt={alt}
           loading={priority ? 'eager' : 'lazy'}
           decoding="async"
           onLoad={() => setLoaded(true)}
+          style={focus ? { objectPosition: focus } : undefined}
           className={clsx(
             'relative h-full w-full object-cover transition-opacity duration-700 ease-[var(--ease-out-expo)]',
             loaded ? 'opacity-100' : 'opacity-0',
@@ -60,7 +65,7 @@ export function Photo({ src, alt, sizes, className, imgClassName, priority }: Pr
   const fallback = photo.widths[Math.min(2, photo.widths.length - 1)]
 
   return (
-    <div className={clsx('relative overflow-hidden', className)} style={{ backgroundColor: photo.color }}>
+    <div className={clsx('relative overflow-hidden', className)} style={{ backgroundColor: photo.color, ...style }}>
       {photo.lqip && (
         <img
           aria-hidden
@@ -83,6 +88,7 @@ export function Photo({ src, alt, sizes, className, imgClassName, priority }: Pr
         decoding={priority ? 'sync' : 'async'}
         fetchPriority={priority ? 'high' : 'auto'}
         onLoad={() => setLoaded(true)}
+        style={focus ? { objectPosition: focus } : undefined}
         className={clsx(
           'relative h-full w-full object-cover transition-opacity duration-700 ease-[var(--ease-out-expo)]',
           loaded ? 'opacity-100' : 'opacity-0',

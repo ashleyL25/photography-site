@@ -1,13 +1,14 @@
+import { Heading } from './Heading'
 import { useMemo, useRef, useState } from 'react'
 import { motion, useScroll, useTransform } from 'motion/react'
 import clsx from 'clsx'
 import { Photo, aspectOf } from '@/components/Photo'
 import { Lightbox } from '@/components/Lightbox'
-import { MaskText, Parallax, Reveal, RichParagraphs, Unveil } from '@/components/motion'
+import { Parallax, Reveal, RichParagraphs, Unveil } from '@/components/motion'
 import { useColumnCount, useReducedMotion } from '@/lib/hooks'
 import { usePhotoRegistry } from '@/lib/photos'
 import { ArrowLink, Buttons, type ButtonValue } from './links'
-import { EYEBROW, bool, frame, list, text, type WidgetProps } from './types'
+import { EYEBROW, bool, columns as gridColumns, frame, list, ratio, text, type WidgetProps } from './types'
 
 /* ------------------------------------------------------------------ *
  * Selected work
@@ -35,9 +36,11 @@ const RATIO: Record<string, string> = { tall: 'aspect-[3/4.3]', wide: 'aspect-[4
 export function SelectedWork({ content, styles }: WidgetProps) {
   const f = frame(styles, { id: 'work', pad: 'py-28 md:py-40', rule: true })
   const items = list<{ image: string; caption: string; span: string }>(content, 'items').filter((i) => i.image)
+  const showCaptions = bool(content, 'show_captions', true)
+  const showCounter = bool(content, 'show_counter', true)
 
   return (
-    <section id={f.id} className={clsx('relative scroll-mt-24 overflow-hidden', f.pad, f.className)}>
+    <section id={f.id} className={clsx('relative scroll-mt-24 overflow-hidden', f.pad, f.className)} style={f.style}>
       <div className="shell">
         <div className="flex flex-wrap items-end justify-between gap-8">
           <div>
@@ -47,8 +50,8 @@ export function SelectedWork({ content, styles }: WidgetProps) {
                 {text(content, 'eyebrow')}
               </Reveal>
             )}
-            <MaskText
-              text={text(content, 'heading')}
+            <Heading
+              content={content}
               className="display mt-6 max-w-2xl text-[clamp(2.4rem,6vw,5.2rem)] text-ink"
             />
           </div>
@@ -71,12 +74,16 @@ export function SelectedWork({ content, styles }: WidgetProps) {
                   />
                 </Unveil>
               </Parallax>
-              <figcaption className="mt-4 flex items-baseline justify-between gap-4 border-t border-line pt-3">
-                <span className="text-[0.9rem] text-muted italic">{item.caption}</span>
-                <span className="label text-faint">
-                  {String(i + 1).padStart(2, '0')} / {String(items.length).padStart(2, '0')}
-                </span>
-              </figcaption>
+              {(showCaptions || showCounter) && (
+                <figcaption className="mt-4 flex items-baseline justify-between gap-4 border-t border-line pt-3">
+                  <span className="text-[0.9rem] text-muted italic">{showCaptions ? item.caption : ''}</span>
+                  {showCounter && (
+                    <span className="label text-faint">
+                      {String(i + 1).padStart(2, '0')} / {String(items.length).padStart(2, '0')}
+                    </span>
+                  )}
+                </figcaption>
+              )}
             </figure>
           ))}
         </div>
@@ -92,7 +99,7 @@ export function SelectedWork({ content, styles }: WidgetProps) {
 type StepValue = { title: string; body: string; image: string }
 
 /** One pinned step. Later cards slide over earlier ones, which recede as they go. */
-function Step({ step, index, total }: { step: StepValue; index: number; total: number }) {
+function Step({ step, index, total, count }: { step: StepValue; index: number; total: number; count: boolean }) {
   const ref = useRef<HTMLDivElement>(null)
   const reduced = useReducedMotion()
 
@@ -118,9 +125,11 @@ function Step({ step, index, total }: { step: StepValue; index: number; total: n
             <span className="display text-[clamp(3.5rem,7vw,6rem)] leading-none text-accent">
               {String(index + 1).padStart(2, '0')}
             </span>
-            <span className="label text-faint">
-              Step {index + 1} of {total}
-            </span>
+            {count && (
+              <span className="label text-faint">
+                Step {index + 1} of {total}
+              </span>
+            )}
           </div>
           <div>
             <h3 className="display text-[clamp(2rem,3.6vw,3.1rem)] text-ink">{step.title}</h3>
@@ -141,7 +150,7 @@ export function Process({ content, styles }: WidgetProps) {
   const steps = list<StepValue>(content, 'steps')
 
   return (
-    <section id={f.id} className={clsx('relative scroll-mt-24', f.pad, f.className)}>
+    <section id={f.id} className={clsx('relative scroll-mt-24', f.pad, f.className)} style={f.style}>
       <div className="shell">
         <div className="max-w-2xl">
           {text(content, 'eyebrow') && (
@@ -150,12 +159,12 @@ export function Process({ content, styles }: WidgetProps) {
               {text(content, 'eyebrow')}
             </Reveal>
           )}
-          <MaskText text={text(content, 'heading')} className="display mt-6 text-[clamp(2.2rem,5.2vw,4.4rem)] text-ink" />
+          <Heading content={content} className="display mt-6 text-[clamp(2.2rem,5.2vw,4.4rem)] text-ink" />
         </div>
 
         <div className="mt-20 pb-16">
           {steps.map((step, i) => (
-            <Step key={`${step.title}-${i}`} step={step} index={i} total={steps.length} />
+            <Step key={`${step.title}-${i}`} step={step} index={i} total={steps.length} count={bool(content, 'show_step_count', true)} />
           ))}
         </div>
       </div>
@@ -173,6 +182,8 @@ export function Process({ content, styles }: WidgetProps) {
  * which CSS columns cannot do, and which is the difference between a gallery
  * and a list that happens to be in columns.
  */
+const GAP: Record<string, string> = { tight: 'gap-2 md:gap-3', normal: 'gap-5 md:gap-7', loose: 'gap-8 md:gap-12' }
+
 export function columnize(photos: string[], columns: number): string[][] {
   const buckets = Array.from({ length: columns }, () => ({ items: [] as string[], height: 0 }))
   for (const photo of photos) {
@@ -188,12 +199,15 @@ export function MasonryGallery({
   title,
   caption,
   maxColumns = 3,
+  gap = 'normal',
 }: {
   photos: string[]
   title: string
   caption?: string
   maxColumns?: number
+  gap?: string
 }) {
+  const gapClass = GAP[gap] ?? GAP.normal
   usePhotoRegistry()
   const columns = Math.min(useColumnCount(), maxColumns)
   const [openIndex, setOpenIndex] = useState<number | null>(null)
@@ -201,9 +215,9 @@ export function MasonryGallery({
 
   return (
     <>
-      <div className="flex items-start gap-5 md:gap-7">
+      <div className={clsx('flex items-start', gapClass)}>
         {grid.map((column, ci) => (
-          <div key={ci} className="flex min-w-0 flex-1 flex-col gap-5 md:gap-7">
+          <div key={ci} className={clsx('flex min-w-0 flex-1 flex-col', gapClass)}>
             {column.map((photo, ri) => (
               <motion.button
                 key={`${photo}-${ri}`}
@@ -247,9 +261,10 @@ export function PhotoGallery({ content, styles }: WidgetProps) {
   const f = frame(styles)
   const photos = list<string>(content, 'images')
   const heading = text(content, 'heading')
+  const layout = text(content, 'layout') || 'masonry'
 
   return (
-    <section id={f.id} className={clsx('scroll-mt-24', f.pad, f.className)}>
+    <section id={f.id} className={clsx('scroll-mt-24', f.pad, f.className)} style={f.style}>
       <div className="shell">
         {(text(content, 'eyebrow') || heading) && (
           <div className="mb-14 max-w-2xl">
@@ -259,17 +274,126 @@ export function PhotoGallery({ content, styles }: WidgetProps) {
                 {text(content, 'eyebrow')}
               </Reveal>
             )}
-            {heading && <MaskText text={heading} className="display mt-6 text-[clamp(2rem,4.4vw,3.4rem)] text-ink" />}
+            {heading && <Heading content={content} className="display mt-6 text-[clamp(2rem,4.4vw,3.4rem)] text-ink" />}
           </div>
         )}
-        <MasonryGallery
+        {layout === 'masonry' && (
+          <MasonryGallery
+            photos={photos}
+            title={heading || 'Gallery'}
+            caption={text(content, 'caption') || undefined}
+            maxColumns={Number(text(content, 'columns')) || 3}
+            gap={text(content, 'gap')}
+          />
+        )}
+      </div>
+      {layout !== 'masonry' && (
+        <CroppedGallery
           photos={photos}
           title={heading || 'Gallery'}
           caption={text(content, 'caption') || undefined}
-          maxColumns={Number(text(content, 'columns')) || 3}
+          carousel={layout === 'carousel'}
+          columns={text(content, 'columns') || '3'}
+          shape={text(content, 'ratio')}
+          gap={text(content, 'gap')}
         />
-      </div>
+      )}
     </section>
+  )
+}
+
+/**
+ * Every photograph cropped to one shape — as an even grid, or a row that
+ * scrolls sideways and snaps. The carousel runs to the edge of the screen and
+ * starts in line with the page's content, so it reads as leaving the frame.
+ */
+function CroppedGallery({
+  photos,
+  title,
+  caption,
+  carousel,
+  columns,
+  shape,
+  gap,
+}: {
+  photos: string[]
+  title: string
+  caption?: string
+  carousel: boolean
+  columns: string
+  shape: string
+  gap: string
+}) {
+  const [openIndex, setOpenIndex] = useState<number | null>(null)
+  const track = useRef<HTMLDivElement>(null)
+  const gapClass = GAP[gap] ?? GAP.normal
+  const cardWidth = columns === '2' ? 'w-[78vw] sm:w-[46vw]' : columns === '4' ? 'w-[64vw] sm:w-[34vw] lg:w-[23vw]' : 'w-[72vw] sm:w-[40vw] lg:w-[30vw]'
+
+  const nudge = (dir: number) => track.current?.scrollBy({ left: dir * track.current.clientWidth * 0.8, behavior: 'smooth' })
+
+  const items = photos.map((photo, i) => (
+    <motion.button
+      key={`${photo}-${i}`}
+      type="button"
+      onClick={() => setOpenIndex(i)}
+      className={clsx('group relative block cursor-zoom-in overflow-hidden', carousel && clsx('shrink-0 snap-start', cardWidth))}
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '0px 0px -8% 0px' }}
+      transition={{ duration: 0.8, delay: Math.min((i % 4) * 0.06, 0.3), ease: [0.16, 1, 0.3, 1] }}
+    >
+      <Photo
+        src={photo}
+        alt={`${title} — photograph ${i + 1}`}
+        sizes={carousel ? '(min-width: 1024px) 30vw, 72vw' : '(min-width: 1024px) 31vw, (min-width: 640px) 46vw, 92vw'}
+        className="w-full"
+        style={ratio(shape)}
+        imgClassName="transition-transform duration-[1400ms] ease-[var(--ease-out-expo)] group-hover:scale-[1.045]"
+      />
+    </motion.button>
+  ))
+
+  return (
+    <>
+      {carousel ? (
+        <div className="relative">
+          <div
+            ref={track}
+            className={clsx(
+              'flex snap-x snap-mandatory overflow-x-auto scroll-smooth pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
+              'shell-inset',
+              gapClass,
+            )}
+          >
+            {items}
+          </div>
+          {photos.length > 2 && (
+            <div className="shell mt-6 flex justify-end gap-3">
+              {[-1, 1].map((dir) => (
+                <button
+                  key={dir}
+                  type="button"
+                  onClick={() => nudge(dir)}
+                  aria-label={dir < 0 ? 'Previous photographs' : 'Next photographs'}
+                  className="grid h-11 w-11 place-items-center rounded-full border border-line text-muted transition-colors hover:border-accent hover:text-accent"
+                >
+                  <span aria-hidden>{dir < 0 ? '←' : '→'}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className={clsx('shell grid', gridColumns(columns), gapClass)}>{items}</div>
+      )}
+      <Lightbox
+        ids={photos}
+        index={openIndex}
+        onClose={() => setOpenIndex(null)}
+        onNavigate={setOpenIndex}
+        caption={caption ? () => caption : undefined}
+      />
+    </>
   )
 }
 
@@ -290,7 +414,7 @@ export function ImageBlock({ content, styles }: WidgetProps) {
   const shape = text(content, 'shape') || 'auto'
 
   return (
-    <section id={f.id} className={clsx('scroll-mt-24', f.pad, f.className)}>
+    <section id={f.id} className={clsx('scroll-mt-24', f.pad, f.className)} style={f.style}>
       <figure className={clsx(width === 'full' ? 'w-full' : 'shell', width === 'narrow' && 'max-w-3xl')}>
         <Unveil className={shape === 'arch' ? 'arch' : undefined}>
           <Photo
@@ -298,6 +422,7 @@ export function ImageBlock({ content, styles }: WidgetProps) {
             alt={text(content, 'alt')}
             sizes={width === 'full' ? '100vw' : width === 'narrow' ? '(min-width: 768px) 48rem, 92vw' : '92vw'}
             className={clsx('w-full', SHAPE[shape])}
+            focus={text(content, 'focal') === 'top' ? 'center 20%' : text(content, 'focal') === 'bottom' ? 'center 80%' : undefined}
           />
         </Unveil>
         {text(content, 'caption') && (
@@ -320,7 +445,7 @@ export function ImageText({ content, styles }: WidgetProps) {
 
   return (
     <section id={f.id} className={clsx('scroll-mt-24', f.className)}>
-      <div className={clsx('shell grid items-center gap-14 lg:grid-cols-12 lg:gap-16', f.pad)}>
+      <div className={clsx('shell grid items-center gap-14 lg:grid-cols-12 lg:gap-16', f.pad)} style={f.style}>
         <div className={clsx('lg:col-span-6', left && 'lg:order-2 lg:col-start-7')}>
           {text(content, 'eyebrow') && (
             <Reveal className={EYEBROW}>
@@ -329,7 +454,7 @@ export function ImageText({ content, styles }: WidgetProps) {
             </Reveal>
           )}
           {text(content, 'heading') && (
-            <MaskText text={text(content, 'heading')} className="display mt-6 text-[clamp(2rem,4.4vw,3.4rem)] text-ink" />
+            <Heading content={content} className="display mt-6 text-[clamp(2rem,4.4vw,3.4rem)] text-ink" />
           )}
           <RichParagraphs
             html={text(content, 'body')}
@@ -349,7 +474,8 @@ export function ImageText({ content, styles }: WidgetProps) {
                 src={text(content, 'image')}
                 alt={text(content, 'alt')}
                 sizes="(min-width: 1024px) 36vw, 90vw"
-                className="aspect-[3/4]"
+                className="w-full"
+                style={ratio(content.ratio, '3/4')}
               />
             </Unveil>
           </Parallax>

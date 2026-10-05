@@ -142,6 +142,14 @@ export function cleanAgainst(fields: readonly FieldDef[], input: unknown): Recor
           : []
         break
 
+      case 'sessions':
+      case 'albums':
+        // Ids, in the order picked.
+        out[field.name] = Array.isArray(value)
+          ? value.filter((v): v is string => typeof v === 'string' && v.length > 0 && v.length < 64).slice(0, 60)
+          : []
+        break
+
       case 'lines':
         // Typed as one item per line; stored as the list. A string is accepted
         // too, so a client that posts the textarea's raw value still works.

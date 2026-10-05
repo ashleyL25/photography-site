@@ -1,14 +1,15 @@
+import { Heading } from './Heading'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
 import { Photo } from '@/components/Photo'
-import { DrawRule, MaskText, Reveal } from '@/components/motion'
+import { DrawRule, Reveal } from '@/components/motion'
 import { api } from '@/lib/api'
 import { registerPhotos } from '@/lib/photos'
 import { useSite } from '@/lib/site'
 import { ArrowLink } from './links'
-import { EYEBROW, frame, text, type WidgetProps } from './types'
+import { EYEBROW, frame, text, type WidgetProps, columns } from './types'
 import type { PhotoMeta, Post } from '@shared/types'
 
 export function postDate(post: Post): string {
@@ -62,7 +63,7 @@ export function BlogGrid({ content, styles, data }: WidgetProps) {
   if (posts.length === 0) return null
 
   return (
-    <section id={f.id} className={clsx('scroll-mt-24', f.pad, f.className)}>
+    <section id={f.id} className={clsx('scroll-mt-24', f.pad, f.className)} style={f.style}>
       <div className="shell">
         <div className="flex flex-wrap items-end justify-between gap-6">
           <div>
@@ -72,13 +73,13 @@ export function BlogGrid({ content, styles, data }: WidgetProps) {
                 {text(content, 'eyebrow')}
               </Reveal>
             )}
-            <MaskText text={text(content, 'heading')} className="display mt-6 text-[clamp(2rem,4.4vw,3.4rem)] text-ink" />
+            <Heading content={content} className="display mt-6 text-[clamp(2rem,4.4vw,3.4rem)] text-ink" />
           </div>
           <Reveal delay={0.12}>
             <ArrowLink href={text(content, 'link_href')} label={text(content, 'link_label')} />
           </Reveal>
         </div>
-        <ul className="mt-14 grid gap-x-8 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className={clsx('mt-14 grid gap-x-8 gap-y-14', columns(content.columns, '3'))}>
           {posts.map((post, i) => (
             <PostCard key={post.id} post={post} index={i} />
           ))}
@@ -144,7 +145,7 @@ export function BlogListing({ content, styles }: WidgetProps) {
         </div>
       )}
 
-      <section className={clsx('shell', f.pad)}>
+      <section className={clsx('shell', f.pad)} style={f.style}>
         {categories.length === 0 && <DrawRule className="mb-16" />}
         <AnimatePresence mode="wait">
           {posts && (

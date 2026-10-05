@@ -36,6 +36,12 @@ export type FieldType =
   | 'repeater'
   /** Blog posts to show — see `CollectionSource`. */
   | 'collection'
+  /** Session types to show, by id, in order. Empty means all of them. */
+  | 'sessions'
+  /** Albums to show, by id, in order. */
+  | 'albums'
+  /** One portfolio category, by slug. */
+  | 'category'
 
 export interface VisibleWhen {
   field: string
@@ -123,6 +129,18 @@ const alt = (name: string, value = ''): FieldDef => ({
   help: 'What the photograph shows, for anyone who cannot see it. Leave empty for a purely decorative one.',
 })
 
+const COLUMNS = (value: string): FieldDef => ({
+  name: 'columns',
+  label: 'Columns on a wide screen',
+  type: 'choice',
+  default: value,
+  options: [
+    { value: '2', label: 'Two' },
+    { value: '3', label: 'Three' },
+    { value: '4', label: 'Four' },
+  ],
+})
+
 const BUTTONS = (value: unknown[] = []): FieldDef => ({
   name: 'buttons',
   label: 'Buttons',
@@ -155,38 +173,162 @@ const BUTTONS = (value: unknown[] = []): FieldDef => ({
  * for the times a section is reused somewhere new and wants to sit differently.
  * ------------------------------------------------------------------ */
 
+const SPACE_OPTIONS = [
+  { value: 'auto', label: 'As designed' },
+  { value: 'none', label: 'None' },
+  { value: 'xs', label: 'Extra small' },
+  { value: 'sm', label: 'Small' },
+  { value: 'md', label: 'Medium' },
+  { value: 'lg', label: 'Large' },
+  { value: 'xl', label: 'Extra large' },
+] as const
+
+const RULE_OPTIONS = [
+  { value: 'auto', label: 'As designed' },
+  { value: 'none', label: 'None' },
+  { value: 'line', label: 'Hairline' },
+  { value: 'arch', label: 'Arch ornament' },
+] as const
+
 export const STYLE_FIELDS: readonly FieldDef[] = [
   {
     name: 'background',
     label: 'Background',
-    type: 'choice',
-    default: 'auto',
-    options: [
-      { value: 'auto', label: 'As designed' },
-      { value: 'canvas', label: 'Page' },
-      { value: 'surface', label: 'Raised band' },
-    ],
-  },
-  {
-    name: 'rule',
-    label: 'Line above',
-    type: 'choice',
-    default: 'auto',
-    options: [
-      { value: 'auto', label: 'As designed' },
-      { value: 'line', label: 'Always' },
-      { value: 'none', label: 'Never' },
+    type: 'group',
+    help: 'A colour band or a photograph behind the section. Dark choices switch the text to light automatically.',
+    children: [
+      {
+        name: 'scheme',
+        label: 'Colour',
+        type: 'choice',
+        default: 'auto',
+        options: [
+          { value: 'auto', label: 'As designed' },
+          { value: 'canvas', label: 'Page' },
+          { value: 'surface', label: 'Raised band' },
+          { value: 'beige', label: 'Beige' },
+          { value: 'champagne', label: 'Champagne' },
+          { value: 'charcoal', label: 'Charcoal' },
+          { value: 'forest', label: 'Forest green' },
+          { value: 'sage', label: 'Sage' },
+          { value: 'copper', label: 'Copper' },
+        ],
+      },
+      { name: 'image', label: 'Background photograph', type: 'image', default: '' },
+      {
+        name: 'overlay',
+        label: 'Darken the photograph',
+        type: 'number',
+        default: 55,
+        min: 0,
+        max: 95,
+        step: 5,
+        suffix: '%',
+        visibleWhen: { field: 'image', equals: ['__truthy__'] },
+      },
+      {
+        name: 'parallax',
+        label: 'Photograph drifts as the page scrolls',
+        type: 'boolean',
+        default: true,
+        visibleWhen: { field: 'image', equals: ['__truthy__'] },
+      },
+      {
+        name: 'focal',
+        label: 'Keep in frame',
+        type: 'choice',
+        default: 'center',
+        options: [
+          { value: 'center', label: 'Centre' },
+          { value: 'top', label: 'Top' },
+          { value: 'bottom', label: 'Bottom' },
+          { value: 'left', label: 'Left' },
+          { value: 'right', label: 'Right' },
+        ],
+        visibleWhen: { field: 'image', equals: ['__truthy__'] },
+      },
     ],
   },
   {
     name: 'spacing',
     label: 'Spacing',
-    type: 'choice',
-    default: 'auto',
-    options: [
-      { value: 'auto', label: 'As designed' },
-      { value: 'compact', label: 'Compact' },
-      { value: 'none', label: 'None' },
+    type: 'group',
+    children: [
+      { name: 'top', label: 'Space above', type: 'choice', default: 'auto', options: SPACE_OPTIONS },
+      { name: 'bottom', label: 'Space below', type: 'choice', default: 'auto', options: SPACE_OPTIONS },
+    ],
+  },
+  {
+    name: 'layout',
+    label: 'Width and alignment',
+    type: 'group',
+    help: 'For the text and photo widgets. Sections with a fixed design keep theirs.',
+    children: [
+      {
+        name: 'width',
+        label: 'Width',
+        type: 'choice',
+        default: 'auto',
+        options: [
+          { value: 'auto', label: 'As designed' },
+          { value: 'narrow', label: 'Narrow — reading width' },
+          { value: 'medium', label: 'Medium' },
+          { value: 'wide', label: 'Page width' },
+          { value: 'full', label: 'Edge to edge' },
+        ],
+      },
+      {
+        name: 'align',
+        label: 'Text alignment',
+        type: 'choice',
+        default: 'auto',
+        options: [
+          { value: 'auto', label: 'As designed' },
+          { value: 'left', label: 'Left' },
+          { value: 'center', label: 'Centred' },
+        ],
+      },
+    ],
+  },
+  {
+    name: 'rules',
+    label: 'Lines',
+    type: 'group',
+    children: [
+      { name: 'top', label: 'Above', type: 'choice', default: 'auto', options: RULE_OPTIONS },
+      { name: 'bottom', label: 'Below', type: 'choice', default: 'none', options: RULE_OPTIONS.slice(1) },
+    ],
+  },
+  {
+    name: 'animation',
+    label: 'Entrance',
+    type: 'group',
+    help: 'How the whole section arrives as it scrolls into view, on top of its own built-in reveals.',
+    children: [
+      {
+        name: 'type',
+        label: 'Animation',
+        type: 'choice',
+        default: 'none',
+        options: [
+          { value: 'none', label: 'Only the built-in reveals' },
+          { value: 'fade', label: 'Fade in' },
+          { value: 'rise', label: 'Rise up' },
+          { value: 'scale', label: 'Settle in from slightly larger' },
+          { value: 'curtain', label: 'Unveil from the bottom' },
+        ],
+      },
+      {
+        name: 'delay',
+        label: 'Delay',
+        type: 'number',
+        default: 0,
+        min: 0,
+        max: 1,
+        step: 0.1,
+        suffix: 's',
+        visibleWhen: { field: 'type', equals: ['fade', 'rise', 'scale', 'curtain'] },
+      },
     ],
   },
   {
@@ -211,7 +353,7 @@ export const STYLE_FIELDS: readonly FieldDef[] = [
  * The widgets
  * ------------------------------------------------------------------ */
 
-export const WIDGETS: readonly WidgetDef[] = [
+const BASE_WIDGETS: readonly WidgetDef[] = [
   /* =========================================================== Opening */
   {
     type: 'home_hero',
@@ -296,6 +438,10 @@ export const WIDGETS: readonly WidgetDef[] = [
         default: ['Senior Pictures', 'Graduation', 'Engagements', 'Couples', 'Families', 'Pets'],
         help: 'One per line.',
       },
+      { name: 'speed', label: 'Speed', type: 'choice', default: 'normal', options: [{ value: 'slow', label: 'Slow' }, { value: 'normal', label: 'Normal' }, { value: 'fast', label: 'Fast' }] },
+      { name: 'size', label: 'Size', type: 'choice', default: 'lg', options: [{ value: 'sm', label: 'Small' }, { value: 'md', label: 'Medium' }, { value: 'lg', label: 'Large' }] },
+      { name: 'separator', label: 'Between the words', type: 'choice', default: 'arch', options: [{ value: 'arch', label: 'Arch' }, { value: 'dot', label: 'Dot' }, { value: 'star', label: 'Star' }, { value: 'none', label: 'Nothing' }] },
+      { name: 'react_to_scroll', label: 'Speed up and reverse with the scroll', type: 'boolean', default: true },
     ],
   },
   {
@@ -326,6 +472,7 @@ export const WIDGETS: readonly WidgetDef[] = [
       image('image_offset', 'Smaller overlapping photograph'),
       alt('alt_offset'),
       { name: 'caption', label: 'Caption under the small photograph', type: 'text', default: 'Central Iowa · 2024' },
+      { name: 'image_side', label: 'Photograph on the', type: 'choice', default: 'right', options: [{ value: 'left', label: 'Left' }, { value: 'right', label: 'Right' }] },
     ],
   },
   {
@@ -368,6 +515,7 @@ export const WIDGETS: readonly WidgetDef[] = [
       alt('alt', 'Ashley, sitting at an outdoor table on a summer afternoon'),
       { name: 'signature', label: 'Signature', type: 'text', default: 'Ashley' },
       { name: 'show_instagram', label: 'Show the Instagram link', type: 'boolean', default: true },
+      { name: 'image_side', label: 'Photograph on the', type: 'choice', default: 'left', options: [{ value: 'left', label: 'Left' }, { value: 'right', label: 'Right' }] },
     ],
   },
   {
@@ -391,6 +539,8 @@ export const WIDGETS: readonly WidgetDef[] = [
           { name: 'body', label: 'Body', type: 'textarea', default: '' },
         ],
       },
+      { name: 'columns', label: 'Columns on a wide screen', type: 'choice', default: '2', options: [{ value: '2', label: 'Two' }, { value: '3', label: 'Three' }, { value: '4', label: 'Four' }] },
+      { name: 'show_numbers', label: 'Show the numbers', type: 'boolean', default: true },
     ],
   },
   {
@@ -407,6 +557,7 @@ export const WIDGETS: readonly WidgetDef[] = [
       { name: 'link_label', label: 'Link label', type: 'text', default: 'Packages and add-ons' },
       { name: 'link_href', label: 'Link', type: 'link', default: '/contact#investment' },
       { name: 'items', label: 'Items', type: 'lines', default: [], help: 'One per line.' },
+      { name: 'list_columns', label: 'List columns', type: 'choice', default: '1', options: [{ value: '1', label: 'One' }, { value: '2', label: 'Two' }] },
     ],
   },
   {
@@ -484,6 +635,7 @@ export const WIDGETS: readonly WidgetDef[] = [
           { name: 'body', label: 'Body', type: 'textarea', default: '' },
         ],
       },
+      { name: 'columns', label: 'Columns on a wide screen', type: 'choice', default: '3', options: [{ value: '2', label: 'Two' }, { value: '3', label: 'Three' }, { value: '4', label: 'Four' }] },
     ],
   },
   {
@@ -532,6 +684,8 @@ export const WIDGETS: readonly WidgetDef[] = [
     fields: [
       { name: 'quote', label: 'Quote', type: 'textarea', default: '' },
       { name: 'attribution', label: 'Attribution', type: 'text', default: '' },
+      { name: 'style', label: 'Style', type: 'choice', default: 'display', options: [{ value: 'display', label: 'Large, set in the display face' }, { value: 'aside', label: 'Italic, with a rule beside it' }] },
+      { name: 'image', label: 'Portrait beside it', type: 'image', default: '' },
     ],
   },
   {
@@ -559,6 +713,7 @@ export const WIDGETS: readonly WidgetDef[] = [
           { name: 'a', label: 'Answer', type: 'textarea', default: '' },
         ],
       },
+      { name: 'layout', label: 'Layout', type: 'choice', default: 'split', options: [{ value: 'split', label: 'Heading beside the questions' }, { value: 'stacked', label: 'Heading above the questions' }] },
     ],
   },
 
@@ -598,6 +753,8 @@ export const WIDGETS: readonly WidgetDef[] = [
           },
         ],
       },
+      { name: 'show_captions', label: 'Show captions', type: 'boolean', default: true },
+      { name: 'show_counter', label: 'Show the 01 / 09 counter', type: 'boolean', default: true },
     ],
   },
   {
@@ -623,6 +780,7 @@ export const WIDGETS: readonly WidgetDef[] = [
           { name: 'image', label: 'Photograph', type: 'image', default: '' },
         ],
       },
+      { name: 'show_step_count', label: 'Show “Step 1 of 3”', type: 'boolean', default: true },
     ],
   },
   {
@@ -648,6 +806,31 @@ export const WIDGETS: readonly WidgetDef[] = [
         ],
       },
       { name: 'caption', label: 'Caption in the full-screen view', type: 'text', default: '' },
+      {
+        name: 'layout',
+        label: 'Layout',
+        type: 'choice',
+        default: 'masonry',
+        options: [
+          { value: 'masonry', label: 'Balanced columns — every photo uncropped' },
+          { value: 'grid', label: 'Even grid — every photo the same shape' },
+          { value: 'carousel', label: 'Carousel — a row you swipe through' },
+        ],
+      },
+      {
+        name: 'ratio',
+        label: 'Shape in the grid and carousel',
+        type: 'choice',
+        default: '4/5',
+        options: [
+          { value: '4/5', label: 'Portrait — 4:5' },
+          { value: '3/4', label: 'Tall — 3:4' },
+          { value: '1/1', label: 'Square' },
+          { value: '3/2', label: 'Landscape — 3:2' },
+        ],
+        visibleWhen: { field: 'layout', equals: ['grid', 'carousel'] },
+      },
+      { name: 'gap', label: 'Space between', type: 'choice', default: 'normal', options: [{ value: 'tight', label: 'Tight' }, { value: 'normal', label: 'Normal' }, { value: 'loose', label: 'Loose' }] },
     ],
   },
   {
@@ -684,6 +867,7 @@ export const WIDGETS: readonly WidgetDef[] = [
           { value: 'full', label: 'Edge to edge' },
         ],
       },
+      { name: 'focal', label: 'Keep in frame', type: 'choice', default: 'center', options: [{ value: 'center', label: 'Centre' }, { value: 'top', label: 'Top' }, { value: 'bottom', label: 'Bottom' }] },
     ],
   },
   {
@@ -711,6 +895,7 @@ export const WIDGETS: readonly WidgetDef[] = [
         ],
       },
       { name: 'arch', label: 'Arched top', type: 'boolean', default: true },
+      { name: 'ratio', label: 'Shape', type: 'choice', default: '3/4', options: [{ value: '3/4', label: 'Tall — 3:4' }, { value: '4/5', label: 'Portrait — 4:5' }, { value: '1/1', label: 'Square' }, { value: '3/2', label: 'Landscape — 3:2' }] },
     ],
   },
 
@@ -732,6 +917,7 @@ export const WIDGETS: readonly WidgetDef[] = [
         default:
           'Six ways in. Senior sessions are a set package; everything else is planned around you — usually one location, chosen together, anywhere in the Des Moines metro.',
       },
+      { name: 'sessions', label: 'Which sessions', type: 'sessions', default: [], wide: true, help: 'Leave empty for all of them, in the order set under Sessions.' },
     ],
   },
   {
@@ -745,6 +931,7 @@ export const WIDGETS: readonly WidgetDef[] = [
       { name: 'cta_label', label: 'Main link', type: 'text', default: 'The full session' },
       { name: 'guide_label', label: 'Guide link', type: 'text', default: 'Prep guide' },
       { name: 'featured_prefix', label: 'Before the most-booked tier', type: 'text', default: 'Most booked:' },
+      { name: 'sessions', label: 'Which sessions', type: 'sessions', default: [], wide: true, help: 'Leave empty for all of them, in the order set under Sessions.' },
     ],
   },
   {
@@ -789,6 +976,7 @@ export const WIDGETS: readonly WidgetDef[] = [
       { name: 'close_body', label: 'Closing paragraph', type: 'textarea', default: '' },
       { name: 'close_label', label: 'Closing button', type: 'text', default: '' },
       { name: 'close_href', label: 'Closing button link', type: 'link', default: '/contact' },
+      { name: 'sessions', label: 'Which sessions', type: 'sessions', default: [], wide: true, help: 'Leave empty for all of them, in the order set under Sessions.' },
     ],
   },
   {
@@ -961,6 +1149,11 @@ export const WIDGETS: readonly WidgetDef[] = [
       { name: 'all_label', label: 'Everything filter', type: 'text', default: 'Everything' },
       { name: 'frames_label', label: 'After the photo count', type: 'text', default: 'frames' },
       { name: 'empty', label: 'When a category is empty', type: 'text', default: 'Nothing in this category yet.' },
+      { name: 'columns', label: 'Columns on a wide screen', type: 'choice', default: '3', options: [{ value: '2', label: 'Two' }, { value: '3', label: 'Three' }, { value: '4', label: 'Four' }] },
+      { name: 'ratio', label: 'Card shape', type: 'choice', default: '3/4', options: [{ value: '3/4', label: 'Tall — 3:4' }, { value: '4/5', label: 'Portrait — 4:5' }, { value: '1/1', label: 'Square' }, { value: '3/2', label: 'Landscape — 3:2' }] },
+      { name: 'show_filters', label: 'Show the category filters', type: 'boolean', default: true },
+      { name: 'show_count', label: 'Show how many photographs', type: 'boolean', default: true },
+      { name: 'category', label: 'Only this category', type: 'category', default: '', help: 'Leave empty for everything.' },
     ],
   },
 
@@ -1223,6 +1416,7 @@ export const WIDGETS: readonly WidgetDef[] = [
           items: [],
         },
       },
+      { name: 'columns', label: 'Columns on a wide screen', type: 'choice', default: '3', options: [{ value: '2', label: 'Two' }, { value: '3', label: 'Three' }] },
     ],
   },
 
@@ -1258,6 +1452,318 @@ export const WIDGETS: readonly WidgetDef[] = [
   },
 
   /* ========================================================= Structure */
+  /* ======================================================= Added later */
+  {
+    type: 'testimonials',
+    label: 'Kind words',
+    description: 'What clients said — one at a time on a slider, in a grid, or one large quote.',
+    icon: 'quote',
+    category: 'Text',
+    hosts: ALL,
+    fields: [
+      eyebrow('Kind words'),
+      heading('From the people in the photographs'),
+      {
+        name: 'items',
+        label: 'Testimonials',
+        type: 'repeater',
+        itemLabel: 'Testimonial',
+        default: [],
+        children: [
+          { name: 'quote', label: 'What they said', type: 'textarea', default: '' },
+          { name: 'name', label: 'Name', type: 'text', default: '' },
+          { name: 'detail', label: 'Session', type: 'text', default: '', placeholder: 'Senior pictures, 2025' },
+          { name: 'image', label: 'Photograph', type: 'image', default: '' },
+        ],
+      },
+      {
+        name: 'layout',
+        label: 'Layout',
+        type: 'choice',
+        default: 'slider',
+        options: [
+          { value: 'slider', label: 'Slider — one at a time' },
+          { value: 'grid', label: 'Grid' },
+          { value: 'single', label: 'One large quote' },
+        ],
+      },
+      { name: 'autoplay', label: 'Move on by itself', type: 'boolean', default: true, visibleWhen: { field: 'layout', equals: ['slider'] } },
+    ],
+  },
+  {
+    type: 'stats',
+    label: 'Figures',
+    description: 'A few numbers stated plainly — sessions shot, years booking, photographs delivered — counting up as they appear.',
+    icon: 'stats',
+    category: 'Text',
+    hosts: ALL,
+    fields: [
+      eyebrow(),
+      heading(),
+      {
+        name: 'items',
+        label: 'Figures',
+        type: 'repeater',
+        itemLabel: 'Figure',
+        maxItems: 6,
+        default: [],
+        children: [
+          { name: 'value', label: 'Figure', type: 'text', default: '', placeholder: '4.9' },
+          { name: 'suffix', label: 'After it', type: 'text', default: '', placeholder: '+' },
+          { name: 'label', label: 'Label', type: 'text', default: '' },
+        ],
+      },
+      COLUMNS('3'),
+      { name: 'count_up', label: 'Count up as they appear', type: 'boolean', default: true },
+    ],
+  },
+  {
+    type: 'cards',
+    label: 'Cards',
+    description: 'Photographs with a title, a line and a link each — services, mini-sessions, anything that wants a grid.',
+    icon: 'cards',
+    category: 'Photos',
+    hosts: ALL,
+    fields: [
+      eyebrow(),
+      heading(),
+      { name: 'intro', label: 'Intro', type: 'textarea', default: '' },
+      {
+        name: 'items',
+        label: 'Cards',
+        type: 'repeater',
+        itemLabel: 'Card',
+        default: [],
+        children: [
+          { name: 'image', label: 'Photograph', type: 'image', default: '' },
+          { name: 'title', label: 'Title', type: 'text', default: '' },
+          { name: 'body', label: 'Body', type: 'textarea', default: '' },
+          { name: 'href', label: 'Link', type: 'link', default: '' },
+          { name: 'link_label', label: 'Link label', type: 'text', default: '' },
+        ],
+      },
+      COLUMNS('3'),
+      {
+        name: 'style',
+        label: 'Photograph shape',
+        type: 'choice',
+        default: 'arch',
+        options: [
+          { value: 'arch', label: 'Arched top' },
+          { value: 'portrait', label: 'Portrait — 4:5' },
+          { value: 'square', label: 'Square' },
+          { value: 'landscape', label: 'Landscape — 3:2' },
+          { value: 'none', label: 'No photographs — numbered text' },
+        ],
+      },
+    ],
+  },
+  {
+    type: 'before_after',
+    label: 'Before and after',
+    description: 'Two photographs with a handle to drag between them — for showing what the edit does.',
+    icon: 'columns',
+    category: 'Photos',
+    hosts: ALL,
+    fields: [
+      eyebrow(),
+      heading(),
+      { name: 'body', label: 'Intro', type: 'textarea', default: '' },
+      image('before', 'Before'),
+      image('after', 'After'),
+      { name: 'before_label', label: 'Before label', type: 'text', default: 'Straight out of camera' },
+      { name: 'after_label', label: 'After label', type: 'text', default: 'Finished' },
+      { name: 'start', label: 'Handle starts at', type: 'number', default: 50, min: 10, max: 90, step: 5, suffix: '%' },
+      {
+        name: 'ratio',
+        label: 'Shape',
+        type: 'choice',
+        default: '3/2',
+        options: [
+          { value: '3/2', label: 'Landscape — 3:2' },
+          { value: '4/5', label: 'Portrait — 4:5' },
+          { value: '1/1', label: 'Square' },
+        ],
+      },
+    ],
+  },
+  {
+    type: 'album_grid',
+    label: 'Albums',
+    description: 'A few albums as cards — the latest, one category, or picked by hand.',
+    icon: 'portfolio',
+    category: 'Portfolio',
+    hosts: ALL,
+    fields: [
+      eyebrow('Recent sessions'),
+      heading('From the portfolio'),
+      { name: 'link_label', label: 'Link label', type: 'text', default: 'Full portfolio' },
+      { name: 'link_href', label: 'Link', type: 'link', default: '/portfolio' },
+      {
+        name: 'mode',
+        label: 'Which albums',
+        type: 'choice',
+        default: 'latest',
+        options: [
+          { value: 'latest', label: 'The latest' },
+          { value: 'category', label: 'The latest in one category' },
+          { value: 'featured', label: 'Featured albums' },
+          { value: 'pick', label: 'Picked by hand' },
+        ],
+      },
+      { name: 'category', label: 'Category', type: 'category', default: '', visibleWhen: { field: 'mode', equals: ['category'] } },
+      { name: 'albums', label: 'Albums', type: 'albums', default: [], wide: true, visibleWhen: { field: 'mode', equals: ['pick'] } },
+      { name: 'limit', label: 'How many', type: 'number', default: 3, min: 1, max: 12 },
+      COLUMNS('3'),
+      {
+        name: 'ratio',
+        label: 'Card shape',
+        type: 'choice',
+        default: '4/5',
+        options: [
+          { value: '4/5', label: 'Portrait — 4:5' },
+          { value: '3/4', label: 'Tall — 3:4' },
+          { value: '1/1', label: 'Square' },
+          { value: '3/2', label: 'Landscape — 3:2' },
+        ],
+      },
+    ],
+  },
+  {
+    type: 'video',
+    label: 'Video',
+    description: 'A YouTube or Vimeo link, or a video file — a highlight reel, a behind-the-scenes clip.',
+    icon: 'embed',
+    category: 'Photos',
+    hosts: ALL,
+    fields: [
+      eyebrow(),
+      heading(),
+      { name: 'url', label: 'Video link', type: 'link', default: '', help: 'A YouTube or Vimeo address, or a direct link to an .mp4 file.' },
+      image('poster', 'Still shown before it plays'),
+      {
+        name: 'ratio',
+        label: 'Shape',
+        type: 'choice',
+        default: '16/9',
+        options: [
+          { value: '16/9', label: 'Wide — 16:9' },
+          { value: '4/3', label: 'Classic — 4:3' },
+          { value: '1/1', label: 'Square' },
+          { value: '9/16', label: 'Vertical — 9:16' },
+        ],
+      },
+      { name: 'ambient', label: 'Play silently on a loop, like a moving photograph', type: 'boolean', default: false, help: 'For video files only.' },
+      { name: 'caption', label: 'Caption', type: 'text', default: '' },
+    ],
+  },
+  {
+    type: 'logos',
+    label: 'Featured in',
+    description: 'A row of logos or names — publications, vendors, venues.',
+    icon: 'logos',
+    category: 'Text',
+    hosts: ALL,
+    fields: [
+      eyebrow('As seen in'),
+      {
+        name: 'items',
+        label: 'Logos',
+        type: 'repeater',
+        itemLabel: 'Logo',
+        default: [],
+        children: [
+          { name: 'name', label: 'Name', type: 'text', default: '' },
+          { name: 'image', label: 'Logo', type: 'image', default: '', help: 'Leave empty to show the name in type instead.' },
+          { name: 'href', label: 'Link', type: 'link', default: '' },
+        ],
+      },
+      { name: 'muted', label: 'Soften them into the page', type: 'boolean', default: true },
+    ],
+  },
+  {
+    type: 'cta_band',
+    label: 'Banner',
+    description: 'A heading and buttons over a full-width photograph — an invitation between two sections.',
+    icon: 'cta',
+    category: 'Contact',
+    hosts: ALL,
+    fields: [
+      eyebrow('Bookings open'),
+      heading('Let’s make something worth keeping.'),
+      { name: 'body', label: 'Body', type: 'textarea', default: '' },
+      BUTTONS([{ label: 'Start an inquiry', href: '/contact', style: 'primary' }]),
+      image('image', 'Photograph'),
+      { name: 'overlay', label: 'Darken the photograph', type: 'number', default: 55, min: 0, max: 95, step: 5, suffix: '%' },
+      {
+        name: 'align',
+        label: 'Alignment',
+        type: 'choice',
+        default: 'center',
+        options: [
+          { value: 'left', label: 'Left' },
+          { value: 'center', label: 'Centred' },
+        ],
+      },
+      {
+        name: 'height',
+        label: 'Height',
+        type: 'choice',
+        default: 'medium',
+        options: [
+          { value: 'compact', label: 'Compact' },
+          { value: 'medium', label: 'Medium' },
+          { value: 'tall', label: 'Tall' },
+        ],
+      },
+    ],
+  },
+  {
+    type: 'two_column',
+    label: 'Two columns of text',
+    description: 'A heading over two columns of copy, side by side.',
+    icon: 'columns',
+    category: 'Text',
+    hosts: ALL,
+    fields: [
+      eyebrow(),
+      heading(),
+      { name: 'left', label: 'Left column', type: 'richtext', default: '', wide: true },
+      { name: 'right', label: 'Right column', type: 'richtext', default: '', wide: true },
+    ],
+  },
+  {
+    type: 'map',
+    label: 'Map',
+    description: 'A map of a place — a studio, a meeting point, a favourite location.',
+    icon: 'embed',
+    category: 'Contact',
+    hosts: ALL,
+    fields: [
+      eyebrow(),
+      heading(),
+      { name: 'body', label: 'Beside the map', type: 'textarea', default: '' },
+      { name: 'query', label: 'Place or address', type: 'text', default: 'Urbandale, Iowa' },
+      { name: 'zoom', label: 'Zoom', type: 'number', default: 12, min: 4, max: 18 },
+      { name: 'height', label: 'Height', type: 'choice', default: 'md', options: [{ value: 'sm', label: 'Short' }, { value: 'md', label: 'Medium' }, { value: 'lg', label: 'Tall' }] },
+    ],
+  },
+  {
+    type: 'instagram',
+    label: 'Instagram',
+    description: 'A grid of photographs that links through to Instagram.',
+    icon: 'gallery',
+    category: 'Photos',
+    hosts: ALL,
+    fields: [
+      eyebrow('On Instagram'),
+      heading(),
+      { name: 'images', label: 'Photographs', type: 'images', default: [], wide: true },
+      { name: 'columns', label: 'Across', type: 'choice', default: '6', options: [{ value: '3', label: 'Three' }, { value: '4', label: 'Four' }, { value: '6', label: 'Six' }] },
+      { name: 'link_label', label: 'Link label', type: 'text', default: 'Follow along' },
+    ],
+  },
+
   {
     type: 'divider',
     label: 'Rule',
@@ -1265,7 +1771,9 @@ export const WIDGETS: readonly WidgetDef[] = [
     icon: 'divider',
     category: 'Structure',
     hosts: ALL,
-    fields: [],
+    fields: [
+      { name: 'style', label: 'Style', type: 'choice', default: 'line', options: [{ value: 'line', label: 'Hairline' }, { value: 'arch', label: 'Arch ornament' }, { value: 'dots', label: 'Three dots' }] },
+    ],
   },
   {
     type: 'spacer',
@@ -1289,6 +1797,55 @@ export const WIDGETS: readonly WidgetDef[] = [
     ],
   },
 ]
+
+/* ------------------------------------------------------------------ *
+ * Heading options, everywhere there is a heading
+ *
+ * Added here rather than written into each widget, so a widget that gains a
+ * heading gains its level and size controls with it.
+ * ------------------------------------------------------------------ */
+
+const HEADING_TAG: FieldDef = {
+  name: 'heading_tag',
+  label: 'Heading level',
+  type: 'choice',
+  default: 'h2',
+  help: 'For search engines and screen readers, not the size. One H1 per page — the masthead is usually it.',
+  options: [
+    { value: 'h1', label: 'H1' },
+    { value: 'h2', label: 'H2' },
+    { value: 'h3', label: 'H3' },
+    { value: 'p', label: 'Not a heading' },
+  ],
+}
+
+const HEADING_SIZE: FieldDef = {
+  name: 'heading_size',
+  label: 'Heading size',
+  type: 'choice',
+  default: 'auto',
+  options: [
+    { value: 'auto', label: 'As designed' },
+    { value: 'display', label: 'Display — the biggest' },
+    { value: 'xl', label: 'Extra large' },
+    { value: 'lg', label: 'Large' },
+    { value: 'md', label: 'Medium' },
+    { value: 'sm', label: 'Small' },
+  ],
+}
+
+/** Widgets whose heading is a masthead drawn by its own component, not a section heading. */
+const OWN_HEADING = new Set(['page_hero'])
+
+function withHeadingOptions(widget: WidgetDef): WidgetDef {
+  const at = widget.fields.findIndex((f) => f.name === 'heading')
+  if (at < 0 || OWN_HEADING.has(widget.type) || widget.fields.some((f) => f.name === 'heading_size')) return widget
+  const fields = [...widget.fields]
+  fields.splice(at + 1, 0, HEADING_SIZE, HEADING_TAG)
+  return { ...widget, fields }
+}
+
+export const WIDGETS: readonly WidgetDef[] = BASE_WIDGETS.map(withHeadingOptions)
 
 /* ------------------------------------------------------------------ *
  * Lookups and defaults
@@ -1330,7 +1887,7 @@ export function fieldDefaults(fields: readonly FieldDef[]): Record<string, unkno
   for (const f of fields) {
     if (f.type === 'group') {
       out[f.name] = fieldDefaults(f.children ?? [])
-    } else if (f.type === 'repeater' || f.type === 'images' || f.type === 'lines' || f.type === 'multichoice') {
+    } else if (f.type === 'repeater' || f.type === 'images' || f.type === 'lines' || f.type === 'multichoice' || f.type === 'sessions' || f.type === 'albums') {
       out[f.name] = Array.isArray(f.default) ? structuredClone(f.default) : []
     } else if (f.default !== undefined) {
       out[f.name] = structuredClone(f.default)

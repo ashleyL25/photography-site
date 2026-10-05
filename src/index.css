@@ -210,6 +210,23 @@ header {
   }
 }
 
+/*
+ * The shell's left and right edge as padding on a full-width element — for a
+ * row that scrolls to the screen edge but starts in line with the content.
+ */
+@utility shell-inset {
+  --inset: 1.5rem;
+  padding-inline: var(--inset);
+  scroll-padding-inline: var(--inset);
+
+  @media (width >= 48rem) {
+    --inset: 2.5rem;
+  }
+  @media (width >= 80rem) {
+    --inset: calc(max(2.5rem, min(11rem, 12.5rem - (100vw - 96rem) / 2)) + max(0px, (100vw - 96rem) / 2));
+  }
+}
+
 @utility label {
   font-family: var(--font-label-face);
   font-weight: 400;
@@ -373,4 +390,65 @@ header {
 }
 ::view-transition-new(root) {
   z-index: 2;
+}
+
+/* ------------------------------------------------------------------ *
+ * Section colour schemes — the Style tab's background choices
+ *
+ * Each redefines the palette for its subtree, so every widget inside — text,
+ * rules, cards, buttons — recolours with it, and the dark ones turn the text
+ * light without any widget knowing. They hold in both the site's light and
+ * dark themes, because a charcoal band is charcoal either way.
+ * ------------------------------------------------------------------ */
+
+.scheme-beige,
+.scheme-champagne {
+  --surface: #f7f1ea;
+  --ink: #222222;
+  --muted: #5f584f;
+  --faint: #8f857a;
+  --accent: #9a562a;
+  --line: rgb(34 34 34 / 0.14);
+  color-scheme: light;
+}
+.scheme-beige {
+  --canvas: #f0e8e1;
+}
+.scheme-champagne {
+  --canvas: #edd5cb;
+  --surface: #f4e3db;
+}
+
+.scheme-charcoal,
+.scheme-forest,
+.scheme-sage,
+.scheme-copper,
+.scheme-photo {
+  --ink: #f0e8e1;
+  --muted: rgb(240 232 225 / 0.78);
+  --faint: rgb(240 232 225 / 0.55);
+  --accent: #edd5cb;
+  --line: rgb(240 232 225 / 0.18);
+  color-scheme: dark;
+}
+.scheme-charcoal {
+  --canvas: #222222;
+  --surface: #2c2c2c;
+}
+.scheme-forest {
+  --canvas: #2c401e;
+  --surface: #34492a;
+}
+.scheme-sage {
+  --canvas: #5b7343;
+  --surface: #66804c;
+}
+.scheme-copper {
+  --canvas: #9a562a;
+  --surface: #a65f31;
+  --accent: #f6e4da;
+}
+.scheme-photo {
+  --canvas: #1d1f17;
+  --surface: rgb(29 31 23 / 0.6);
 }

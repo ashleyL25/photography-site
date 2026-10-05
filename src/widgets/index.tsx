@@ -34,15 +34,46 @@ import { PortfolioListing } from './portfolio'
 import { GUIDE_BLOCK_TYPES, GuideChapters, GuideClose, GuideLetter, GuidePiecePreview, GuidesListing } from './guides'
 import { BlogGrid, BlogListing } from './blog'
 import { InquiryCta, InquiryFormWidget } from './contact'
+import {
+  AlbumGrid,
+  BeforeAfter,
+  Cards,
+  CtaBand,
+  Instagram,
+  Logos,
+  MapEmbed,
+  Stats,
+  Testimonials,
+  TwoColumn,
+  Video,
+} from './extra'
 import { frame, text, type WidgetProps } from './types'
+import { StyledSection } from './StyledSection'
 import type { Section as SectionData } from '@shared/types'
 
-function Divider({ styles }: WidgetProps) {
+function Divider({ content, styles }: WidgetProps) {
   const f = frame(styles, { pad: 'py-6' })
+  const style = text(content, 'style') || 'line'
   return (
-    <div id={f.id} className={clsx(f.pad, f.className)}>
+    <div id={f.id} className={clsx(f.pad, f.className)} style={f.style}>
       <div className="shell">
-        <DrawRule />
+        {style === 'arch' ? (
+          <div className="flex items-center gap-6 text-accent">
+            <span className="h-px flex-1 bg-line" />
+            <svg viewBox="0 0 24 30" className="h-7 w-6 shrink-0" aria-hidden>
+              <path d="M1 29V12a11 11 0 0 1 22 0v17" fill="none" stroke="currentColor" strokeWidth="1.3" />
+            </svg>
+            <span className="h-px flex-1 bg-line" />
+          </div>
+        ) : style === 'dots' ? (
+          <div className="flex justify-center gap-3 text-accent" aria-hidden>
+            {[0, 1, 2].map((i) => (
+              <span key={i} className="h-1.5 w-1.5 rounded-full bg-current" />
+            ))}
+          </div>
+        ) : (
+          <DrawRule />
+        )}
       </div>
     </div>
   )
@@ -111,6 +142,18 @@ const REGISTRY: Record<string, ComponentType<WidgetProps>> = {
   inquiry_cta: InquiryCta,
   inquiry_form: InquiryFormWidget,
 
+  testimonials: Testimonials,
+  stats: Stats,
+  cards: Cards,
+  before_after: BeforeAfter,
+  album_grid: AlbumGrid,
+  video: Video,
+  logos: Logos,
+  cta_band: CtaBand,
+  two_column: TwoColumn,
+  map: MapEmbed,
+  instagram: Instagram,
+
   divider: Divider,
   spacer: Spacer,
 }
@@ -125,7 +168,11 @@ export function renderSection(section: SectionData) {
     if (import.meta.env.DEV) console.warn(`No renderer for widget type "${section.type}" (section ${section.id})`)
     return null
   }
-  return <Component key={section.id} content={section.content} styles={section.styles} data={section.data} />
+  return (
+    <StyledSection key={section.id} styles={section.styles}>
+      <Component content={section.content} styles={section.styles} data={section.data} />
+    </StyledSection>
+  )
 }
 
 /**

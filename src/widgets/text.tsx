@@ -1,3 +1,4 @@
+import { Heading } from './Heading'
 import { useRef, useState } from 'react'
 import {
   AnimatePresence,
@@ -16,7 +17,7 @@ import { Tick } from '@/components/TierCards'
 import { useReducedMotion } from '@/lib/hooks'
 import { useSiteInfo } from '@/lib/site'
 import { ArrowLink, Buttons, type ButtonValue } from './links'
-import { EYEBROW, bool, fill, frame, list, text, useHostSession, type WidgetProps } from './types'
+import { EYEBROW, bool, columns, fill, frame, list, text, useHostSession, type WidgetProps } from './types'
 
 /* ------------------------------------------------------------------ *
  * Marquee
@@ -28,20 +29,43 @@ function wrap(min: number, max: number, value: number) {
   return ((((value - min) % range) + range) % range) + min
 }
 
-function Track({ words }: { words: string[] }) {
+const MARQUEE_SIZE: Record<string, string> = {
+  sm: 'px-5 text-[clamp(1.4rem,3.4vw,2.6rem)] md:px-8',
+  md: 'px-6 text-[clamp(1.9rem,5vw,4rem)] md:px-10',
+  lg: 'px-8 text-[clamp(2.4rem,7vw,6rem)] md:px-14',
+}
+
+function Separator({ kind, size }: { kind: string; size: string }) {
+  const small = size === 'sm'
+  if (kind === 'none') return null
+  if (kind === 'dot') return <span className={clsx('shrink-0 rounded-full bg-accent', small ? 'h-1.5 w-1.5' : 'h-2 w-2 md:h-3 md:w-3')} />
+  if (kind === 'star')
+    return (
+      <svg viewBox="0 0 24 24" className={clsx('shrink-0 text-accent', small ? 'h-4 w-4' : 'h-6 w-6 md:h-8 md:w-8')}>
+        <path d="M12 2v20M2 12h20M5 5l14 14M19 5 5 19" fill="none" stroke="currentColor" strokeWidth="1.2" />
+      </svg>
+    )
+  return (
+    <svg viewBox="0 0 24 30" className={clsx('shrink-0 text-accent', small ? 'h-4 w-3.5' : 'h-6 w-5 md:h-9 md:w-7')}>
+      <path d="M1 29V12a11 11 0 0 1 22 0v17" fill="none" stroke="currentColor" strokeWidth="1.5" />
+    </svg>
+  )
+}
+
+function Track({ words, size, separator }: { words: string[]; size: string; separator: string }) {
   return (
     <span className="flex shrink-0 items-center">
       {words.map((word, i) => (
         <span key={`${word}-${i}`} className="flex items-center">
-          <span className="display px-8 text-[clamp(2.4rem,7vw,6rem)] whitespace-nowrap md:px-14">{word}</span>
-          <svg viewBox="0 0 24 30" className="h-6 w-5 shrink-0 text-accent md:h-9 md:w-7">
-            <path d="M1 29V12a11 11 0 0 1 22 0v17" fill="none" stroke="currentColor" strokeWidth="1.5" />
-          </svg>
+          <span className={clsx('display whitespace-nowrap', MARQUEE_SIZE[size] ?? MARQUEE_SIZE.lg)}>{word}</span>
+          <Separator kind={separator} size={size} />
         </span>
       ))}
     </span>
   )
 }
+
+const MARQUEE_SPEED: Record<string, number> = { slow: 0.8, normal: 1.6, fast: 3.2 }
 
 /**
  * Horizontal band of words. It idles at a constant crawl, then speeds up and
@@ -54,6 +78,10 @@ export function Marquee({ content, styles }: WidgetProps) {
   const direction = useRef(1)
   const words = list<string>(content, 'items')
   const f = frame(styles, { pad: 'py-8 md:py-12', surface: true })
+  const size = text(content, 'size') || 'lg'
+  const separator = text(content, 'separator') || 'arch'
+  const speed = MARQUEE_SPEED[text(content, 'speed')] ?? MARQUEE_SPEED.normal
+  const reactive = bool(content, 'react_to_scroll', true)
 
   const { scrollY } = useScroll()
   const velocity = useVelocity(scrollY)
@@ -62,8 +90,8 @@ export function Marquee({ content, styles }: WidgetProps) {
 
   useAnimationFrame((_, delta) => {
     if (reduced) return
-    let move = direction.current * 1.6 * (delta / 1000)
-    const v = factor.get()
+    let move = direction.current * speed * (delta / 1000)
+    const v = reactive ? factor.get() : 0
     if (v < 0) direction.current = -1
     else if (v > 0) direction.current = 1
     move += move * Math.abs(v)
@@ -76,12 +104,12 @@ export function Marquee({ content, styles }: WidgetProps) {
     <section
       id={f.id}
       aria-label="Session types"
-      className={clsx('relative overflow-hidden border-y border-line', f.pad, f.className)}
+      className={clsx('relative overflow-hidden border-y border-line', f.pad, f.className)} style={f.style}
     >
       <motion.div className="flex w-max" style={reduced ? undefined : { x }}>
         {/* Two identical tracks so the 50% wrap is invisible. */}
-        <Track words={words} />
-        <Track words={words} />
+        <Track words={words} size={size} separator={separator} />
+        <Track words={words} size={size} separator={separator} />
       </motion.div>
     </section>
   )
@@ -99,11 +127,12 @@ export function Story({ content, styles }: WidgetProps) {
   const f = frame(styles, { id: 'story', pad: 'py-28 md:py-44' })
   const stats = list<{ value: string; label: string }>(content, 'stats').filter((s) => s.value || s.label)
   const offset = text(content, 'image_offset')
+  const left = text(content, 'image_side') === 'left'
 
   return (
-    <section id={f.id} className={clsx('relative scroll-mt-24', f.pad, f.className)}>
+    <section id={f.id} className={clsx('relative scroll-mt-24', f.pad, f.className)} style={f.style}>
       <div className="shell grid gap-16 lg:grid-cols-12 lg:gap-12">
-        <div className="lg:col-span-7 lg:pr-12">
+        <div className={clsx('lg:col-span-7', left ? 'lg:order-2 lg:pl-12' : 'lg:pr-12')}>
           {text(content, 'eyebrow') && (
             <Reveal className={EYEBROW}>
               <span className="h-px w-10 bg-accent" />
@@ -111,7 +140,7 @@ export function Story({ content, styles }: WidgetProps) {
             </Reveal>
           )}
 
-          <MaskText text={text(content, 'heading')} className="display mt-8 text-[clamp(2.2rem,5.4vw,4.6rem)] text-ink" />
+          <Heading content={content} className="display mt-8 text-[clamp(2.2rem,5.4vw,4.6rem)] text-ink" />
 
           <RichParagraphs
             html={text(content, 'body')}
@@ -136,7 +165,7 @@ export function Story({ content, styles }: WidgetProps) {
         {/* `self-start` keeps this column the height of the photograph rather
             than the (much taller) text column, so the offset plate below can
             anchor to the plate's real bottom edge. */}
-        <div className="relative lg:col-span-5 lg:self-start">
+        <div className={clsx('relative lg:col-span-5 lg:self-start', left && 'lg:order-1')}>
           <Parallax speed={0.06}>
             <Unveil className="arch" delay={0.05}>
               <Photo
@@ -149,7 +178,12 @@ export function Story({ content, styles }: WidgetProps) {
           </Parallax>
 
           {offset && (
-            <div className="absolute -bottom-20 left-0 w-[46%] sm:left-4 lg:-bottom-28 lg:-left-28 lg:w-[54%]">
+            <div
+              className={clsx(
+                'absolute -bottom-20 w-[46%] lg:-bottom-28 lg:w-[54%]',
+                left ? 'right-0 sm:right-4 lg:-right-28' : 'left-0 sm:left-4 lg:-left-28',
+              )}
+            >
               <Parallax speed={-0.14}>
                 <Unveil delay={0.25} direction="left" className="ring-8 ring-canvas">
                   <Photo
@@ -186,17 +220,17 @@ export function TextBlock({ content, styles }: WidgetProps) {
 
   if (layout === 'split') {
     return (
-      <section id={f.id} className={clsx('scroll-mt-24', f.pad, f.className)}>
+      <section id={f.id} className={clsx('scroll-mt-24', f.pad, f.className)} style={f.style}>
         <div className="shell grid gap-12 lg:grid-cols-12 lg:gap-20">
           <div className="lg:col-span-5">
             {eyebrow && (
-              <Reveal className={EYEBROW}>
+              <Reveal className={clsx(EYEBROW, f.centered && 'justify-center')}>
                 <span className="h-px w-10 bg-accent" />
                 {eyebrow}
               </Reveal>
             )}
             {heading && (
-              <MaskText text={heading} className="display mt-6 text-[clamp(2rem,4.4vw,3.4rem)] text-ink" />
+              <Heading content={content} className="display mt-6 text-[clamp(2rem,4.4vw,3.4rem)] text-ink" />
             )}
           </div>
 
@@ -213,12 +247,12 @@ export function TextBlock({ content, styles }: WidgetProps) {
 
   if (layout === 'close') {
     return (
-      <section id={f.id} className={clsx('scroll-mt-24', f.pad, f.className)}>
-        <div className="shell">
-          <div className="max-w-2xl">
+      <section id={f.id} className={clsx('scroll-mt-24', f.pad, f.className)} style={f.style}>
+        <div className={f.shell}>
+          <div className={f.measure('max-w-2xl')}>
           {eyebrow && <Reveal className="label text-accent">{eyebrow}</Reveal>}
           {heading && (
-            <MaskText text={heading} className="display mt-6 text-[clamp(2.2rem,5.2vw,3.8rem)] text-ink" />
+            <Heading content={content} className="display mt-6 text-[clamp(2.2rem,5.2vw,3.8rem)] text-ink" />
           )}
           <RichParagraphs
             html={text(content, 'body')}
@@ -226,7 +260,7 @@ export function TextBlock({ content, styles }: WidgetProps) {
             start={0.15}
           />
           <Reveal delay={0.22}>
-            <Buttons buttons={buttons} className="mt-10" />
+            <Buttons buttons={buttons} className={clsx('mt-10', f.centered && 'justify-center')} />
           </Reveal>
           </div>
         </div>
@@ -235,23 +269,23 @@ export function TextBlock({ content, styles }: WidgetProps) {
   }
 
   return (
-    <section id={f.id} className={clsx('scroll-mt-24', f.pad, f.className)}>
-      <div className="shell">
-        <div className="max-w-2xl">
+    <section id={f.id} className={clsx('scroll-mt-24', f.pad, f.className)} style={f.style}>
+      <div className={f.shell}>
+        <div className={f.measure('max-w-2xl')}>
           {eyebrow && (
-            <Reveal className={EYEBROW}>
+            <Reveal className={clsx(EYEBROW, f.centered && 'justify-center')}>
               <span className="h-px w-10 bg-accent" />
               {eyebrow}
             </Reveal>
           )}
-          {heading && <MaskText text={heading} className="display mt-6 text-[clamp(2rem,4.4vw,3.4rem)] text-ink" />}
+          {heading && <Heading content={content} className="display mt-6 text-[clamp(2rem,4.4vw,3.4rem)] text-ink" />}
           <RichParagraphs
             html={text(content, 'body')}
             className="mt-8 space-y-6 text-[1.02rem] leading-[1.85] text-muted"
             start={0.15}
           />
           <Reveal delay={0.22}>
-            <Buttons buttons={buttons} className="mt-10" />
+            <Buttons buttons={buttons} className={clsx('mt-10', f.centered && 'justify-center')} />
           </Reveal>
         </div>
       </div>
@@ -266,13 +300,14 @@ export function TextBlock({ content, styles }: WidgetProps) {
 export function AboutIntro({ content, styles }: WidgetProps) {
   const site = useSiteInfo()
   const f = frame(styles, { id: 'about', pad: 'py-28 md:py-40', surface: true, rule: true })
+  const right = text(content, 'image_side') === 'right'
 
   return (
-    <section id={f.id} className={clsx('relative scroll-mt-24 overflow-hidden', f.pad, f.className)}>
+    <section id={f.id} className={clsx('relative scroll-mt-24 overflow-hidden', f.pad, f.className)} style={f.style}>
       <div className="shell grid items-center gap-16 lg:grid-cols-12 lg:gap-20">
-        <div className="relative lg:col-span-5">
+        <div className={clsx('relative lg:col-span-5', right && 'lg:order-2')}>
           <Parallax speed={0.05}>
-            <Unveil className="arch" direction="left">
+            <Unveil className="arch" direction={right ? 'right' : 'left'}>
               <Photo
                 src={text(content, 'image')}
                 alt={text(content, 'alt')}
@@ -285,7 +320,10 @@ export function AboutIntro({ content, styles }: WidgetProps) {
           {/* Framing rule that overshoots the plate — a printed-page gesture. */}
           <Reveal
             delay={0.4}
-            className="pointer-events-none absolute -top-6 -right-6 hidden h-[calc(100%+3rem)] w-[70%] border border-accent/40 lg:block"
+            className={clsx(
+              'pointer-events-none absolute -top-6 hidden h-[calc(100%+3rem)] w-[70%] border border-accent/40 lg:block',
+              right ? '-left-6' : '-right-6',
+            )}
           >
             <span className="sr-only" />
           </Reveal>
@@ -299,7 +337,7 @@ export function AboutIntro({ content, styles }: WidgetProps) {
             </Reveal>
           )}
 
-          <MaskText text={text(content, 'heading')} className="display mt-8 text-[clamp(2.1rem,4.8vw,4rem)] text-ink" />
+          <Heading content={content} className="display mt-8 text-[clamp(2.1rem,4.8vw,4rem)] text-ink" />
 
           <RichParagraphs
             html={text(content, 'body')}
@@ -344,7 +382,7 @@ export function NumberedCards({ content, styles }: WidgetProps) {
   const items = list<{ title: string; body: string }>(content, 'items')
 
   return (
-    <section id={f.id} className={clsx('scroll-mt-24', f.pad, f.className)}>
+    <section id={f.id} className={clsx('scroll-mt-24', f.pad, f.className)} style={f.style}>
       <div className="shell">
         <div className="max-w-2xl">
           {text(content, 'eyebrow') && (
@@ -353,13 +391,13 @@ export function NumberedCards({ content, styles }: WidgetProps) {
               {text(content, 'eyebrow')}
             </Reveal>
           )}
-          <MaskText text={text(content, 'heading')} className="display mt-6 text-[clamp(2rem,4.4vw,3.4rem)] text-ink" />
+          <Heading content={content} className="display mt-6 text-[clamp(2rem,4.4vw,3.4rem)] text-ink" />
         </div>
 
-        <div className="mt-16 grid gap-x-12 gap-y-14 sm:grid-cols-2">
+        <div className={clsx('mt-16 grid gap-x-12 gap-y-14', columns(content.columns, '2'))}>
           {items.map((item, i) => (
             <Reveal key={`${item.title}-${i}`} delay={(i % 2) * 0.08}>
-              <span className="label text-faint">{String(i + 1).padStart(2, '0')}</span>
+              {bool(content, 'show_numbers', true) && <span className="label text-faint">{String(i + 1).padStart(2, '0')}</span>}
               <h3 className="display mt-5 text-[1.7rem] text-ink">{item.title}</h3>
               <p className="mt-4 max-w-md text-[0.99rem] leading-[1.85] text-muted">{item.body}</p>
             </Reveal>
@@ -379,7 +417,7 @@ export function ChecklistSplit({ content, styles }: WidgetProps) {
   const items = list<string>(content, 'items')
 
   return (
-    <section id={f.id} className={clsx('scroll-mt-24', f.pad, f.className)}>
+    <section id={f.id} className={clsx('scroll-mt-24', f.pad, f.className)} style={f.style}>
       <div className="shell grid gap-12 lg:grid-cols-12 lg:gap-20">
         <div className="lg:col-span-5">
           {text(content, 'eyebrow') && (
@@ -388,7 +426,7 @@ export function ChecklistSplit({ content, styles }: WidgetProps) {
               {text(content, 'eyebrow')}
             </Reveal>
           )}
-          <MaskText text={text(content, 'heading')} className="display mt-6 text-[clamp(2rem,4.2vw,3.2rem)] text-ink" />
+          <Heading content={content} className="display mt-6 text-[clamp(2rem,4.2vw,3.2rem)] text-ink" />
           {text(content, 'body') && (
             <Reveal delay={0.15} as="p" className="mt-8 max-w-md text-[1rem] leading-[1.85] text-muted">
               {text(content, 'body')}
@@ -399,7 +437,7 @@ export function ChecklistSplit({ content, styles }: WidgetProps) {
           </Reveal>
         </div>
 
-        <ul className="lg:col-span-6 lg:col-start-7">
+        <ul className={clsx('lg:col-span-6 lg:col-start-7', text(content, 'list_columns') === '2' && 'sm:grid sm:grid-cols-2 sm:gap-x-10')}>
           {items.map((line, i) => (
             <Reveal
               as="li"
@@ -427,7 +465,7 @@ export function TimelineArc({ content, styles }: WidgetProps) {
 
   return (
     <section id={f.id} className={clsx('scroll-mt-24', f.className)}>
-      <div className={clsx('shell grid gap-14 lg:grid-cols-12 lg:gap-16', f.pad)}>
+      <div className={clsx('shell grid gap-14 lg:grid-cols-12 lg:gap-16', f.pad)} style={f.style}>
         <div className="lg:col-span-7">
           {text(content, 'eyebrow') && (
             <Reveal className={EYEBROW}>
@@ -435,7 +473,7 @@ export function TimelineArc({ content, styles }: WidgetProps) {
               {text(content, 'eyebrow')}
             </Reveal>
           )}
-          <MaskText text={text(content, 'heading')} className="display mt-6 text-[clamp(2.2rem,5vw,4rem)] text-ink" />
+          <Heading content={content} className="display mt-6 text-[clamp(2.2rem,5vw,4rem)] text-ink" />
           {text(content, 'lead') && (
             <Reveal delay={0.15} as="p" className="mt-8 max-w-xl text-[1.02rem] leading-[1.85] text-muted">
               {text(content, 'lead')}
@@ -492,7 +530,7 @@ export function AboutEssays({ content, styles }: WidgetProps) {
 
   return (
     <section id={f.id} className={clsx('scroll-mt-24', f.className)}>
-      <div className={clsx('shell grid gap-16 lg:grid-cols-12 lg:gap-20', f.pad)}>
+      <div className={clsx('shell grid gap-16 lg:grid-cols-12 lg:gap-20', f.pad)} style={f.style}>
         {/* Sticky so the portrait stays beside the essays instead of leaving a
             tall empty column once it scrolls past. */}
         <div className="relative lg:col-span-5 lg:sticky lg:top-28 lg:self-start">
@@ -555,11 +593,11 @@ export function Milestones({ content, styles }: WidgetProps) {
   const entries = list<{ year: string; title: string; body: string }>(content, 'entries')
 
   return (
-    <section id={f.id} className={clsx('scroll-mt-24', f.pad, f.className)}>
+    <section id={f.id} className={clsx('scroll-mt-24', f.pad, f.className)} style={f.style}>
       <div className="shell">
-        <MaskText text={text(content, 'heading')} className="display max-w-xl text-[clamp(2.2rem,5vw,4rem)] text-ink" />
+        <Heading content={content} className="display max-w-xl text-[clamp(2.2rem,5vw,4rem)] text-ink" />
 
-        <ol className="mt-16 grid gap-x-10 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+        <ol className={clsx('mt-16 grid gap-x-10 gap-y-12', columns(content.columns, '3'))}>
           {entries.map((entry, i) => (
             <Reveal as="li" key={`${entry.year}-${i}`} delay={(i % 3) * 0.1}>
               <div className="flex items-baseline gap-4">
@@ -584,7 +622,7 @@ export function AsideCta({ content, styles }: WidgetProps) {
   const f = frame(styles)
   return (
     <section id={f.id} className={clsx('scroll-mt-24', f.className)}>
-      <div className={clsx('shell grid gap-16 lg:grid-cols-12 lg:gap-20', f.pad)}>
+      <div className={clsx('shell grid gap-16 lg:grid-cols-12 lg:gap-20', f.pad)} style={f.style}>
         <Reveal className="lg:col-span-5">
           <p className="label text-accent">{text(content, 'aside_title')}</p>
           <p className="mt-6 border-l border-accent/40 pl-6 text-[1.02rem] leading-[1.85] text-muted italic">
@@ -593,7 +631,7 @@ export function AsideCta({ content, styles }: WidgetProps) {
         </Reveal>
 
         <div className="lg:col-span-6 lg:col-start-7">
-          <MaskText text={text(content, 'heading')} className="display text-[clamp(2.2rem,5vw,3.8rem)] text-ink" />
+          <Heading content={content} className="display text-[clamp(2.2rem,5vw,3.8rem)] text-ink" />
           <Reveal delay={0.12}>
             <Buttons buttons={list<ButtonValue>(content, 'buttons')} className="mt-10" />
           </Reveal>
@@ -615,15 +653,16 @@ export function CtaClose({ content, styles }: WidgetProps) {
     : { session: 'session', slug: '', title: '' }
 
   return (
-    <section id={f.id} className={clsx('scroll-mt-24', f.pad, f.className)}>
+    <section id={f.id} className={clsx('scroll-mt-24', f.pad, f.className)} style={f.style}>
       {/* The measure is capped on an inner element rather than on `shell`
           itself: `shell` carries `margin-inline: auto`, so narrowing it
           re-centres the block off the gutter every other section lines up on. */}
-      <div className="shell">
-        <div className="max-w-2xl">
+      <div className={f.shell}>
+        <div className={f.measure('max-w-2xl')}>
         {bool(content, 'rule') && <DrawRule className="mb-14" />}
         {text(content, 'eyebrow') && <Reveal className="label text-accent">{text(content, 'eyebrow')}</Reveal>}
-        <MaskText
+        <Heading
+          content={content}
           text={fill(text(content, 'heading'), tokens)}
           className="display mt-6 text-[clamp(2.2rem,5.4vw,4rem)] text-ink"
         />
@@ -633,7 +672,7 @@ export function CtaClose({ content, styles }: WidgetProps) {
           </Reveal>
         )}
         <Reveal delay={0.22}>
-          <Buttons buttons={list<ButtonValue>(content, 'buttons')} className="mt-10" tokens={tokens} />
+          <Buttons buttons={list<ButtonValue>(content, 'buttons')} className={clsx('mt-10', f.centered && 'justify-center')} tokens={tokens} />
         </Reveal>
         </div>
       </div>
@@ -647,16 +686,39 @@ export function CtaClose({ content, styles }: WidgetProps) {
 
 export function Quote({ content, styles }: WidgetProps) {
   const f = frame(styles)
-  return (
-    <section id={f.id} className={clsx('scroll-mt-24', f.pad, f.className)}>
-      <div className="shell max-w-3xl text-center">
+  const aside = text(content, 'style') === 'aside'
+  const image = text(content, 'image')
+  const left = aside || f.align === 'left' || Boolean(image)
+
+  const words = (
+    <>
+      {aside ? (
+        <Reveal as="p" className="border-l border-accent pl-8 font-serif text-[clamp(1.4rem,2.6vw,2rem)] leading-[1.5] text-ink italic">
+          {text(content, 'quote')}
+        </Reveal>
+      ) : (
         <MaskText as="p" text={text(content, 'quote')} className="display text-[clamp(1.9rem,4.4vw,3.4rem)] text-ink" />
-        {text(content, 'attribution') && (
-          <Reveal delay={0.2} className="label mt-8 text-accent">
-            {text(content, 'attribution')}
-          </Reveal>
-        )}
-      </div>
+      )}
+      {text(content, 'attribution') && (
+        <Reveal delay={0.2} className={clsx('label mt-8 text-accent', aside && 'pl-8')}>
+          {text(content, 'attribution')}
+        </Reveal>
+      )}
+    </>
+  )
+
+  return (
+    <section id={f.id} className={clsx('scroll-mt-24', f.pad, f.className)} style={f.style}>
+      {image ? (
+        <div className={clsx(f.shell, 'grid items-center gap-12 md:grid-cols-12 md:gap-16')}>
+          <Unveil className="arch mx-auto w-2/3 md:col-span-4 md:w-full">
+            <Photo src={image} alt="" sizes="(min-width: 768px) 28vw, 60vw" className="aspect-[4/5]" />
+          </Unveil>
+          <div className="md:col-span-7 md:col-start-6">{words}</div>
+        </div>
+      ) : (
+        <div className={clsx(f.shell, !left && 'text-center', f.width === 'auto' && 'max-w-3xl', f.measure())}>{words}</div>
+      )}
     </section>
   )
 }
@@ -723,18 +785,19 @@ export function Faq({ content, styles }: WidgetProps) {
   const f = frame(styles, { surface: true, rule: true })
   const items = list<{ q: string; a: string }>(content, 'items')
   const [open, setOpen] = useState<number | null>(bool(content, 'open_first', true) ? 0 : null)
+  const stacked = text(content, 'layout') === 'stacked'
 
   return (
-    <section id={f.id} className={clsx('scroll-mt-24', f.pad, f.className)}>
-      <div className="shell grid gap-12 lg:grid-cols-12 lg:gap-20">
-        <div className="lg:col-span-4">
+    <section id={f.id} className={clsx('scroll-mt-24', f.pad, f.className)} style={f.style}>
+      <div className={clsx('shell grid gap-12', stacked ? 'max-w-3xl' : 'lg:grid-cols-12 lg:gap-20')}>
+        <div className={stacked ? undefined : 'lg:col-span-4'}>
           {text(content, 'eyebrow') && (
             <Reveal className={EYEBROW}>
               <span className="h-px w-10 bg-accent" />
               {text(content, 'eyebrow')}
             </Reveal>
           )}
-          <MaskText text={text(content, 'heading')} className="display mt-6 text-[clamp(2rem,4vw,3.2rem)] text-ink" />
+          <Heading content={content} className="display mt-6 text-[clamp(2rem,4vw,3.2rem)] text-ink" />
           {text(content, 'intro') && (
             <Reveal delay={0.16} className="mt-8 max-w-sm text-[0.95rem] leading-relaxed text-muted">
               {text(content, 'intro')}
@@ -747,7 +810,7 @@ export function Faq({ content, styles }: WidgetProps) {
           )}
         </div>
 
-        <div className="lg:col-span-7 lg:col-start-6">
+        <div className={stacked ? undefined : 'lg:col-span-7 lg:col-start-6'}>
           <DrawRule />
           {items.map((item, i) => (
             <Question

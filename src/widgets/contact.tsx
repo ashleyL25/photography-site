@@ -1,7 +1,8 @@
 import clsx from 'clsx'
+import { Heading } from './Heading'
 import { Photo } from '@/components/Photo'
 import { InquiryForm } from '@/components/InquiryForm'
-import { MaskText, Reveal } from '@/components/motion'
+import { Reveal } from '@/components/motion'
 import { useSiteInfo } from '@/lib/site'
 import { bool, frame, text, type WidgetProps } from './types'
 
@@ -23,7 +24,7 @@ export function InquiryCta({ content, styles }: WidgetProps) {
         <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-[rgb(var(--scrim))]/45 to-[rgb(var(--scrim))]/85" />
       </div>
 
-      <div className={clsx('shell relative text-beige', f.pad)}>
+      <div className={clsx('shell relative text-beige', f.pad)} style={f.style}>
         <div className="grid gap-16 lg:grid-cols-12 lg:gap-20">
           <div className="lg:col-span-5">
             {text(content, 'eyebrow') && (
@@ -33,7 +34,7 @@ export function InquiryCta({ content, styles }: WidgetProps) {
               </Reveal>
             )}
 
-            <MaskText text={text(content, 'heading')} className="display mt-8 text-[clamp(2.4rem,5.6vw,4.6rem)] text-beige" />
+            <Heading content={content} className="display mt-8 text-[clamp(2.4rem,5.6vw,4.6rem)] text-beige" />
 
             {text(content, 'body') && (
               <Reveal delay={0.15} as="p" className="mt-8 max-w-md leading-[1.85] text-beige/70">
@@ -90,7 +91,7 @@ export function InquiryFormWidget({ content, styles }: WidgetProps) {
 
   return (
     <section id={f.id} className={clsx('scroll-mt-24', f.className)}>
-      <div className={clsx('shell grid gap-16 lg:grid-cols-12 lg:gap-20', f.pad)}>
+      <div className={clsx('shell grid gap-16 lg:grid-cols-12 lg:gap-20', f.pad)} style={f.style}>
         <div className="lg:col-span-7">
           <Reveal className="label text-accent">{text(content, 'form_label')}</Reveal>
           <div className="mt-10">
