@@ -101,6 +101,27 @@ A guide's chapters are widgets too: a **Chapter** widget starts one and the bloc
 after it belong to it. The guide page groups them back into numbered chapters with
 the chapter index, so the chapters stay editable in the ordinary page builder.
 
+### Theme settings
+
+**Settings → Theme** in the dashboard is the site-wide styling, laid out like
+the Pollywog HubSpot theme's settings: Colours (a light and a dark scheme, the
+brand palette, the first-visit light/dark choice), Typography (four Google Fonts
+faces, body text, every heading level H1–H6, paragraph sizes, labels, quotes,
+links), Buttons (shape and type, primary, secondary and text-link colours, hover
+animations), Elements (photo and card corners, forms, list bullets, focus
+outline, back to top), Layout (container width, gutters, spacing), Header
+(scroll behaviour, logo, navigation, button, mobile menu), Footer and Animation.
+A live preview of any page sits beside the form, in light or dark, desktop or
+phone, and nothing reaches visitors until Save.
+
+The schema and the stylesheet it produces are in `shared/theme.ts`. Every value
+defaults to the site as designed — colours left empty, numbers at the values
+the stylesheet already used — and `themeCss` only writes what differs, so an
+untouched theme changes nothing. The stylesheet reads the results as CSS custom
+properties with the design as each fallback (`display`, `label`, `shell`, `.cta`
+in `src/index.css`), and the server writes the saved theme into the page itself
+so it paints correctly from the first frame.
+
 ### The Style tab
 
 Every widget has the same Style tab, applied by `src/widgets/StyledSection.tsx`

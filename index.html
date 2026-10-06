@@ -53,8 +53,14 @@
     <script>
       // Resolve the theme before first paint so there is no flash of the wrong palette.
       ;(() => {
-        const stored = localStorage.getItem('ap-theme')
-        const dark = stored ? stored === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches
+        // A visitor's own choice wins; then the site's default from the Theme
+        // settings (written in by the server); then their device.
+        let stored = null
+        try { stored = localStorage.getItem('ap-theme') } catch {}
+        const preset = window.__AP_MODE
+        const dark = stored
+          ? stored === 'dark'
+          : preset === 'dark' || (preset !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches)
         document.documentElement.classList.toggle('dark', dark)
         document.documentElement.classList.toggle('light', !dark)
         // Must match --canvas for each palette in src/index.css.

@@ -18,6 +18,7 @@ import GuideEditorPage from './guides/GuideEditorPage'
 import TaxonomyPage from './TaxonomyPage'
 import MediaPage from './media/MediaPage'
 import SettingsPage from './settings/SettingsPage'
+import ThemePage from './theme/ThemePage'
 import InquiriesPage from './InquiriesPage'
 import AccountPage from './AccountPage'
 import UsersPage from './UsersPage'
@@ -76,6 +77,8 @@ export default function AdminRoutes() {
               <Route path="inquiries" element={<InquiriesPage />} />
               <Route path="settings" element={<Navigate to="/dashboard/settings/site" replace />} />
               <Route path="settings/:group" element={<SettingsPage />} />
+              <Route path="theme" element={<Navigate to="/dashboard/theme/colors" replace />} />
+              <Route path="theme/:group" element={<ThemePage />} />
               <Route path="account" element={<AccountPage />} />
 
               <Route

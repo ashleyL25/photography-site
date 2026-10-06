@@ -3,6 +3,7 @@ import { Route, Routes, useLocation } from 'react-router-dom'
 import { Layout } from '@/components/Layout'
 import { PageCurtain } from '@/components/PageTransition'
 import { usePageTransition } from '@/lib/hooks'
+import { useThemeSettings } from '@/lib/site'
 import DynamicPage, { PageFallback } from '@/pages/DynamicPage'
 
 // Pages built in the dashboard ship in the main bundle; the rest split out so a
@@ -28,7 +29,8 @@ function lazyPage(Page: React.ComponentType) {
 function Site() {
   // Routes render against the deferred location, so a page swap happens behind
   // the curtain rather than in front of the reader.
-  const { rendered, phase } = usePageTransition()
+  const anim = useThemeSettings('animation', 'global')
+  const { rendered, phase } = usePageTransition(anim.page_transition !== false)
 
   return (
     <>

@@ -19,6 +19,7 @@ import { MediaField, MediaListField } from './MediaPicker'
 import { CollectionPicker } from './CollectionPicker'
 import { CategorySelect, GuideSelect, OrderedPicker, SessionSelect } from './ContentPickers'
 import { ArtworkChoice, ElementField } from './ArtworkFields'
+import { FontField, ThemeColorField } from './ThemeFields'
 
 /**
  * Renders a field schema as a form.
@@ -263,6 +264,12 @@ function Field({
             onChange={onChange}
           />
         )
+
+      case 'color':
+        return <ThemeColorField id={id} value={typeof value === 'string' ? value : ''} onChange={onChange} />
+
+      case 'font':
+        return <FontField id={id} value={typeof value === 'string' ? value : ''} onChange={onChange} />
 
       case 'session':
         return <SessionSelect id={id} value={typeof value === 'string' ? value : ''} onChange={onChange} />

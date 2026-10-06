@@ -108,6 +108,72 @@ body {
 header {
   z-index: 9999;
 }
+
+
+/* ------------------------------------------------------------------ *
+ * Buttons
+ *
+ * The site's pill buttons, as classes the Theme settings drive. Every value is
+ * a variable with the design as its fallback.
+ * ------------------------------------------------------------------ */
+@layer components {
+  .cta {
+    display: inline-block;
+    font-family: var(--btn-family, var(--font-label-face));
+    font-size: var(--btn-size, 0.6875rem);
+    font-weight: var(--btn-weight, 400);
+    text-transform: var(--btn-transform, uppercase);
+    letter-spacing: var(--btn-tracking, 0.28em);
+    line-height: 1;
+    border-radius: var(--btn-radius, 999px);
+    border-width: var(--btn-border, 1px);
+    border-style: solid;
+    padding: var(--btn-py, 1rem) var(--btn-px, 2.25rem);
+    transition-property: color, background-color, border-color, transform, box-shadow, background-size;
+    transition-duration: var(--btn-speed, 400ms);
+    transition-timing-function: var(--ease-out-expo);
+  }
+  .cta-sm {
+    padding: calc(var(--btn-py, 1rem) * 0.75) calc(var(--btn-px, 2.25rem) * 0.67);
+  }
+  .cta-primary {
+    background-color: var(--btn1-bg, transparent);
+    color: var(--btn1-text, var(--ink));
+    border-color: var(--btn1-border, var(--ink));
+  }
+  .cta-primary:hover {
+    background-color: var(--btn1-hover-bg, var(--accent));
+    color: var(--btn1-hover-text, var(--canvas));
+    border-color: var(--btn1-hover-border, var(--accent));
+  }
+  .cta-secondary {
+    background-color: var(--btn2-bg, transparent);
+    color: var(--btn2-text, var(--muted));
+    border-color: var(--btn2-border, var(--line));
+  }
+  .cta-secondary:hover {
+    background-color: var(--btn2-hover-bg, transparent);
+    color: var(--btn2-hover-text, var(--accent));
+    border-color: var(--btn2-hover-border, var(--accent));
+  }
+  .cta-link {
+    color: var(--btn3-text, var(--ink));
+    border-color: var(--btn3-line, var(--ink));
+  }
+  .cta-link:hover {
+    color: var(--btn3-hover-text, var(--accent));
+    border-color: var(--btn3-hover-text, var(--accent));
+  }
+
+  /* Photographs and cards — corner radius from the Theme settings. */
+  .photo-frame {
+    border-radius: var(--photo-radius, 0);
+  }
+  .card-frame {
+    border-radius: var(--card-r, 0);
+    box-shadow: var(--card-shadow, none);
+  }
+}
 @layer base {
   *,
   ::before,
@@ -199,14 +265,14 @@ header {
  */
 @utility shell {
   margin-inline: auto;
-  max-width: 96rem;
-  padding-inline: 1.5rem;
+  max-width: var(--container, 96rem);
+  padding-inline: var(--gutter-sm, 1.5rem);
 
   @media (width >= 48rem) {
-    padding-inline: 2.5rem;
+    padding-inline: var(--gutter-md, 2.5rem);
   }
   @media (width >= 80rem) {
-    padding-inline: max(2.5rem, min(11rem, 12.5rem - (100vw - 96rem) / 2));
+    padding-inline: max(var(--gutter-md, 2.5rem), min(11rem, 12.5rem - (100vw - var(--container, 96rem)) / 2));
   }
 }
 
@@ -215,37 +281,43 @@ header {
  * row that scrolls to the screen edge but starts in line with the content.
  */
 @utility shell-inset {
-  --inset: 1.5rem;
+  --inset: var(--gutter-sm, 1.5rem);
   padding-inline: var(--inset);
   scroll-padding-inline: var(--inset);
 
   @media (width >= 48rem) {
-    --inset: 2.5rem;
+    --inset: var(--gutter-md, 2.5rem);
   }
   @media (width >= 80rem) {
-    --inset: calc(max(2.5rem, min(11rem, 12.5rem - (100vw - 96rem) / 2)) + max(0px, (100vw - 96rem) / 2));
+    --inset: calc(max(var(--gutter-md, 2.5rem), min(11rem, 12.5rem - (100vw - var(--container, 96rem)) / 2)) + max(0px, (100vw - var(--container, 96rem)) / 2));
   }
 }
 
 @utility label {
-  font-family: var(--font-label-face);
-  font-weight: 400;
-  text-transform: uppercase;
-  letter-spacing: 0.28em;
-  font-size: 0.6875rem;
+  font-family: var(--l-family, var(--font-label-face));
+  font-weight: var(--l-weight, 400);
+  text-transform: var(--l-transform, uppercase);
+  letter-spacing: var(--l-tracking, 0.28em);
+  font-size: var(--l-size, 0.6875rem);
   line-height: 1;
 }
 
+/*
+ * The display face. Each property reads a variable the Theme settings can set
+ * per heading level (see shared/theme.ts), falling back to the design.
+ */
 @utility display {
-  font-family: var(--font-display-face);
-  font-weight: 400;
-  line-height: 0.92;
-  letter-spacing: 0.005em;
+  font-family: var(--d-family, var(--font-display-face));
+  font-weight: var(--d-weight, 400);
+  line-height: var(--d-leading, 0.92);
+  letter-spacing: var(--d-tracking, 0.005em);
+  text-transform: var(--d-transform, none);
+  font-style: var(--d-style, normal);
 }
 
 /* Boho arch — a rounded-top window used for portraits and the monogram. */
 @utility arch {
-  border-radius: 999px 999px 6px 6px;
+  border-radius: var(--arch-radius, 999px) var(--arch-radius, 999px) 6px 6px;
 }
 
 /* Full-bleed 35mm film grain, layered over everything but the cursor. */
@@ -412,10 +484,10 @@ header {
   color-scheme: light;
 }
 .scheme-beige {
-  --canvas: #f0e8e1;
+  --canvas: var(--color-beige);
 }
 .scheme-champagne {
-  --canvas: #edd5cb;
+  --canvas: var(--color-champagne);
   --surface: #f4e3db;
 }
 
@@ -432,19 +504,19 @@ header {
   color-scheme: dark;
 }
 .scheme-charcoal {
-  --canvas: #222222;
+  --canvas: var(--color-charcoal);
   --surface: #2c2c2c;
 }
 .scheme-forest {
-  --canvas: #2c401e;
+  --canvas: var(--color-forest);
   --surface: #34492a;
 }
 .scheme-sage {
-  --canvas: #5b7343;
+  --canvas: var(--color-sage);
   --surface: #66804c;
 }
 .scheme-copper {
-  --canvas: #9a562a;
+  --canvas: var(--color-copper);
   --surface: #a65f31;
   --accent: #f6e4da;
 }
@@ -541,4 +613,14 @@ header {
   0% { transform: scaleY(0); }
   50% { transform: scaleY(1); }
   100% { transform: scaleY(0); transform-origin: bottom; }
+}
+
+/* Header navigation links — the label style, with the Theme settings' own values. */
+@utility nav-link {
+  font-family: var(--nav-family, var(--l-family, var(--font-label-face)));
+  font-weight: var(--l-weight, 400);
+  text-transform: var(--nav-transform, var(--l-transform, uppercase));
+  letter-spacing: var(--nav-tracking, var(--l-tracking, 0.28em));
+  font-size: var(--nav-size, var(--l-size, 0.6875rem));
+  line-height: 1;
 }

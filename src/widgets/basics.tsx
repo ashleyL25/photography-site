@@ -25,15 +25,15 @@ function Head({ content, centered, className }: { content: Record<string, unknow
           {centered && <span className="h-px w-10 bg-accent" />}
         </Reveal>
       )}
-      {text(content, 'heading') && <Heading content={content} className="display mt-6 text-[clamp(2rem,4.4vw,3.4rem)] text-ink" />}
+      {text(content, 'heading') && <Heading content={content} className="display mt-6 text-[calc(clamp(2rem,4.4vw,3.4rem)*var(--hs,1))] text-ink" />}
     </div>
   )
 }
 
 const TEXT_SIZE: Record<string, string> = {
-  sm: 'text-[0.95rem] leading-[1.8]',
-  md: 'text-[1.04rem] leading-[1.9]',
-  lg: 'text-[1.2rem] leading-[1.85]',
+  sm: 'text-[length:var(--p-small,0.95rem)] leading-[1.8]',
+  md: 'text-[length:var(--p-medium,1.04rem)] leading-[1.9]',
+  lg: 'text-[length:var(--p-large,1.2rem)] leading-[1.85]',
 }
 
 export function RichTextBlock({ content, styles }: WidgetProps) {

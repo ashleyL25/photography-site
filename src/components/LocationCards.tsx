@@ -253,7 +253,7 @@ function LocationModal({
         {/* The location itself. */}
         <div className="overflow-y-auto p-8 md:p-10">
           <p className="label text-accent">{location.area}</p>
-          <h3 className="display mt-4 text-[clamp(1.9rem,3.4vw,2.6rem)] text-ink">
+          <h3 className="display mt-4 text-[calc(clamp(1.9rem,3.4vw,2.6rem)*var(--hs,1))] text-ink">
             {location.name}
           </h3>
 

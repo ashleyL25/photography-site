@@ -1,4 +1,5 @@
 import { SWATCHES } from '../../shared/palette.js'
+import { FONTS } from '../../shared/theme.js'
 import { randomUUID } from 'node:crypto'
 import { execute, query } from '../db.js'
 import { sanitizeHtml, htmlToText } from './sanitize.js'
@@ -141,6 +142,21 @@ export function cleanAgainst(fields: readonly FieldDef[], input: unknown): Recor
         out[field.name] = Array.isArray(value)
           ? value.filter((v): v is string => typeof v === 'string' && v.length > 0).map((v) => v.slice(0, 768)).slice(0, 600)
           : []
+        break
+
+      case 'color': {
+        // A hex, rgb()/rgba()/hsl() or a CSS variable — nothing that could
+        // break out of the declaration it is written into.
+        const v = typeof value === 'string' ? value.trim() : ''
+        out[field.name] =
+          /^#[0-9a-f]{3,8}$/i.test(v) || /^(rgb|rgba|hsl|hsla)\([0-9.,%\s/]+\)$/i.test(v) || /^var\(--[a-z0-9-]+\)$/i.test(v) || v === 'transparent'
+            ? v
+            : ''
+        break
+      }
+
+      case 'font':
+        out[field.name] = typeof value === 'string' && FONTS.some((f) => f.value === value) ? value : (field.default ?? '')
         break
 
       case 'swatch':

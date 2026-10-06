@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
 import { useScrolled } from '@/lib/hooks'
 import { useOverPhoto } from '@/lib/chrome'
-import { useSiteInfo } from '@/lib/site'
+import { useSiteInfo, useThemeSettings } from '@/lib/site'
 import { ThemeToggle } from './ThemeToggle'
 import { Wordmark } from './Brand'
 
@@ -118,14 +118,54 @@ function NavDropdown({
   )
 }
 
+/** Literal classes for the mobile-menu breakpoint, so Tailwind sees each one. */
+const DESKTOP_NAV: Record<string, string> = { md: 'md:flex', lg: 'lg:flex', xl: 'xl:flex' }
+const MOBILE_ONLY: Record<string, string> = { md: 'md:hidden', lg: 'lg:hidden', xl: 'xl:hidden' }
+
+/** True while the page is moving down past the header, for "hide on scroll". */
+function useScrollingDown(enabled: boolean) {
+  const [down, setDown] = useState(false)
+  useEffect(() => {
+    if (!enabled) return setDown(false)
+    let last = scrollY
+    const onScroll = () => {
+      const y = scrollY
+      if (Math.abs(y - last) > 6) {
+        setDown(y > last && y > 240)
+        last = y
+      }
+    }
+    addEventListener('scroll', onScroll, { passive: true })
+    return () => removeEventListener('scroll', onScroll)
+  }, [enabled])
+  return down
+}
+
+const CTA_CLASS: Record<string, string> = {
+  primary: 'cta cta-primary cta-sm',
+  secondary: 'cta cta-secondary cta-sm',
+  link: 'cta-link label border-b pb-2 transition-colors',
+}
+
 export function Header() {
   const { pathname } = useLocation()
   const scrolled = useScrolled(80)
   const site = useSiteInfo()
-  const photoBacked = useOverPhoto()
+  const behaviour = useThemeSettings('header', 'behaviour')
+  const logo = useThemeSettings('header', 'logo')
+  const navTheme = useThemeSettings('header', 'nav')
+  const ctaTheme = useThemeSettings('header', 'cta')
+  const mobile = useThemeSettings('header', 'mobile')
+  const modeTheme = useThemeSettings('colors', 'mode')
+  const sticky = typeof behaviour.sticky === 'string' ? behaviour.sticky : 'always'
+  const bp = typeof mobile.breakpoint === 'string' && mobile.breakpoint in DESKTOP_NAV ? mobile.breakpoint : 'lg'
+  const indicator = typeof navTheme.indicator === 'string' ? navTheme.indicator : 'underline'
+  const scrolledBg = behaviour.scrolled_bg === 'surface' ? 'bg-surface' : behaviour.scrolled_bg === 'glass' ? 'bg-canvas/75 backdrop-blur-xl' : 'bg-canvas backdrop-blur-xl'
+  const photoBacked = useOverPhoto() && behaviour.over_photo !== false
   const NAV = site.nav
   const MOBILE_NAV = [...NAV, { label: 'Contact', to: '/contact', children: undefined }]
   const [open, setOpen] = useState(false)
+  const hidden = useScrollingDown(sticky === 'hide')
   /** Which drawer item has its children showing — one at a time, or none. */
   const [expanded, setExpanded] = useState<string | null>(null)
 
@@ -166,41 +206,70 @@ export function Header() {
       <header
         data-over={over}
         className={clsx(
-          'group/head fixed inset-x-0 top-0 z-70 transition-all duration-500 ease-[var(--ease-out-expo)]',
+          'group/head inset-x-0 top-0 z-70 transition-all duration-500 ease-[var(--ease-out-expo)]',
+          sticky === 'none' ? 'absolute' : 'fixed',
+          hidden && !open && '-translate-y-full',
           // The top padding carries the iOS status-bar inset on top of its own
           // spacing, so the bar's background and blur reach the physical top
           // edge rather than leaving a strip the page scrolls through.
-          scrolled
-            ? 'border-b border-line bg-canvas pt-[calc(1.25rem+env(safe-area-inset-top))] pb-3 backdrop-blur-xl'
-            : 'border-b border-transparent pt-[calc(1.25rem+env(safe-area-inset-top))] pb-6',
+          scrolled && sticky !== 'none'
+            ? clsx(
+                'border-b pt-[calc(1.25rem*var(--header-pad,1)+env(safe-area-inset-top))] pb-[calc(0.75rem*var(--header-pad,1))]',
+                scrolledBg,
+                behaviour.scrolled_border === false ? 'border-transparent' : 'border-line',
+                behaviour.shadow === true && 'shadow-[0_12px_40px_-24px_rgb(0_0_0/0.45)]',
+              )
+            : 'border-b border-transparent pt-[calc(1.25rem*var(--header-pad,1)+env(safe-area-inset-top))] pb-[calc(1.5rem*var(--header-pad,1))]',
           over && 'text-beige [text-shadow:0_1px_18px_rgb(0_0_0/0.35)]',
         )}
       >
         <div className="shell flex items-center justify-between gap-6">
           <Link to="/" className="shrink-0" aria-label={`${site.name} — home`}>
-            <Wordmark />
+            {logo.kind === 'image' && typeof logo.image === 'string' && logo.image ? (
+              <span className="relative block" style={{ height: typeof logo.height === 'number' ? logo.height : 40 }}>
+                <img
+                  src={logo.image}
+                  alt=""
+                  className={clsx('h-full w-auto', typeof logo.image_dark === 'string' && logo.image_dark && 'dark:hidden group-data-[over=true]/head:hidden')}
+                />
+                {typeof logo.image_dark === 'string' && logo.image_dark && (
+                  <img src={logo.image_dark} alt="" className="hidden h-full w-auto group-data-[over=true]/head:block dark:block" />
+                )}
+              </span>
+            ) : logo.kind === 'text' ? (
+              <span className="display block whitespace-nowrap" style={{ fontSize: typeof logo.height === 'number' ? logo.height * 0.7 : 28 }}>
+                {site.name}
+              </span>
+            ) : (
+              <Wordmark />
+            )}
           </Link>
 
-          <nav className="hidden items-center gap-9 lg:flex" aria-label="Primary">
+          <nav className={clsx('hidden items-center', DESKTOP_NAV[bp])} style={{ gap: 'var(--nav-gap, 2.25rem)' }} aria-label="Primary">
             {NAV.map((item) => {
               const link = (
                 <Link
                   to={item.to}
                   aria-current={isActive(item.to) ? 'page' : undefined}
                   className={clsx(
-                    'label group relative py-2 transition-colors duration-300',
+                    'nav-link group relative py-2 transition-colors duration-300',
                     isActive(item.to)
                       ? 'text-accent group-data-[over=true]/head:text-champagne'
                       : 'text-muted hover:text-ink group-data-[over=true]/head:text-beige/75 group-data-[over=true]/head:hover:text-beige',
                   )}
                 >
                   {item.label}
-                  <span
-                    className={clsx(
-                      'absolute inset-x-0 -bottom-0.5 h-px origin-left bg-accent transition-transform duration-500 ease-[var(--ease-out-expo)] group-hover:scale-x-100 group-data-[over=true]/head:bg-champagne',
-                      isActive(item.to) ? 'scale-x-100' : 'scale-x-0',
-                    )}
-                  />
+                  {indicator !== 'none' && (
+                    <span
+                      className={clsx(
+                        'absolute bg-accent transition-transform duration-500 ease-[var(--ease-out-expo)] group-data-[over=true]/head:bg-champagne',
+                        indicator === 'dot'
+                          ? 'left-1/2 -bottom-1.5 size-1 -translate-x-1/2 rounded-full group-hover:scale-100'
+                          : 'inset-x-0 -bottom-0.5 h-px origin-left group-hover:scale-x-100',
+                        isActive(item.to) ? (indicator === 'dot' ? 'scale-100' : 'scale-x-100') : indicator === 'dot' ? 'scale-0' : 'scale-x-0',
+                      )}
+                    />
+                  )}
                 </Link>
               )
 
@@ -216,19 +285,21 @@ export function Header() {
           </nav>
 
           <div className="flex items-center gap-3">
+            {ctaTheme.show !== false && (
             <Link
               to={site.headerCta.href}
-              className="label hidden rounded-full border border-ink px-6 py-3 text-ink transition-colors duration-400 hover:border-accent hover:bg-accent hover:text-canvas group-data-[over=true]/head:border-beige/60 group-data-[over=true]/head:text-beige group-data-[over=true]/head:hover:border-champagne group-data-[over=true]/head:hover:bg-champagne group-data-[over=true]/head:hover:text-charcoal sm:inline-block"
+              className={clsx(CTA_CLASS[String(ctaTheme.style ?? 'primary')] ?? CTA_CLASS.primary, 'hidden group-data-[over=true]/head:border-beige/60 group-data-[over=true]/head:text-beige group-data-[over=true]/head:hover:border-champagne group-data-[over=true]/head:hover:bg-champagne group-data-[over=true]/head:hover:text-charcoal sm:inline-block')}
             >
               {site.headerCta.label}
             </Link>
-            <ThemeToggle />
+            )}
+            {modeTheme.toggle !== false && <ThemeToggle />}
             <button
               type="button"
               onClick={() => setOpen((v) => !v)}
               aria-label={open ? 'Close menu' : 'Open menu'}
               aria-expanded={open}
-              className="grid size-10 place-items-center rounded-full border border-line text-ink group-data-[over=true]/head:border-beige/40 group-data-[over=true]/head:text-beige lg:hidden"
+              className={clsx('grid size-10 place-items-center rounded-full border border-line text-ink group-data-[over=true]/head:border-beige/40 group-data-[over=true]/head:text-beige', MOBILE_ONLY[bp])}
             >
               <span className="relative block h-3 w-4">
                 <motion.span
@@ -257,10 +328,16 @@ export function Header() {
             // top items somewhere unreachable — auto margins collapse instead of
             // overflowing, so the content centres when it fits and scrolls when
             // it does not.
-            className="fixed inset-0 z-60 flex flex-col overflow-y-auto bg-canvas px-8 pt-[calc(5rem+env(safe-area-inset-top))] pb-[env(safe-area-inset-bottom)] lg:hidden"
-            initial={{ clipPath: 'inset(0% 0% 100% 0%)' }}
-            animate={{ clipPath: 'inset(0% 0% 0% 0%)' }}
-            exit={{ clipPath: 'inset(0% 0% 100% 0%)' }}
+            className={clsx('fixed inset-0 z-60 flex flex-col overflow-y-auto bg-canvas px-8 pt-[calc(5rem+env(safe-area-inset-top))] pb-[env(safe-area-inset-bottom)]', MOBILE_ONLY[bp])}
+            {...(mobile.animation === 'fade'
+              ? { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 } }
+              : mobile.animation === 'slide'
+                ? { initial: { x: '100%' }, animate: { x: 0 }, exit: { x: '100%' } }
+                : {
+                    initial: { clipPath: 'inset(0% 0% 100% 0%)' },
+                    animate: { clipPath: 'inset(0% 0% 0% 0%)' },
+                    exit: { clipPath: 'inset(0% 0% 100% 0%)' },
+                  })}
             transition={{ duration: 0.7, ease: [0.76, 0, 0.24, 1] }}
           >
             <div className="m-auto w-full py-8">
@@ -278,11 +355,13 @@ export function Header() {
                       <Link
                         to={item.to}
                         onClick={() => setOpen(false)}
-                        className="display block flex-1 py-5 text-[clamp(2.4rem,11vw,3.6rem)] text-ink"
+                        className="display block flex-1 py-5 text-[calc(clamp(2.4rem,11vw,3.6rem)*var(--mnav-scale,1))] text-ink"
                       >
-                        <span className="label mr-4 align-middle text-[0.55rem] text-faint">
-                          0{i + 1}
-                        </span>
+                        {mobile.numbers !== false && (
+                          <span className="label mr-4 align-middle text-[0.55rem] text-faint">
+                            0{i + 1}
+                          </span>
+                        )}
                         {item.label}
                       </Link>
                       {/* A separate control, not a tap on the word. Making the

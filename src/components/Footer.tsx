@@ -1,27 +1,37 @@
 import { Link } from 'react-router-dom'
-import { useSiteInfo } from '@/lib/site'
+import clsx from 'clsx'
+import { useSiteInfo, useThemeSettings } from '@/lib/site'
 import { Monogram } from './Brand'
 
 export function Footer() {
   const year = new Date().getFullYear()
   const SITE = useSiteInfo()
   const NAV = SITE.nav
+  const look = useThemeSettings('footer', 'style')
+  const show = useThemeSettings('footer', 'show')
+  const scheme = typeof look.scheme === 'string' ? look.scheme : 'canvas'
 
   return (
     // The bottom inset clears the home indicator, which overlaps the page
     // because of viewport-fit=cover. Zero anywhere without one.
-    <footer className="border-t border-line bg-canvas pb-[env(safe-area-inset-bottom)]">
-      <div className="shell py-16 md:py-20">
+    <footer
+      className={clsx(
+        'pb-[env(safe-area-inset-bottom)]',
+        look.border !== false && 'border-t border-line',
+        scheme === 'surface' ? 'bg-surface' : scheme === 'canvas' ? 'bg-canvas' : `scheme-${scheme} bg-canvas text-ink`,
+      )}
+    >
+      <div className="shell py-[calc(4rem*var(--footer-pad,1))] md:py-[calc(5rem*var(--footer-pad,1))]">
         <div className="flex flex-col gap-12 lg:flex-row lg:items-start lg:justify-between">
           <div className="max-w-sm">
-            <Monogram className="h-12 text-accent" />
+            {show.monogram !== false && <Monogram className="h-12 text-accent" />}
             <p className="display mt-6 text-[1.8rem] text-ink">{SITE.name}</p>
             <p className="mt-3 text-[0.95rem] leading-relaxed text-muted">
               {SITE.tagline}. Based in {SITE.base}, photographing across {SITE.serves}.
             </p>
           </div>
 
-          <nav aria-label="Footer" className="flex flex-col gap-4">
+          {show.explore !== false && <nav aria-label="Footer" className="flex flex-col gap-4">
             <span className="label text-faint">Explore</span>
             {[...NAV, { label: 'Contact', to: '/contact' }].map((item) => (
               <Link
@@ -32,9 +42,10 @@ export function Footer() {
                 {item.label}
               </Link>
             ))}
-          </nav>
+          </nav>}
 
-          <div className="flex flex-col gap-4">
+          {(show.contact !== false || show.cta !== false) && <div className="flex flex-col gap-4">
+            {show.contact !== false && <>
             <span className="label text-faint">Get in touch</span>
             <a
               href={`mailto:${SITE.email}`}
@@ -50,13 +61,14 @@ export function Footer() {
             >
               {SITE.instagramHandle}
             </a>
-            <Link
+            </>}
+            {show.cta !== false && <Link
               to="/contact"
-              className="label mt-4 inline-block w-max rounded-full border border-ink px-7 py-3 text-ink transition-colors duration-400 hover:border-accent hover:bg-accent hover:text-canvas"
+              className="cta cta-primary cta-sm mt-4 inline-block w-max px-7"
             >
               {SITE.footerCta}
-            </Link>
-          </div>
+            </Link>}
+          </div>}
         </div>
 
         <div className="mt-16 flex flex-col gap-4 border-t border-line pt-8 sm:flex-row sm:items-center sm:justify-between">

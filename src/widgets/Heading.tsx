@@ -6,11 +6,11 @@ import { MaskText } from '@/components/motion'
  * scales between a phone and a wide screen the way the designed ones do.
  */
 const SIZES: Record<string, string> = {
-  display: 'text-[clamp(3rem,9vw,7.5rem)]',
-  xl: 'text-[clamp(2.4rem,6vw,5.2rem)]',
-  lg: 'text-[clamp(2.2rem,5vw,4rem)]',
-  md: 'text-[clamp(1.9rem,4vw,3rem)]',
-  sm: 'text-[clamp(1.5rem,2.6vw,2.1rem)]',
+  display: 'text-[calc(clamp(3rem,9vw,7.5rem)*var(--hs,1))]',
+  xl: 'text-[calc(clamp(2.4rem,6vw,5.2rem)*var(--hs,1))]',
+  lg: 'text-[calc(clamp(2.2rem,5vw,4rem)*var(--hs,1))]',
+  md: 'text-[calc(clamp(1.9rem,4vw,3rem)*var(--hs,1))]',
+  sm: 'text-[calc(clamp(1.5rem,2.6vw,2.1rem)*var(--hs,1))]',
 }
 
 /**
@@ -35,6 +35,6 @@ export function Heading({
   const size = typeof content.heading_size === 'string' ? SIZES[content.heading_size] : undefined
   const tag = content.heading_tag
   const as = tag === 'h1' || tag === 'h3' || tag === 'p' ? tag : 'h2'
-  const classes = size ? className.replace(/text-\[clamp\([^\]]+\)\]/, size) : className
+  const classes = size ? className.replace(/text-\[(?:calc\()?clamp\([^\]]+\)\]/, size) : className
   return <MaskText as={as} text={words} className={classes} />
 }

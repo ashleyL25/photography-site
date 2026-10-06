@@ -101,7 +101,7 @@ function PostRow({ post, index, options }: { post: Post; index: number; options:
             {options.showCategory !== false && post.category && <span className="label text-accent">{post.category.name}</span>}
             <Meta post={post} o={options} />
           </div>
-          <h3 className="display mt-3 text-[clamp(1.7rem,3vw,2.4rem)] text-ink transition-colors duration-400 group-hover:text-accent">{post.title}</h3>
+          <h3 className="display mt-3 text-[calc(clamp(1.7rem,3vw,2.4rem)*var(--hs,1))] text-ink transition-colors duration-400 group-hover:text-accent">{post.title}</h3>
           {options.showExcerpt !== false && post.excerpt && <p className="mt-3 max-w-2xl text-[0.98rem] leading-relaxed text-muted">{post.excerpt}</p>}
         </div>
       </Link>
@@ -115,7 +115,7 @@ function PostIndexRow({ post, index, options }: { post: Post; index: number; opt
     <li className="border-b border-line">
       <Link to={`/blog/${post.slug}`} className="group grid grid-cols-12 items-baseline gap-4 py-6">
         <span className="label col-span-2 text-faint md:col-span-1">{String(index + 1).padStart(2, '0')}</span>
-        <span className="display col-span-10 text-[clamp(1.4rem,2.8vw,2.2rem)] text-ink transition-colors duration-400 group-hover:text-accent md:col-span-7">
+        <span className="display col-span-10 text-[calc(clamp(1.4rem,2.8vw,2.2rem)*var(--hs,1))] text-ink transition-colors duration-400 group-hover:text-accent md:col-span-7">
           {post.title}
         </span>
         <span className="label col-span-6 col-start-3 text-muted md:col-span-2 md:col-start-auto">
@@ -175,7 +175,7 @@ export function BlogGrid({ content, styles, data }: WidgetProps) {
                 {text(content, 'eyebrow')}
               </Reveal>
             )}
-            <Heading content={content} className="display mt-6 text-[clamp(2rem,4.4vw,3.4rem)] text-ink" />
+            <Heading content={content} className="display mt-6 text-[calc(clamp(2rem,4.4vw,3.4rem)*var(--hs,1))] text-ink" />
           </div>
           <Reveal delay={0.12}>
             <ArrowLink href={text(content, 'link_href')} label={text(content, 'link_label')} />

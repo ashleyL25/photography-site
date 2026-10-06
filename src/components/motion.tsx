@@ -1,14 +1,29 @@
 import { useRef, type ReactNode } from 'react'
 import { motion, useScroll, useSpring, useTransform, type Variants } from 'motion/react'
 import clsx from 'clsx'
+import { useThemeSettings } from '@/lib/site'
 
 const VIEWPORT = { once: true, margin: '0px 0px -12% 0px' } as const
+
+/**
+ * The Theme settings' animation choices: whether things reveal at all, how
+ * fast, how far they rise, and whether photographs drift.
+ */
+function useMotionPrefs() {
+  const a = useThemeSettings('animation', 'global')
+  return {
+    reveals: a.reveals !== false,
+    speed: typeof a.speed === 'number' && a.speed > 0 ? a.speed / 100 : 1,
+    distance: typeof a.distance === 'number' ? a.distance : 28,
+    parallax: a.parallax !== false,
+  }
+}
 
 /** Simple fade-and-rise, the workhorse for body copy and small elements. */
 export function Reveal({
   children,
   delay = 0,
-  y = 28,
+  y,
   className,
   as = 'div',
   html,
@@ -22,13 +37,14 @@ export function Reveal({
   html?: string
 }) {
   const Tag = motion[as]
+  const prefs = useMotionPrefs()
   return (
     <Tag
       className={className}
-      initial={{ opacity: 0, y }}
+      initial={prefs.reveals ? { opacity: 0, y: y ?? prefs.distance } : false}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={VIEWPORT}
-      transition={{ duration: 0.9, delay, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: 0.9 * prefs.speed, delay: delay * prefs.speed, ease: [0.16, 1, 0.3, 1] }}
       {...(html !== undefined ? { dangerouslySetInnerHTML: { __html: html } } : { children })}
     />
   )
@@ -110,6 +126,7 @@ export function MaskText({
   as?: 'h1' | 'h2' | 'h3' | 'p' | 'span'
 }) {
   const words = text.split(' ')
+  const prefs = useMotionPrefs()
   return (
     <Tag className={className}>
       {/* Keyed on the text: the viewport trigger is one-shot, so if the copy is
@@ -118,10 +135,10 @@ export function MaskText({
       <motion.span
         key={text}
         className="inline"
-        initial="hidden"
+        initial={prefs.reveals ? 'hidden' : false}
         whileInView="shown"
         viewport={VIEWPORT}
-        transition={{ staggerChildren: stagger, delayChildren: delay }}
+        transition={{ staggerChildren: stagger * prefs.speed, delayChildren: delay * prefs.speed }}
       >
         {words.map((word, i) => (
           <span
@@ -131,7 +148,7 @@ export function MaskText({
             <motion.span
               className={clsx('inline-block will-change-transform', wordClassName)}
               variants={wordVariants}
-              transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 1 * prefs.speed, ease: [0.16, 1, 0.3, 1] }}
             >
               {word}
               {i < words.length - 1 ? ' ' : ''}
@@ -165,21 +182,22 @@ export function Unveil({
       : direction === 'left'
         ? 'inset(0% 100% 0% 0%)'
         : 'inset(0% 0% 0% 100%)'
+  const prefs = useMotionPrefs()
 
   return (
     <motion.div
       className={clsx('overflow-hidden', className)}
-      initial={{ clipPath: closed }}
+      initial={prefs.reveals ? { clipPath: closed } : false}
       whileInView={{ clipPath: 'inset(0% 0% 0% 0%)' }}
       viewport={VIEWPORT}
-      transition={{ duration: 1.25, delay, ease: [0.76, 0, 0.24, 1] }}
+      transition={{ duration: 1.25 * prefs.speed, delay: delay * prefs.speed, ease: [0.76, 0, 0.24, 1] }}
     >
       <motion.div
         className="h-full w-full"
-        initial={{ scale: 1.24 }}
+        initial={prefs.reveals ? { scale: 1.24 } : false}
         whileInView={{ scale: 1 }}
         viewport={VIEWPORT}
-        transition={{ duration: 1.6, delay, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ duration: 1.6 * prefs.speed, delay: delay * prefs.speed, ease: [0.16, 1, 0.3, 1] }}
       >
         {children}
       </motion.div>
@@ -201,11 +219,12 @@ export function Parallax({
   className?: string
 }) {
   const ref = useRef<HTMLDivElement>(null)
+  const travel = useMotionPrefs().parallax ? speed : 0
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ['start end', 'end start'],
   })
-  const raw = useTransform(scrollYProgress, [0, 1], [`${speed * 100}%`, `${-speed * 100}%`])
+  const raw = useTransform(scrollYProgress, [0, 1], [`${travel * 100}%`, `${-travel * 100}%`])
   const y = useSpring(raw, { stiffness: 90, damping: 22, mass: 0.4 })
 
   return (
@@ -219,13 +238,14 @@ export function Parallax({
 
 /** A hairline that draws itself across the width of its container. */
 export function DrawRule({ className, delay = 0 }: { className?: string; delay?: number }) {
+  const prefs = useMotionPrefs()
   return (
     <motion.div
       className={clsx('h-px w-full origin-left bg-line', className)}
-      initial={{ scaleX: 0 }}
+      initial={prefs.reveals ? { scaleX: 0 } : false}
       whileInView={{ scaleX: 1 }}
       viewport={VIEWPORT}
-      transition={{ duration: 1.4, delay, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: 1.4 * prefs.speed, delay: delay * prefs.speed, ease: [0.16, 1, 0.3, 1] }}
     />
   )
 }

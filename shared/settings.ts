@@ -9,6 +9,7 @@
  */
 
 import { fieldDefaults, hydrateFields, type FieldDef } from './widgets.js'
+import { THEME_FIELDS } from './theme.js'
 import type { PackageSet, PublicTier, Tier, TierPrice } from './types.js'
 
 /* ------------------------------------------------------------------ *
@@ -386,6 +387,7 @@ export const INQUIRY_FIELDS: readonly FieldDef[] = [
 
 export const SETTINGS_GROUPS = {
   site: SITE_FIELDS,
+  theme: THEME_FIELDS,
   pricing: PRICING_FIELDS,
   policy: POLICY_FIELDS,
   library: LIBRARY_FIELDS,

@@ -109,7 +109,7 @@ export default function AlbumPage() {
           <div className="shell flex flex-wrap items-end justify-between gap-10">
             <div>
               <Reveal className="label text-faint">Next session</Reveal>
-              <MaskText text={next.title} className="display mt-4 text-[clamp(2rem,4.4vw,3.4rem)] text-ink" />
+              <MaskText text={next.title} className="display mt-4 text-[calc(clamp(2rem,4.4vw,3.4rem)*var(--hs,1))] text-ink" />
               <Reveal delay={0.1} className="mt-3 text-[0.95rem] text-muted italic">
                 {[next.category ? (labels[next.category] ?? next.category) : '', next.dateLabel].filter(Boolean).join(' · ')}
               </Reveal>
@@ -117,7 +117,7 @@ export default function AlbumPage() {
             <Reveal delay={0.16} className="flex flex-wrap gap-4">
               <Link
                 to={`/portfolio/${next.slug}`}
-                className="label rounded-full border border-ink px-8 py-4 text-ink transition-colors duration-400 hover:border-accent hover:bg-accent hover:text-canvas"
+                className="cta cta-primary px-8"
               >
                 View it
               </Link>

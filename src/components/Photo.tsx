@@ -44,7 +44,7 @@ export function Photo({ src, alt, sizes, className, imgClassName, priority, styl
 
   if (!photo) {
     return (
-      <div className={clsx('relative overflow-hidden bg-surface', className)} style={style}>
+      <div className={clsx('photo-frame relative overflow-hidden bg-surface', className)} style={style}>
         <img
           src={src}
           alt={alt}
@@ -65,7 +65,7 @@ export function Photo({ src, alt, sizes, className, imgClassName, priority, styl
   const fallback = photo.widths[Math.min(2, photo.widths.length - 1)]
 
   return (
-    <div className={clsx('relative overflow-hidden', className)} style={{ backgroundColor: photo.color, ...style }}>
+    <div className={clsx('photo-frame relative overflow-hidden', className)} style={{ backgroundColor: photo.color, ...style }}>
       {photo.lqip && (
         <img
           aria-hidden

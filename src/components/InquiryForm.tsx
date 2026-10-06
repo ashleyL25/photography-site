@@ -90,7 +90,7 @@ export function InquiryForm({
   const t = TONE[tone]
 
   const inputClass = clsx(
-    'w-full border-b bg-transparent pb-3 text-[1.05rem] transition-colors duration-300 outline-none',
+    'site-field w-full border-b bg-transparent pb-3 text-[1.05rem] transition-colors duration-300 outline-none',
     t.input,
   )
 
@@ -141,7 +141,7 @@ export function InquiryForm({
             t.panel,
           )}
         >
-          <p className={clsx('display text-[clamp(2rem,4vw,3rem)]', t.heading)}>{INQUIRY.sentHeading}</p>
+          <p className={clsx('display text-[calc(clamp(2rem,4vw,3rem)*var(--hs,1))]', t.heading)}>{INQUIRY.sentHeading}</p>
           <p className={clsx('mx-auto mt-5 max-w-sm leading-relaxed', t.body)}>{INQUIRY.sentBody}</p>
         </motion.div>
       ) : (

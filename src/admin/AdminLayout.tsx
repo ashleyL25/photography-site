@@ -55,6 +55,7 @@ const NAV: NavGroup[] = [
   {
     label: 'Settings',
     items: [
+      { to: '/dashboard/theme/colors', label: 'Theme' },
       { to: '/dashboard/settings/site', label: 'Site & menu' },
       { to: '/dashboard/settings/pricing', label: 'Pricing' },
       { to: '/dashboard/settings/policy', label: 'Policies' },

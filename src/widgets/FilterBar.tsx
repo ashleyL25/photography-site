@@ -117,7 +117,7 @@ export function LoadMore({ label, onClick }: { label: string; onClick: () => voi
       <button
         type="button"
         onClick={onClick}
-        className="label rounded-full border border-ink px-9 py-4 text-ink transition-colors duration-400 hover:border-accent hover:bg-accent hover:text-canvas"
+        className="cta cta-primary"
       >
         {label}
       </button>

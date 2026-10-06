@@ -3,6 +3,7 @@ import { api } from './api'
 import { registerPhotos } from './photos'
 import { prefetch } from './content'
 import { settingsDefaults } from '@shared/settings'
+import { themeCss, themeFontsHref, themeGroup } from '@shared/theme'
 import type { AlbumSummary, GuideSummary, PhotoMeta, PublicSession, Term } from '@shared/types'
 
 /**
@@ -17,6 +18,7 @@ import type { AlbumSummary, GuideSummary, PhotoMeta, PublicSession, Term } from 
 
 export interface SiteSettings {
   site: Record<string, unknown>
+  theme: Record<string, unknown>
   pricing: Record<string, unknown>
   policy: Record<string, unknown>
   library: Record<string, unknown>
@@ -44,6 +46,7 @@ interface SiteContextValue extends SitePayload {
 const EMPTY: SitePayload = {
   settings: {
     site: settingsDefaults('site'),
+    theme: settingsDefaults('theme'),
     pricing: settingsDefaults('pricing'),
     policy: settingsDefaults('policy'),
     library: settingsDefaults('library'),
@@ -130,8 +133,62 @@ export function SiteProvider({
     void load()
   }, [load])
 
-  const value = useMemo<SiteContextValue>(() => ({ ...payload, ready, refresh: load }), [payload, ready, load])
+  // The dashboard's Theme screen previews an unsaved theme by posting it in.
+  const [previewTheme, setPreviewTheme] = useState<Record<string, unknown> | null>(null)
+  useEffect(() => {
+    const onMessage = (event: MessageEvent) => {
+      if (event.origin !== window.location.origin) return
+      if (event.data?.type === 'ap-theme:preview') setPreviewTheme(event.data.theme ?? null)
+    }
+    window.addEventListener('message', onMessage)
+    return () => window.removeEventListener('message', onMessage)
+  }, [])
+
+  const theme = previewTheme ?? (payload.settings.theme as Record<string, unknown> | undefined) ?? EMPTY.settings.theme
+  useApplyTheme(theme)
+
+  const value = useMemo<SiteContextValue>(() => {
+    const settings = previewTheme ? { ...payload.settings, theme: previewTheme } : payload.settings
+    return { ...payload, settings, ready, refresh: load }
+  }, [payload, previewTheme, ready, load])
   return <SiteContext.Provider value={value}>{children}</SiteContext.Provider>
+}
+
+/**
+ * Writes the theme into the page: its stylesheet in a <style> tag, and a font
+ * link for any typeface the page does not already load. Not on the dashboard's
+ * own screens, which keep their own look — only on the site and its preview.
+ */
+function useApplyTheme(theme: Record<string, unknown>) {
+  useEffect(() => {
+    const path = window.location.pathname
+    if (path.startsWith('/dashboard') && !path.startsWith('/dashboard/preview-frame')) return
+    let style = document.getElementById('theme-css') as HTMLStyleElement | null
+    if (!style) {
+      style = document.createElement('style')
+      style.id = 'theme-css'
+      document.head.appendChild(style)
+    }
+    style.textContent = themeCss(theme)
+
+    const href = themeFontsHref(theme)
+    let link = document.getElementById('theme-fonts') as HTMLLinkElement | null
+    if (href) {
+      if (!link) {
+        link = document.createElement('link')
+        link.id = 'theme-fonts'
+        link.rel = 'stylesheet'
+        document.head.appendChild(link)
+      }
+      if (link.href !== href) link.href = href
+    } else link?.remove()
+  }, [theme])
+}
+
+/** One group of theme settings — `useThemeSettings('header', 'behaviour')`. */
+export function useThemeSettings(group: string, sub: string): Record<string, unknown> {
+  const { settings } = useContext(SiteContext)
+  return themeGroup(settings.theme, group, sub)
 }
 
 export function useSite() {

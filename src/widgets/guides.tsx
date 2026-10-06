@@ -41,7 +41,7 @@ export function GuidesListing({ content, styles }: WidgetProps) {
                   <div className="md:col-span-6">
                     <div className="flex items-baseline gap-4">
                       <span className="label text-faint">{String(i + 1).padStart(2, '0')}</span>
-                      <h2 className="display text-[clamp(1.9rem,4vw,2.9rem)] text-ink transition-colors duration-500 group-hover:text-accent">
+                      <h2 className="display text-[calc(clamp(1.9rem,4vw,2.9rem)*var(--hs,1))] text-ink transition-colors duration-500 group-hover:text-accent">
                         {guide.title}
                       </h2>
                     </div>
@@ -311,7 +311,7 @@ export function GuideChapters({ sections, guideSlug }: { sections: Section[]; gu
                 <MaskText
                   as="h2"
                   text={text(chapter.section.content, 'title')}
-                  className="display mt-5 text-[clamp(2rem,4.2vw,3.2rem)] text-ink"
+                  className="display mt-5 text-[calc(clamp(2rem,4.2vw,3.2rem)*var(--hs,1))] text-ink"
                 />
                 {text(chapter.section.content, 'lead') && (
                   <Reveal delay={0.14} className="mt-6 max-w-sm text-[1rem] leading-[1.85] text-muted italic">
@@ -356,7 +356,7 @@ export function GuideClose({ content, styles }: WidgetProps) {
       <div className="shell">
         <div className="max-w-2xl">
           {text(content, 'eyebrow') && <Reveal className="label text-accent">{text(content, 'eyebrow')}</Reveal>}
-          <Heading content={content} className="display mt-6 text-[clamp(2.2rem,5.2vw,3.8rem)] text-ink" />
+          <Heading content={content} className="display mt-6 text-[calc(clamp(2.2rem,5.2vw,3.8rem)*var(--hs,1))] text-ink" />
           {text(content, 'body') && (
             <Reveal delay={0.15} className="mt-8 text-[1.04rem] leading-[1.9] text-muted">
               {text(content, 'body')}
@@ -365,7 +365,7 @@ export function GuideClose({ content, styles }: WidgetProps) {
           <Reveal delay={0.22} className="mt-10 flex flex-wrap gap-4 print:hidden">
             <Link
               to="/contact"
-              className="label rounded-full border border-ink px-9 py-4 text-ink transition-colors duration-400 hover:border-accent hover:bg-accent hover:text-canvas"
+              className="cta cta-primary"
             >
               {text(content, 'button_label')}
             </Link>
@@ -422,7 +422,7 @@ export function GuidePiecePreview({ section, guideSlug }: { section: Section; gu
         <div className="shell">
           <div className="lg:w-1/3">
             <p className="label text-accent">Chapter</p>
-            <h2 className="display mt-5 text-[clamp(2rem,4.2vw,3.2rem)] text-ink">{text(section.content, 'title')}</h2>
+            <h2 className="display mt-5 text-[calc(clamp(2rem,4.2vw,3.2rem)*var(--hs,1))] text-ink">{text(section.content, 'title')}</h2>
             {text(section.content, 'lead') && (
               <p className="mt-6 max-w-sm text-[1rem] leading-[1.85] text-muted italic">{text(section.content, 'lead')}</p>
             )}

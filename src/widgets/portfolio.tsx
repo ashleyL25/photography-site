@@ -165,7 +165,7 @@ export function AlbumIndex({
         <li key={album.id} className="border-b border-line">
           <Link to={`/portfolio/${album.slug}`} className="group grid grid-cols-12 items-center gap-4 py-6 md:py-8">
             <span className="label col-span-2 text-faint md:col-span-1">{String(i + 1).padStart(2, '0')}</span>
-            <span className="display col-span-10 text-[clamp(1.6rem,3.4vw,2.6rem)] text-ink transition-colors duration-400 group-hover:text-accent md:col-span-6">
+            <span className="display col-span-10 text-[calc(clamp(1.6rem,3.4vw,2.6rem)*var(--hs,1))] text-ink transition-colors duration-400 group-hover:text-accent md:col-span-6">
               {album.title}
             </span>
             <span className="label col-span-6 col-start-3 text-muted md:col-span-2 md:col-start-auto">

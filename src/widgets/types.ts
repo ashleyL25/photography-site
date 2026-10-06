@@ -92,11 +92,11 @@ const g = (v: unknown) => (v && typeof v === 'object' ? (v as Record<string, unk
  */
 export const SPACE: Record<string, string> = {
   none: '0px',
-  xs: 'clamp(1.25rem, 2vw, 2rem)',
-  sm: 'clamp(2.5rem, 4vw, 4rem)',
-  md: 'clamp(4rem, 6vw, 6rem)',
-  lg: 'clamp(5.5rem, 8vw, 8rem)',
-  xl: 'clamp(7rem, 11vw, 11rem)',
+  xs: 'calc(clamp(1.25rem, 2vw, 2rem) * var(--space-scale, 1))',
+  sm: 'calc(clamp(2.5rem, 4vw, 4rem) * var(--space-scale, 1))',
+  md: 'calc(clamp(4rem, 6vw, 6rem) * var(--space-scale, 1))',
+  lg: 'calc(clamp(5.5rem, 8vw, 8rem) * var(--space-scale, 1))',
+  xl: 'calc(clamp(7rem, 11vw, 11rem) * var(--space-scale, 1))',
 }
 
 /** The background schemes that are dark, and so turn the text light. */

@@ -104,7 +104,7 @@ export function SessionsIndex({ content, styles }: WidgetProps) {
                 {text(content, 'eyebrow')}
               </Reveal>
             )}
-            <Heading content={content} className="display mt-6 text-[clamp(3rem,9vw,7.5rem)] text-ink" />
+            <Heading content={content} className="display mt-6 text-[calc(clamp(3rem,9vw,7.5rem)*var(--hs,1))] text-ink" />
           </div>
           {text(content, 'blurb') && (
             <Reveal delay={0.2} className="max-w-xs pb-4 text-[0.95rem] leading-relaxed text-muted">
@@ -146,7 +146,7 @@ export function SessionsIndex({ content, styles }: WidgetProps) {
                   viewport={{ once: true, margin: '0px 0px -10% 0px' }}
                 >
                   <motion.span
-                    className="display block text-[clamp(2rem,4.4vw,3.9rem)] whitespace-nowrap text-ink transition-colors duration-500 group-hover:text-accent"
+                    className="display block text-[calc(clamp(2rem,4.4vw,3.9rem)*var(--hs,1))] whitespace-nowrap text-ink transition-colors duration-500 group-hover:text-accent"
                     variants={{ hidden: { y: '105%' }, shown: { y: '0%' } }}
                     transition={{ delay: 0.06 + i * 0.06, duration: 1, ease: [0.16, 1, 0.3, 1] }}
                   >
@@ -259,7 +259,7 @@ export function SessionCards({ content, styles }: WidgetProps) {
                   <div className="mt-7 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
                     <div className="flex items-baseline gap-4">
                       <span className="label text-faint">{session.index}</span>
-                      <h2 className="display text-[clamp(2rem,3.6vw,2.9rem)] text-ink transition-colors duration-500 group-hover:text-accent">
+                      <h2 className="display text-[calc(clamp(2rem,3.6vw,2.9rem)*var(--hs,1))] text-ink transition-colors duration-500 group-hover:text-accent">
                         {session.title}
                       </h2>
                     </div>
@@ -329,7 +329,7 @@ export function AlwaysIncluded({ content, styles }: WidgetProps) {
               {text(content, 'eyebrow')}
             </Reveal>
           )}
-          <Heading content={content} className="display mt-6 text-[clamp(2rem,4.4vw,3.4rem)] text-ink" />
+          <Heading content={content} className="display mt-6 text-[calc(clamp(2rem,4.4vw,3.4rem)*var(--hs,1))] text-ink" />
           {links.length > 0 && (
             <Reveal delay={0.16} className="mt-10 flex flex-col items-start gap-5">
               {links.map((link, i) => (
@@ -370,7 +370,7 @@ export function SessionLinks({ content, styles }: WidgetProps) {
     <section id={f.id} className={clsx('scroll-mt-24', f.pad, f.className)} style={f.style}>
       <div className="shell">
         <div className="flex flex-wrap items-end justify-between gap-6">
-          <Heading content={content} className="display text-[clamp(2rem,4.4vw,3.2rem)] text-ink" />
+          <Heading content={content} className="display text-[calc(clamp(2rem,4.4vw,3.2rem)*var(--hs,1))] text-ink" />
           <Reveal delay={0.12}>
             <ArrowLink href={text(content, 'link_href')} label={text(content, 'link_label')} />
           </Reveal>
@@ -393,7 +393,7 @@ export function SessionLinks({ content, styles }: WidgetProps) {
           <>
             <DrawRule className="mt-20" />
             <div className="mt-14 max-w-2xl">
-              <MaskText text={closeHeading} className="display text-[clamp(2.2rem,5.2vw,3.8rem)] text-ink" />
+              <MaskText text={closeHeading} className="display text-[calc(clamp(2.2rem,5.2vw,3.8rem)*var(--hs,1))] text-ink" />
               {text(content, 'close_body') && (
                 <Reveal delay={0.15} as="p" className="mt-8 text-[1.04rem] leading-[1.9] text-muted">
                   {text(content, 'close_body')}
@@ -403,7 +403,7 @@ export function SessionLinks({ content, styles }: WidgetProps) {
                 <Reveal delay={0.22} className="mt-10">
                   <SmartLink
                     href={text(content, 'close_href') || '/contact'}
-                    className="label rounded-full border border-ink px-9 py-4 text-ink transition-colors duration-400 hover:border-accent hover:bg-accent hover:text-canvas"
+                    className="cta cta-primary"
                   >
                     {text(content, 'close_label')}
                   </SmartLink>
@@ -484,7 +484,7 @@ export function TextPhotos({
               {text(content, 'eyebrow')}
             </Reveal>
           )}
-          {text(content, 'heading') && <Heading content={content} className="display mt-6 text-[clamp(2rem,4.4vw,3.4rem)] text-ink" />}
+          {text(content, 'heading') && <Heading content={content} className="display mt-6 text-[calc(clamp(2rem,4.4vw,3.4rem)*var(--hs,1))] text-ink" />}
 
           <RichParagraphs
             html={body}
@@ -558,7 +558,7 @@ export function SessionPricing({ content, styles }: WidgetProps) {
                 {text(content, 'eyebrow')}
               </Reveal>
             )}
-            <Heading content={content} className="display mt-6 text-[clamp(2.2rem,5vw,4rem)] text-ink" />
+            <Heading content={content} className="display mt-6 text-[calc(clamp(2.2rem,5vw,4rem)*var(--hs,1))] text-ink" />
           </div>
           {session.intro && (
             <Reveal delay={0.15} className="max-w-md pb-3 text-[0.97rem] leading-[1.8] text-muted">
@@ -640,7 +640,7 @@ export function SessionGuide({ content, styles }: WidgetProps) {
               {text(content, 'eyebrow')}
             </Reveal>
           )}
-          <Heading content={content} className="display mt-6 text-[clamp(2.2rem,5vw,3.8rem)] text-ink" />
+          <Heading content={content} className="display mt-6 text-[calc(clamp(2.2rem,5vw,3.8rem)*var(--hs,1))] text-ink" />
           {guide.subtitle && (
             <Reveal delay={0.15} className="mt-8 max-w-lg text-[1.04rem] leading-[1.9] text-muted">
               {guide.subtitle}
@@ -649,7 +649,7 @@ export function SessionGuide({ content, styles }: WidgetProps) {
           <Reveal delay={0.22} className="mt-10">
             <Link
               to={`/guides/${guide.slug}`}
-              className="label inline-block rounded-full border border-ink px-9 py-4 text-ink transition-colors duration-400 hover:border-accent hover:bg-accent hover:text-canvas"
+              className="cta cta-primary inline-block"
             >
               {text(content, 'button_label')}
             </Link>
@@ -684,7 +684,7 @@ export function SessionAlbums({ content, styles }: WidgetProps) {
     <section id={f.id} className={clsx('scroll-mt-24', f.pad, f.className)} style={f.style}>
       <div className="shell">
         <div className="flex flex-wrap items-end justify-between gap-6">
-          <Heading content={content} className="display text-[clamp(2rem,4.4vw,3.2rem)] text-ink" />
+          <Heading content={content} className="display text-[calc(clamp(2rem,4.4vw,3.2rem)*var(--hs,1))] text-ink" />
           <Reveal delay={0.12}>
             <ArrowLink href={`/portfolio?c=${session.category}`} label={text(content, 'link_label')} />
           </Reveal>
@@ -741,7 +741,7 @@ export function SessionNav({ content, styles }: WidgetProps) {
         ].map((item) => (
           <Link key={item.direction} to={`/sessions/${item.session.slug}`} className={`group py-12 ${item.align}`}>
             <span className="label text-faint">{item.direction}</span>
-            <span className="display mt-3 block text-[clamp(1.8rem,3.4vw,2.6rem)] text-ink transition-colors duration-400 group-hover:text-accent">
+            <span className="display mt-3 block text-[calc(clamp(1.8rem,3.4vw,2.6rem)*var(--hs,1))] text-ink transition-colors duration-400 group-hover:text-accent">
               {item.session.title}
             </span>
           </Link>

@@ -27,7 +27,7 @@ export default function NotFound() {
         <MaskText
           as="h1"
           text="This one is not in the gallery."
-          className="display mt-8 max-w-3xl text-[clamp(2.4rem,7vw,5.5rem)]"
+          className="display mt-8 max-w-3xl text-[calc(clamp(2.4rem,7vw,5.5rem)*var(--hs,1))]"
         />
         <Reveal delay={0.15} as="p" className="mt-8 max-w-md leading-[1.85] text-beige/75">
           The page you were after has moved or never existed. The work is all still here, though.

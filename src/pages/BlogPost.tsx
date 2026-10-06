@@ -52,7 +52,7 @@ export default function BlogPost() {
             <span className="h-px w-10 bg-accent" />
             {eyebrow}
           </Reveal>
-          <MaskText as="h1" text={post.title} className="display mt-8 max-w-4xl text-[clamp(2.8rem,8vw,6.5rem)] text-ink" />
+          <MaskText as="h1" text={post.title} className="display mt-8 max-w-4xl text-[calc(clamp(2.8rem,8vw,6.5rem)*var(--hs,1))] text-ink" />
           {post.subtitle && (
             <Reveal delay={0.15} as="p" className="mt-8 max-w-xl leading-[1.85] text-muted">
               {post.subtitle}
@@ -67,7 +67,7 @@ export default function BlogPost() {
         <section className="border-t border-line bg-surface py-24 md:py-32">
           <div className="shell">
             <div className="flex flex-wrap items-end justify-between gap-6">
-              <MaskText text="Keep reading" className="display text-[clamp(2rem,4.4vw,3.2rem)] text-ink" />
+              <MaskText text="Keep reading" className="display text-[calc(clamp(2rem,4.4vw,3.2rem)*var(--hs,1))] text-ink" />
               <Reveal delay={0.12}>
                 <ArrowLink href="/blog" label="Every post" />
               </Reveal>

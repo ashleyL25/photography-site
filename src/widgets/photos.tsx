@@ -52,7 +52,7 @@ export function SelectedWork({ content, styles }: WidgetProps) {
             )}
             <Heading
               content={content}
-              className="display mt-6 max-w-2xl text-[clamp(2.4rem,6vw,5.2rem)] text-ink"
+              className="display mt-6 max-w-2xl text-[calc(clamp(2.4rem,6vw,5.2rem)*var(--hs,1))] text-ink"
             />
           </div>
           <Reveal delay={0.2}>
@@ -118,11 +118,11 @@ function Step({ step, index, total, count }: { step: StepValue; index: number; t
     >
       <motion.article
         style={reduced ? undefined : { scale, opacity }}
-        className="grid origin-top overflow-hidden rounded-sm border border-line bg-surface shadow-[0_-24px_70px_-40px_rgb(0_0_0/0.45)] md:grid-cols-2"
+        className="card-frame grid origin-top overflow-hidden rounded-sm border border-line bg-surface shadow-[0_-24px_70px_-40px_rgb(0_0_0/0.45)] md:grid-cols-2"
       >
         <div className="flex flex-col justify-between gap-10 p-8 md:p-14 lg:p-16">
           <div className="flex items-center justify-between">
-            <span className="display text-[clamp(3.5rem,7vw,6rem)] leading-none text-accent">
+            <span className="display text-[calc(clamp(3.5rem,7vw,6rem)*var(--hs,1))] leading-none text-accent">
               {String(index + 1).padStart(2, '0')}
             </span>
             {count && (
@@ -132,7 +132,7 @@ function Step({ step, index, total, count }: { step: StepValue; index: number; t
             )}
           </div>
           <div>
-            <h3 className="display text-[clamp(2rem,3.6vw,3.1rem)] text-ink">{step.title}</h3>
+            <h3 className="display text-[calc(clamp(2rem,3.6vw,3.1rem)*var(--hs,1))] text-ink">{step.title}</h3>
             <p className="mt-5 max-w-md text-[1rem] leading-[1.85] text-muted">{step.body}</p>
           </div>
         </div>
@@ -159,7 +159,7 @@ export function Process({ content, styles }: WidgetProps) {
               {text(content, 'eyebrow')}
             </Reveal>
           )}
-          <Heading content={content} className="display mt-6 text-[clamp(2.2rem,5.2vw,4.4rem)] text-ink" />
+          <Heading content={content} className="display mt-6 text-[calc(clamp(2.2rem,5.2vw,4.4rem)*var(--hs,1))] text-ink" />
         </div>
 
         <div className="mt-20 pb-16">
@@ -300,7 +300,7 @@ export function PhotoGallery({ content, styles }: WidgetProps) {
                 {text(content, 'eyebrow')}
               </Reveal>
             )}
-            {heading && <Heading content={content} className="display mt-6 text-[clamp(2rem,4.4vw,3.4rem)] text-ink" />}
+            {heading && <Heading content={content} className="display mt-6 text-[calc(clamp(2rem,4.4vw,3.4rem)*var(--hs,1))] text-ink" />}
           </div>
         )}
         {(layout === 'masonry' || layout === 'drift') && (
@@ -525,7 +525,7 @@ export function ImageText({ content, styles }: WidgetProps) {
             </Reveal>
           )}
           {text(content, 'heading') && (
-            <Heading content={content} className="display mt-6 text-[clamp(2rem,4.4vw,3.4rem)] text-ink" />
+            <Heading content={content} className="display mt-6 text-[calc(clamp(2rem,4.4vw,3.4rem)*var(--hs,1))] text-ink" />
           )}
           <RichParagraphs
             html={text(content, 'body')}

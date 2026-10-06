@@ -56,15 +56,15 @@ export function ArrowLink({
     <SmartLink
       href={href}
       className={clsx(
-        'label group inline-flex items-center gap-3 border-b pb-2 transition-colors hover:border-accent hover:text-accent',
-        quiet ? 'border-line text-muted' : 'border-ink text-ink',
+        'label group inline-flex items-center gap-3 border-b pb-2 transition-colors',
+        quiet ? 'border-line text-muted hover:border-accent hover:text-accent' : 'cta-link',
         className,
       )}
     >
       {label}
       <span
         aria-hidden
-        className="inline-block transition-transform duration-500 ease-[var(--ease-out-expo)] group-hover:translate-x-1.5"
+        className="cta-link-arrow inline-block transition-transform duration-500 ease-[var(--ease-out-expo)] group-hover:translate-x-1.5"
       >
         →
       </span>
@@ -80,7 +80,7 @@ export interface ButtonValue {
 
 const PILL = {
   primary:
-    'label rounded-full border border-ink px-9 py-4 text-ink transition-colors duration-400 hover:border-accent hover:bg-accent hover:text-canvas',
+    'cta cta-primary',
   secondary:
     'label rounded-full border border-line px-9 py-4 text-muted transition-colors duration-400 hover:border-accent hover:text-accent',
 }

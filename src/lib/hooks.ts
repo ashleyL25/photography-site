@@ -39,8 +39,8 @@ export function scrollToElement(el: HTMLElement, offset = -8) {
  * Inertial smooth scrolling. Skipped entirely when the user prefers reduced
  * motion, and on coarse pointers where native momentum is already better.
  */
-export function useSmoothScroll() {
-  const reduced = useReducedMotion()
+export function useSmoothScroll(enabled = true) {
+  const reduced = !useMotionAllowed(enabled)
 
   useEffect(() => {
     if (reduced || matchMedia('(pointer: coarse)').matches) return
@@ -116,9 +116,14 @@ export type CurtainPhase = 'idle' | 'falling' | 'covered' | 'lifting'
  * A query-string or hash change is not a page change — the portfolio filter
  * writes `?c=` on every click — so those pass straight through uncovered.
  */
-export function usePageTransition() {
+/** Motion is allowed when the visitor has not asked for less and the theme has it on. */
+function useMotionAllowed(enabled: boolean) {
+  return !useReducedMotion() && enabled
+}
+
+export function usePageTransition(enabled = true) {
   const location = useLocation()
-  const reduced = useReducedMotion()
+  const reduced = !useMotionAllowed(enabled)
   const [rendered, setRendered] = useState(location)
   const [phase, setPhase] = useState<CurtainPhase>('idle')
 

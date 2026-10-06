@@ -53,7 +53,7 @@ export function TierCards({
   featuredLabel?: string
 }) {
   return (
-    <div className="grid gap-px overflow-hidden bg-line md:grid-cols-3 md:grid-rows-[auto_auto_auto_auto_auto_1fr_auto]">
+    <div className="card-frame grid gap-px overflow-hidden bg-line md:grid-cols-3 md:grid-rows-[auto_auto_auto_auto_auto_1fr_auto]">
       {tiers.map((tier, i) => (
         <Reveal
           key={tier.id}
@@ -71,7 +71,7 @@ export function TierCards({
 
           <span className="label text-faint">{String(i + 1).padStart(2, '0')}</span>
 
-          <h3 className="display mt-6 text-[clamp(1.9rem,3vw,2.6rem)] text-ink">{tier.name}</h3>
+          <h3 className="display mt-6 text-[calc(clamp(1.9rem,3vw,2.6rem)*var(--hs,1))] text-ink">{tier.name}</h3>
           <p className="mt-2 max-w-[22rem] text-[0.9rem] leading-relaxed text-muted italic">
             {tier.summary}
           </p>

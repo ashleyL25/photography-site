@@ -48,7 +48,7 @@ export default function SettingsPage() {
   const [draft, setDraft] = useState<Record<string, unknown> | null>(null)
   const [saving, setSaving] = useState(false)
 
-  const key: SettingsKey = group in SETTINGS_GROUPS ? group : 'site'
+  const key: SettingsKey = group in SETTINGS_GROUPS && group !== 'theme' ? group : 'site'
   const meta = GROUPS.find((g) => g.key === key)!
 
   useEffect(() => {

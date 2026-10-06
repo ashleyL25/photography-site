@@ -155,7 +155,7 @@ export function Story({ content, styles }: WidgetProps) {
             </Reveal>
           )}
 
-          <Heading content={content} className="display mt-8 text-[clamp(2.2rem,5.4vw,4.6rem)] text-ink" />
+          <Heading content={content} className="display mt-8 text-[calc(clamp(2.2rem,5.4vw,4.6rem)*var(--hs,1))] text-ink" />
 
           <RichParagraphs
             html={text(content, 'body')}
@@ -169,7 +169,7 @@ export function Story({ content, styles }: WidgetProps) {
                 {stats.map((stat, i) => (
                   <Reveal key={`${stat.label}-${i}`} delay={0.15 + i * 0.1}>
                     <dt className="label mb-3 text-faint">{stat.label}</dt>
-                    <dd className="display text-[clamp(2.2rem,4vw,3.4rem)] text-ink">{stat.value}</dd>
+                    <dd className="display text-[calc(clamp(2.2rem,4vw,3.4rem)*var(--hs,1))] text-ink">{stat.value}</dd>
                   </Reveal>
                 ))}
               </dl>
@@ -246,7 +246,7 @@ export function TextBlock({ content, styles }: WidgetProps) {
               </Reveal>
             )}
             {heading && (
-              <Heading content={content} className="display mt-6 text-[clamp(2rem,4.4vw,3.4rem)] text-ink" />
+              <Heading content={content} className="display mt-6 text-[calc(clamp(2rem,4.4vw,3.4rem)*var(--hs,1))] text-ink" />
             )}
           </div>
 
@@ -268,7 +268,7 @@ export function TextBlock({ content, styles }: WidgetProps) {
           <div className={f.measure('max-w-2xl')}>
           {eyebrow && <Reveal className="label text-accent">{eyebrow}</Reveal>}
           {heading && (
-            <Heading content={content} className="display mt-6 text-[clamp(2.2rem,5.2vw,3.8rem)] text-ink" />
+            <Heading content={content} className="display mt-6 text-[calc(clamp(2.2rem,5.2vw,3.8rem)*var(--hs,1))] text-ink" />
           )}
           <RichParagraphs
             html={text(content, 'body')}
@@ -294,7 +294,7 @@ export function TextBlock({ content, styles }: WidgetProps) {
               {eyebrow}
             </Reveal>
           )}
-          {heading && <Heading content={content} className="display mt-6 text-[clamp(2rem,4.4vw,3.4rem)] text-ink" />}
+          {heading && <Heading content={content} className="display mt-6 text-[calc(clamp(2rem,4.4vw,3.4rem)*var(--hs,1))] text-ink" />}
           <RichParagraphs
             html={text(content, 'body')}
             className={clsx('mt-8 space-y-6 text-[1.02rem] leading-[1.85] text-muted', prose)}
@@ -353,7 +353,7 @@ export function AboutIntro({ content, styles }: WidgetProps) {
             </Reveal>
           )}
 
-          <Heading content={content} className="display mt-8 text-[clamp(2.1rem,4.8vw,4rem)] text-ink" />
+          <Heading content={content} className="display mt-8 text-[calc(clamp(2.1rem,4.8vw,4rem)*var(--hs,1))] text-ink" />
 
           <RichParagraphs
             html={text(content, 'body')}
@@ -407,7 +407,7 @@ export function NumberedCards({ content, styles }: WidgetProps) {
               {text(content, 'eyebrow')}
             </Reveal>
           )}
-          <Heading content={content} className="display mt-6 text-[clamp(2rem,4.4vw,3.4rem)] text-ink" />
+          <Heading content={content} className="display mt-6 text-[calc(clamp(2rem,4.4vw,3.4rem)*var(--hs,1))] text-ink" />
         </div>
 
         <div className={clsx('mt-16 grid gap-x-12 gap-y-14', columns(content.columns, '2'))}>
@@ -442,7 +442,7 @@ export function ChecklistSplit({ content, styles }: WidgetProps) {
               {text(content, 'eyebrow')}
             </Reveal>
           )}
-          <Heading content={content} className="display mt-6 text-[clamp(2rem,4.2vw,3.2rem)] text-ink" />
+          <Heading content={content} className="display mt-6 text-[calc(clamp(2rem,4.2vw,3.2rem)*var(--hs,1))] text-ink" />
           {text(content, 'body') && (
             <Reveal delay={0.15} as="p" className="mt-8 max-w-md text-[1rem] leading-[1.85] text-muted">
               {text(content, 'body')}
@@ -489,7 +489,7 @@ export function TimelineArc({ content, styles }: WidgetProps) {
               {text(content, 'eyebrow')}
             </Reveal>
           )}
-          <Heading content={content} className="display mt-6 text-[clamp(2.2rem,5vw,4rem)] text-ink" />
+          <Heading content={content} className="display mt-6 text-[calc(clamp(2.2rem,5vw,4rem)*var(--hs,1))] text-ink" />
           {text(content, 'lead') && (
             <Reveal delay={0.15} as="p" className="mt-8 max-w-xl text-[1.02rem] leading-[1.85] text-muted">
               {text(content, 'lead')}
@@ -611,13 +611,13 @@ export function Milestones({ content, styles }: WidgetProps) {
   return (
     <section id={f.id} className={clsx('scroll-mt-24', f.pad, f.className)} style={f.style}>
       <div className="shell">
-        <Heading content={content} className="display max-w-xl text-[clamp(2.2rem,5vw,4rem)] text-ink" />
+        <Heading content={content} className="display max-w-xl text-[calc(clamp(2.2rem,5vw,4rem)*var(--hs,1))] text-ink" />
 
         <ol className={clsx('mt-16 grid gap-x-10 gap-y-12', columns(content.columns, '3'))}>
           {entries.map((entry, i) => (
             <Reveal as="li" key={`${entry.year}-${i}`} delay={(i % 3) * 0.1}>
               <div className="flex items-baseline gap-4">
-                <span className="display text-[clamp(1.9rem,3vw,2.6rem)] text-accent">{entry.year}</span>
+                <span className="display text-[calc(clamp(1.9rem,3vw,2.6rem)*var(--hs,1))] text-accent">{entry.year}</span>
                 <span className="h-px flex-1 bg-line" />
               </div>
               <h3 className="mt-4 text-[1.15rem] text-ink">{entry.title}</h3>
@@ -647,7 +647,7 @@ export function AsideCta({ content, styles }: WidgetProps) {
         </Reveal>
 
         <div className="lg:col-span-6 lg:col-start-7">
-          <Heading content={content} className="display text-[clamp(2.2rem,5vw,3.8rem)] text-ink" />
+          <Heading content={content} className="display text-[calc(clamp(2.2rem,5vw,3.8rem)*var(--hs,1))] text-ink" />
           <Reveal delay={0.12}>
             <Buttons buttons={list<ButtonValue>(content, 'buttons')} className="mt-10" />
           </Reveal>
@@ -681,7 +681,7 @@ export function CtaClose({ content, styles }: WidgetProps) {
         <Heading
           content={content}
           text={fill(text(content, 'heading'), tokens)}
-          className="display mt-6 text-[clamp(2.2rem,5.4vw,4rem)] text-ink"
+          className="display mt-6 text-[calc(clamp(2.2rem,5.4vw,4rem)*var(--hs,1))] text-ink"
         />
         {text(content, 'body') && (
           <Reveal delay={0.15} className="mt-8 text-[1.04rem] leading-[1.9] text-muted">
@@ -729,7 +729,7 @@ export function Quote({ content, styles }: WidgetProps) {
         </Reveal>
         </div>
       ) : (
-        <MaskText as="p" text={text(content, 'quote')} className="display text-[clamp(1.9rem,4.4vw,3.4rem)] text-ink" />
+        <MaskText as="p" text={text(content, 'quote')} className="display text-[calc(clamp(1.9rem,4.4vw,3.4rem)*var(--hs,1))] text-ink" />
       )}
       {(text(content, 'attribution') || source) && (
         <Reveal delay={0.2} className={clsx('label mt-8', aside && 'pl-8')}>
@@ -833,7 +833,7 @@ export function Faq({ content, styles }: WidgetProps) {
               {text(content, 'eyebrow')}
             </Reveal>
           )}
-          <Heading content={content} className="display mt-6 text-[clamp(2rem,4vw,3.2rem)] text-ink" />
+          <Heading content={content} className="display mt-6 text-[calc(clamp(2rem,4vw,3.2rem)*var(--hs,1))] text-ink" />
           {text(content, 'intro') && (
             <Reveal delay={0.16} className="mt-8 max-w-sm text-[0.95rem] leading-relaxed text-muted">
               {text(content, 'intro')}

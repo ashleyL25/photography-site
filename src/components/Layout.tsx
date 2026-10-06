@@ -5,7 +5,9 @@ import { Header } from './Header'
 import { Footer } from './Footer'
 import { IndexRail, SocialRail } from './Rails'
 import { Preloader } from './Preloader'
+import { BackToTop } from './BackToTop'
 import { resetScroll, scrollToElement, useSmoothScroll } from '@/lib/hooks'
+import { useThemeSettings } from '@/lib/site'
 
 /**
  * Restores scroll position on navigation, and honors a `/#section` hash by
@@ -75,7 +77,8 @@ function ScrollManager() {
 
 export function Layout() {
   const { pathname } = useLocation()
-  useSmoothScroll()
+  const anim = useThemeSettings('animation', 'global')
+  useSmoothScroll(anim.smooth_scroll !== false)
 
   return (
     // `reducedMotion="user"` makes every motion component drop its transform
@@ -83,7 +86,7 @@ export function Layout() {
     // cannot reach JS-driven animations.
     <MotionConfig reducedMotion="user">
       <div className="grain relative flex min-h-screen flex-col">
-        <Preloader />
+        {anim.preloader !== false && <Preloader />}
         <ScrollManager />
 
         <a
@@ -108,6 +111,7 @@ export function Layout() {
         </main>
 
         <Footer />
+        <BackToTop />
       </div>
     </MotionConfig>
   )

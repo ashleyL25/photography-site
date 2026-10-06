@@ -42,7 +42,7 @@ export function Investment({ content, styles }: WidgetProps) {
             )}
             <Heading
               content={content}
-              className="display mt-6 max-w-2xl text-[clamp(2.2rem,5.2vw,4.4rem)] text-ink"
+              className="display mt-6 max-w-2xl text-[calc(clamp(2.2rem,5.2vw,4.4rem)*var(--hs,1))] text-ink"
             />
           </div>
           {text(content, 'blurb') && (
@@ -163,7 +163,7 @@ export function Investment({ content, styles }: WidgetProps) {
         {pricing.addOns.length > 0 && (
           <div className="mt-24">
             <div className="flex flex-wrap items-end justify-between gap-6">
-              <MaskText text={text(content, 'addons_heading')} className="display text-[clamp(1.9rem,4vw,3rem)] text-ink" />
+              <MaskText text={text(content, 'addons_heading')} className="display text-[calc(clamp(1.9rem,4vw,3rem)*var(--hs,1))] text-ink" />
               {text(content, 'addons_blurb') && (
                 <Reveal delay={0.12} className="max-w-sm pb-2 text-[0.9rem] leading-relaxed text-muted">
                   {text(content, 'addons_blurb')}
@@ -201,7 +201,7 @@ export function Investment({ content, styles }: WidgetProps) {
             </Reveal>
             <MaskText
               text={pricing.booking.heading}
-              className="display mt-6 max-w-3xl text-[clamp(1.9rem,4.2vw,3.2rem)] text-ink"
+              className="display mt-6 max-w-3xl text-[calc(clamp(1.9rem,4.2vw,3.2rem)*var(--hs,1))] text-ink"
             />
 
             <ol className="mt-14 grid gap-px overflow-hidden bg-line sm:grid-cols-2 lg:grid-cols-4">
@@ -248,7 +248,7 @@ export function FinishingLevels({ content, styles }: WidgetProps) {
               {text(content, 'eyebrow')}
             </Reveal>
           )}
-          <Heading content={content} className="display mt-6 text-[clamp(2rem,4.4vw,3.4rem)] text-ink" />
+          <Heading content={content} className="display mt-6 text-[calc(clamp(2rem,4.4vw,3.4rem)*var(--hs,1))] text-ink" />
           {text(content, 'body') && (
             <Reveal delay={0.15} as="p" className="mt-8 text-[1.02rem] leading-[1.85] text-muted">
               {text(content, 'body')}
@@ -260,7 +260,7 @@ export function FinishingLevels({ content, styles }: WidgetProps) {
           {levels.map((level, i) => (
             <Reveal key={level.key} delay={i * 0.1} className="bg-canvas p-8 md:p-10">
               <p className="label text-faint">{level.applies}</p>
-              <h3 className="display mt-6 text-[clamp(1.8rem,3vw,2.4rem)] text-ink">{level.label}</h3>
+              <h3 className="display mt-6 text-[calc(clamp(1.8rem,3vw,2.4rem)*var(--hs,1))] text-ink">{level.label}</h3>
               <p className="mt-5 text-[0.99rem] leading-[1.85] text-muted">{level.body}</p>
             </Reveal>
           ))}
@@ -288,7 +288,7 @@ export function WeatherPolicy({ content, styles }: WidgetProps) {
               {text(content, 'eyebrow')}
             </Reveal>
           )}
-          <Heading content={content} className="display mt-6 text-[clamp(2rem,4.4vw,3.4rem)] text-ink" />
+          <Heading content={content} className="display mt-6 text-[calc(clamp(2rem,4.4vw,3.4rem)*var(--hs,1))] text-ink" />
         </div>
 
         <div className="mt-14 grid gap-x-10 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">
@@ -360,7 +360,7 @@ export function GalleryTimeline({ content, styles }: WidgetProps) {
                 {text(content, 'eyebrow')}
               </Reveal>
             )}
-            <Heading content={content} className="display mt-6 text-[clamp(2rem,4.4vw,3.6rem)] text-ink" />
+            <Heading content={content} className="display mt-6 text-[calc(clamp(2rem,4.4vw,3.6rem)*var(--hs,1))] text-ink" />
           </div>
           {text(content, 'body') && (
             <Reveal

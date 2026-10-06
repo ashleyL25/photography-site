@@ -50,6 +50,10 @@ export type FieldType =
   | 'session'
   /** One guide, by slug. */
   | 'guide'
+  /** Any CSS colour — hex, rgb(), or empty for "as designed". */
+  | 'color'
+  /** One of the Google Fonts in shared/theme.ts, by slug. */
+  | 'font'
 
 export interface VisibleWhen {
   field: string

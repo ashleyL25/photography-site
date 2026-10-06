@@ -1,5 +1,8 @@
+import { getSettings } from './lib/settings.js'
+import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { themeCss, themeFontsHref } from '../shared/theme.js'
 import express, { type NextFunction, type Request, type Response } from 'express'
 import cookieParser from 'cookie-parser'
 import { configErrors, env, isProduction, mediaConfigured } from './env.js'
@@ -106,8 +109,42 @@ app.use('/api', (_req, res) => {
 
 /* ---------------------------------------------------------------- Client */
 
+/**
+ * The page itself, with the theme written in.
+ *
+ * The saved theme's stylesheet, its fonts and the first-visit light/dark choice
+ * go into the HTML rather than arriving with the first API response, so the
+ * page paints in its own colours and typefaces from the first frame instead of
+ * flashing the defaults. Read once from disk and cached; the theme comes from
+ * the settings cache, which a save clears.
+ */
+let shell: string | null = null
+async function sendPage(res: express.Response) {
+  shell ??= await readFile(path.join(CLIENT_DIR, 'index.html'), 'utf8')
+  let theme: Record<string, unknown> = {}
+  try {
+    theme = await getSettings('theme')
+  } catch {
+    /* No database: the page still works with the designed theme. */
+  }
+  const css = themeCss(theme).replace(/<\/style/gi, '')
+  const fonts = themeFontsHref(theme)
+  const mode = String((theme.colors as Record<string, Record<string, unknown>> | undefined)?.mode?.default ?? 'device')
+  const head =
+    `<script>window.__AP_MODE=${JSON.stringify(['light', 'dark'].includes(mode) ? mode : 'device')}</script>` +
+    (fonts ? `<link rel="stylesheet" id="theme-fonts" href="${fonts.replace(/"/g, '&quot;')}">` : '') +
+    (css ? `<style id="theme-css">${css}</style>` : '')
+  res.setHeader('Cache-Control', 'no-cache')
+  res.type('html').send(shell.replace('<head>', `<head>${head}`))
+}
+
+app.get(['/', '/index.html'], (_req, res, next) => {
+  sendPage(res).catch(next)
+})
+
 app.use(
   express.static(CLIENT_DIR, {
+    index: false,
     /**
      * Hashed asset filenames are immutable by construction, so they are cached
      * for a year. `index.html` is not hashed and must never be, or a deploy
@@ -130,8 +167,8 @@ app.use(
 )
 
 /** Client-side routing: everything else is the SPA. */
-app.get(/.*/, (_req, res) => {
-  res.sendFile(path.join(CLIENT_DIR, 'index.html'))
+app.get(/.*/, (_req, res, next) => {
+  sendPage(res).catch(next)
 })
 
 /**

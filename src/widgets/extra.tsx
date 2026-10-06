@@ -42,7 +42,7 @@ function Head({
             {centered && <span className="h-px w-10 bg-accent" />}
           </Reveal>
         )}
-        {heading && <Heading content={content} className="display mt-6 text-[clamp(2rem,4.4vw,3.4rem)] text-ink" />}
+        {heading && <Heading content={content} className="display mt-6 text-[calc(clamp(2rem,4.4vw,3.4rem)*var(--hs,1))] text-ink" />}
       </div>
       {link?.label && (
         <Reveal delay={0.12}>
@@ -124,7 +124,7 @@ export function Testimonials({ content, styles }: WidgetProps) {
                   exit={{ opacity: 0, y: -12 }}
                   transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
                 >
-                  <blockquote className="display text-[clamp(1.6rem,3.4vw,2.7rem)] leading-[1.3] text-ink">
+                  <blockquote className="display text-[calc(clamp(1.6rem,3.4vw,2.7rem)*var(--hs,1))] leading-[1.3] text-ink">
                     {(layout === 'single' ? items[0] : current).quote}
                   </blockquote>
                   <figcaption className="mt-10">
@@ -227,7 +227,7 @@ export function Stats({ content, styles }: WidgetProps) {
         <dl className={clsx('grid gap-x-10 gap-y-12', columns(content.columns, '3'), f.centered && 'text-center')}>
           {items.map((item, i) => (
             <Reveal key={i} delay={(i % 4) * 0.08} className="border-t border-line pt-6">
-              <dd className="display text-[clamp(2.8rem,6vw,4.8rem)] leading-none" style={{ color: swatchCss(text(content, 'swatch') || 'ink') }}>
+              <dd className="display text-[calc(clamp(2.8rem,6vw,4.8rem)*var(--hs,1))] leading-none" style={{ color: swatchCss(text(content, 'swatch') || 'ink') }}>
                 <CountUp value={item.value} enabled={countUp} />
                 {item.suffix && <span className="text-accent">{item.suffix}</span>}
               </dd>
@@ -302,8 +302,8 @@ export function Cards({ content, styles }: WidgetProps) {
             const filled = cardStyle === 'filled'
             const dark = filled && ['charcoal', 'forest', 'sage', 'accent'].includes(item.swatch ?? '')
             const boxClass = clsx(
-              cardStyle === 'bordered' && 'h-full border border-line p-5 md:p-6',
-              filled && clsx('h-full p-5 md:p-6', dark ? 'scheme-charcoal' : 'scheme-beige'),
+              cardStyle === 'bordered' && 'card-frame h-full border border-line p-5 md:p-6',
+              filled && clsx('card-frame h-full p-5 md:p-6', dark ? 'scheme-charcoal' : 'scheme-beige'),
             )
             const boxStyle = filled ? { backgroundColor: swatchColor(item.swatch || 'beige') } : undefined
             return (
@@ -664,7 +664,7 @@ export function CtaBand({ content, styles }: WidgetProps) {
               {centered && <span className="h-px w-10 bg-accent" />}
             </Reveal>
           )}
-          <Heading content={content} className="display mt-6 text-[clamp(2.4rem,5.6vw,4.8rem)] text-ink" />
+          <Heading content={content} className="display mt-6 text-[calc(clamp(2.4rem,5.6vw,4.8rem)*var(--hs,1))] text-ink" />
           {text(content, 'body') && (
             <Reveal as="p" delay={0.12} className={clsx('mt-8 max-w-xl text-[1.05rem] leading-[1.85] text-muted', centered && 'mx-auto')}>
               {text(content, 'body')}
@@ -853,7 +853,7 @@ export function AuthorCard({ content, styles }: WidgetProps) {
         <div
           className={clsx(
             'mx-auto max-w-4xl',
-            bool(content, 'boxed', true) && 'border border-line p-8 md:p-12',
+            bool(content, 'boxed', true) && 'card-frame border border-line p-8 md:p-12',
             stacked ? 'text-center' : 'grid items-center gap-10 md:grid-cols-12',
           )}
         >
@@ -861,7 +861,7 @@ export function AuthorCard({ content, styles }: WidgetProps) {
           <div className={stacked ? undefined : picture ? 'md:col-span-8' : 'md:col-span-12'}>
             {text(content, 'role') && <Reveal className="label text-accent">{text(content, 'role')}</Reveal>}
             {text(content, 'name') && (
-              <Reveal as="p" delay={0.05} className="display mt-4 text-[clamp(2rem,4vw,3rem)] text-ink">
+              <Reveal as="p" delay={0.05} className="display mt-4 text-[calc(clamp(2rem,4vw,3rem)*var(--hs,1))] text-ink">
                 {text(content, 'name')}
               </Reveal>
             )}

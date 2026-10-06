@@ -34,7 +34,7 @@ export function InquiryCta({ content, styles }: WidgetProps) {
               </Reveal>
             )}
 
-            <Heading content={content} className="display mt-8 text-[clamp(2.4rem,5.6vw,4.6rem)] text-beige" />
+            <Heading content={content} className="display mt-8 text-[calc(clamp(2.4rem,5.6vw,4.6rem)*var(--hs,1))] text-beige" />
 
             {text(content, 'body') && (
               <Reveal delay={0.15} as="p" className="mt-8 max-w-md leading-[1.85] text-beige/70">
