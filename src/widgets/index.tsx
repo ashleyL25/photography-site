@@ -50,6 +50,7 @@ import {
 } from './extra'
 import { frame, text, type WidgetProps } from './types'
 import { StyledSection } from './StyledSection'
+import { ButtonsRow, ColumnsBlock, EmbedCode, HeadingBlock, ListBlock, RichTextBlock, TextPhotosBlock } from './basics'
 import type { Section as SectionData } from '@shared/types'
 import { swatchCss } from '@shared/palette'
 import { ArtworkSvg } from '@/components/Decor'
@@ -117,6 +118,14 @@ function Spacer({ content, styles }: WidgetProps) {
  * describes what a widget *has*, and this says what draws it.
  */
 const REGISTRY: Record<string, ComponentType<WidgetProps>> = {
+  rich_text: RichTextBlock,
+  heading_block: HeadingBlock,
+  text_photos: TextPhotosBlock,
+  buttons_row: ButtonsRow,
+  list_block: ListBlock,
+  columns_block: ColumnsBlock,
+  embed_code: EmbedCode,
+
   home_hero: HomeHero,
   page_hero: PageHeroWidget,
   session_hero: SessionHero,

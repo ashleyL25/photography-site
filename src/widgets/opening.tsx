@@ -7,6 +7,7 @@ import { useReducedMotion } from '@/lib/hooks'
 import { useSiteInfo } from '@/lib/site'
 import clsx from 'clsx'
 import { Buttons, type ButtonValue } from './links'
+import { NeedsSession, useSourceSession } from './sessions'
 import { bool, fill, frame, list, text, useHost, type WidgetProps } from './types'
 
 const INTRO_DELAY = 1.15
@@ -201,10 +202,9 @@ const FOCUS: Record<string, string | undefined> = { top: 'center 20%', bottom: '
 
 /** A session's masthead, filled in from the session itself. */
 export function SessionHero({ content, styles }: WidgetProps) {
-  const host = useHost()
+  const session = useSourceSession(content)
   const f = frame(styles, { pad: '' })
-  if (host.kind !== 'session') return null
-  const session = host.session
+  if (!session) return <NeedsSession label="Session masthead" />
 
   return (
     <PageHero

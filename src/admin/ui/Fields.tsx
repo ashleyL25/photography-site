@@ -17,7 +17,7 @@ import {
 import { RichTextEditor } from './RichTextEditor'
 import { MediaField, MediaListField } from './MediaPicker'
 import { CollectionPicker } from './CollectionPicker'
-import { CategorySelect, OrderedPicker } from './ContentPickers'
+import { CategorySelect, GuideSelect, OrderedPicker, SessionSelect } from './ContentPickers'
 import { ArtworkChoice, ElementField } from './ArtworkFields'
 
 /**
@@ -263,6 +263,12 @@ function Field({
             onChange={onChange}
           />
         )
+
+      case 'session':
+        return <SessionSelect id={id} value={typeof value === 'string' ? value : ''} onChange={onChange} />
+
+      case 'guide':
+        return <GuideSelect id={id} value={typeof value === 'string' ? value : ''} onChange={onChange} />
 
       case 'category':
         return <CategorySelect id={id} value={typeof value === 'string' ? value : ''} onChange={onChange} />

@@ -1,5 +1,5 @@
 import { Heading } from './Heading'
-import { useRef, useState } from 'react'
+import { useContext, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AnimatePresence, motion, useMotionValue, useSpring } from 'motion/react'
 import clsx from 'clsx'
@@ -8,9 +8,46 @@ import { TierCards, Tick } from '@/components/TierCards'
 import { DrawRule, MaskText, Parallax, Reveal, RichParagraphs, Unveil } from '@/components/motion'
 import { useReducedMotion } from '@/lib/hooks'
 import { usePricing, useRetouching, useSite } from '@/lib/site'
-import { ArrowLink, SmartLink } from './links'
-import { EYEBROW, frame, list, text, useHost, type WidgetProps } from './types'
+import { ArrowLink, Buttons, SmartLink, type ButtonValue } from './links'
+import { EYEBROW, PreviewContext, bool, frame, list, text, useHost, type WidgetProps } from './types'
 import type { PublicTier } from '@shared/types'
+
+/**
+ * The session a session widget shows: the page's own, or the one picked in its
+ * Which session field. Null when there is neither — on an ordinary page with
+ * nothing chosen yet — and the widget then draws nothing.
+ */
+export function useSourceSession(content: Record<string, unknown>) {
+  const host = useHost()
+  const { sessions } = useSite()
+  const source = text(content, 'source') || 'host'
+  if (source === 'pick') return sessions.find((s) => s.id === text(content, 'session')) ?? null
+  if (host.kind === 'session') return host.session
+  if (host.kind === 'guide') return host.session
+  return null
+}
+
+/**
+ * What a session widget draws in the dashboard preview when it has no session
+ * to show, so it reads as "needs a choice" rather than as missing. Nothing on
+ * the live site.
+ */
+export function NeedsSession({ label }: { label: string }) {
+  const preview = useContext(PreviewContext)
+  if (!preview) return null
+  return (
+    <section className="py-16">
+      <div className="shell">
+        <div className="border border-dashed border-line px-8 py-10 text-center">
+          <p className="label text-accent">{label}</p>
+          <p className="mt-3 text-[0.95rem] text-muted">
+            This page isn’t a session’s own page — choose one under <em>Which session</em> to show it here.
+          </p>
+        </div>
+      </div>
+    </section>
+  )
+}
 
 /** The session types a widget was told to show, in that order — or all of them. */
 function usePickedSessions(content: Record<string, unknown>) {
@@ -386,53 +423,109 @@ export function SessionLinks({ content, styles }: WidgetProps) {
 
 /** The long copy and the two supporting frames. */
 export function SessionOverview({ content, styles }: WidgetProps) {
-  const host = useHost()
+  const session = useSourceSession(content)
+  const custom = text(content, 'source') === 'custom'
+  if (!custom && !session) return <NeedsSession label="What it actually is" />
+  return (
+    <TextPhotos
+      content={content}
+      styles={styles}
+      body={custom ? text(content, 'body') : session!.detail}
+      points={custom ? list<string>(content, 'points') : session!.points}
+      photo={custom ? text(content, 'photo') : session!.photo}
+      alt={custom ? text(content, 'photo_alt') : session!.title}
+      photos={custom ? list<string>(content, 'photos') : session!.gallery}
+    />
+  )
+}
+
+const MAIN_SHAPE: Record<string, string> = {
+  arch: 'arch aspect-[3/4]',
+  portrait: 'aspect-[4/5]',
+  square: 'aspect-square',
+  landscape: 'aspect-[3/2]',
+}
+
+/**
+ * Text and a ticked list beside a main photograph with smaller ones under it —
+ * a session's "What it actually is", and the Text beside photographs widget.
+ */
+export function TextPhotos({
+  content,
+  styles,
+  body,
+  points,
+  photo,
+  alt,
+  photos,
+}: {
+  content: Record<string, unknown>
+  styles: Record<string, unknown>
+  body: string
+  points: string[]
+  photo: string
+  alt: string
+  photos: string[]
+}) {
   const f = frame(styles)
-  if (host.kind !== 'session') return null
-  const session = host.session
+  const left = text(content, 'image_side') === 'left'
+  const shape = text(content, 'shape') || 'arch'
+  const count = Number(text(content, 'small_count') || '2')
+  const small = photos.slice(0, count)
+  const showPoints = bool(content, 'show_points', true) && points.length > 0
 
   return (
     <section id={f.id} className={clsx('scroll-mt-24', f.className)}>
       <div className={clsx('shell grid gap-14 lg:grid-cols-12 lg:gap-16', f.pad)} style={f.style}>
-        <div className="lg:col-span-6">
+        <div className={clsx('lg:col-span-6', left && 'lg:order-2 lg:col-start-7')}>
           {text(content, 'eyebrow') && (
             <Reveal className={EYEBROW}>
               <span className="h-px w-10 bg-accent" />
               {text(content, 'eyebrow')}
             </Reveal>
           )}
+          {text(content, 'heading') && <Heading content={content} className="display mt-6 text-[clamp(2rem,4.4vw,3.4rem)] text-ink" />}
 
           <RichParagraphs
-            html={session.detail}
+            html={body}
             className="mt-10 max-w-xl space-y-6 text-[1.06rem] leading-[1.9] text-muted"
             step={0.06}
             start={0.06}
           />
 
-          <DrawRule className="mt-12" />
+          {showPoints && (
+            <>
+              <DrawRule className="mt-12" />
+              <ul className="mt-8 space-y-4">
+                {points.map((point, i) => (
+                  <Reveal as="li" key={`${point}-${i}`} delay={i * 0.06} className="flex gap-4 text-[0.99rem] leading-relaxed text-muted">
+                    <Tick className="mt-[0.6rem]" />
+                    {point}
+                  </Reveal>
+                ))}
+              </ul>
+            </>
+          )}
 
-          <ul className="mt-8 space-y-4">
-            {session.points.map((point, i) => (
-              <Reveal as="li" key={`${point}-${i}`} delay={i * 0.06} className="flex gap-4 text-[0.99rem] leading-relaxed text-muted">
-                <Tick className="mt-[0.6rem]" />
-                {point}
-              </Reveal>
-            ))}
-          </ul>
+          <Reveal delay={0.2}>
+            <Buttons buttons={list<ButtonValue>(content, 'buttons')} className="mt-10" />
+          </Reveal>
         </div>
 
-        <div className="lg:col-span-5 lg:col-start-8">
-          <Parallax speed={0.05}>
-            <Unveil className="arch">
-              <Photo src={session.photo} alt={session.title} sizes="(min-width: 1024px) 36vw, 90vw" className="aspect-[3/4]" />
-            </Unveil>
-          </Parallax>
+        <div className={clsx('lg:col-span-5', left ? 'lg:order-1 lg:col-start-1' : 'lg:col-start-8')}>
+          {photo && (
+            <Parallax speed={0.05}>
+              <Unveil className={shape === 'arch' ? 'arch' : undefined}>
+                <Photo src={photo} alt={alt} sizes="(min-width: 1024px) 36vw, 90vw" className={MAIN_SHAPE[shape] ?? MAIN_SHAPE.arch} />
+              </Unveil>
+            </Parallax>
+          )}
 
-          {session.gallery.length > 0 && (
-            <div className="mt-6 grid grid-cols-2 gap-6">
-              {session.gallery.slice(0, 2).map((photo, i) => (
-                <Unveil key={`${photo}-${i}`} delay={0.15 + i * 0.1}>
-                  <Photo src={photo} alt="" sizes="(min-width: 1024px) 18vw, 44vw" className="aspect-[4/5]" />
+          {small.length > 0 && (
+            <div className={clsx('mt-6 grid gap-6', small.length === 3 ? 'grid-cols-3' : 'grid-cols-2')}>
+              {small.map((p, i) => (
+                <Unveil key={`${p}-${i}`} delay={0.15 + i * 0.1}>
+                  <Photo src={p} alt="" sizes="(min-width: 1024px) 18vw, 44vw" className="aspect-[4/5]" />
                 </Unveil>
               ))}
             </div>
@@ -445,12 +538,12 @@ export function SessionOverview({ content, styles }: WidgetProps) {
 
 /** This session's tier ladder. */
 export function SessionPricing({ content, styles }: WidgetProps) {
-  const host = useHost()
+  const session = useSourceSession(content)
   const retouching = useRetouching()
   const { alwaysIncluded, byRequestNote } = usePricing()
   const f = frame(styles, { id: 'pricing', rule: true })
-  if (host.kind !== 'session' || host.session.tiers.length === 0) return null
-  const session = host.session
+  if (!session) return <NeedsSession label="Session pricing" />
+  if (session.tiers.length === 0) return null
   const hidePrices = !session.pricesShown
   const editing = retouching[session.editingStyle]
 
@@ -529,11 +622,12 @@ export function SessionPricing({ content, styles }: WidgetProps) {
 
 /** The guide connected to this session. */
 export function SessionGuide({ content, styles }: WidgetProps) {
-  const host = useHost()
+  const session = useSourceSession(content)
   const { guides } = useSite()
   const f = frame(styles, { surface: true, rule: true })
-  if (host.kind !== 'session' || !host.session.guideSlug) return null
-  const guide = guides.find((g) => g.slug === host.session.guideSlug)
+  const slug = text(content, 'source') === 'guide' ? text(content, 'guide') : session?.guideSlug
+  if (!slug) return session || text(content, 'source') === 'guide' ? null : <NeedsSession label="Session prep guide" />
+  const guide = guides.find((g) => g.slug === slug)
   if (!guide) return null
 
   return (
@@ -577,11 +671,11 @@ export function SessionGuide({ content, styles }: WidgetProps) {
 
 /** Albums from this session's portfolio category. */
 export function SessionAlbums({ content, styles }: WidgetProps) {
-  const host = useHost()
+  const session = useSourceSession(content)
   const { albums } = useSite()
   const f = frame(styles, { rule: true })
-  if (host.kind !== 'session' || !host.session.category) return null
-  const session = host.session
+  if (!session) return <NeedsSession label="Sessions like yours" />
+  if (!session.category) return null
   const limit = typeof content.limit === 'number' ? content.limit : 3
   const shoots = albums.filter((a) => a.category === session.category).slice(0, limit)
   if (shoots.length === 0) return null
@@ -624,12 +718,12 @@ export function SessionAlbums({ content, styles }: WidgetProps) {
 
 /** Previous and next through the sessions. */
 export function SessionNav({ content, styles }: WidgetProps) {
-  const host = useHost()
+  const current = useSourceSession(content)
   const { sessions } = useSite()
   const f = frame(styles, { surface: true, rule: true, pad: '' })
-  if (host.kind !== 'session' || sessions.length < 2) return null
+  if (!current || sessions.length < 2) return <NeedsSession label="Previous and next session" />
 
-  const position = sessions.findIndex((s) => s.id === host.session.id)
+  const position = sessions.findIndex((s) => s.id === current.id)
   if (position < 0) return null
   const previous = sessions[(position - 1 + sessions.length) % sessions.length]
   const next = sessions[(position + 1) % sessions.length]

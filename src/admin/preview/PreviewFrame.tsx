@@ -6,7 +6,7 @@ import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
 import { PHOTO_OPENERS, renderSection } from '@/widgets'
 import { GUIDE_BLOCK_TYPES, GuideChapters } from '@/widgets/guides'
-import { HostContext } from '@/widgets/types'
+import { HostContext, PreviewContext } from '@/widgets/types'
 import { usePhotoLookup } from '../photos'
 import type { FromFrame, ToFrame } from './protocol'
 import type { Section } from '@shared/types'
@@ -108,6 +108,7 @@ function Page({ state }: { state: ToFrame }) {
   })
 
   return (
+    <PreviewContext.Provider value={true}>
     <HostContext.Provider value={host}>
       <div className="grain relative flex min-h-screen flex-col">
         <Header />
@@ -125,5 +126,6 @@ function Page({ state }: { state: ToFrame }) {
         <Footer />
       </div>
     </HostContext.Provider>
+    </PreviewContext.Provider>
   )
 }

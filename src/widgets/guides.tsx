@@ -250,17 +250,23 @@ function useBlocks(sections: Section[]): { block: Block; key: string }[][] {
  */
 export function GuideChapters({ sections, guideSlug }: { sections: Section[]; guideSlug: string }) {
   const chapters = useMemo(() => {
-    const out: { section: Section; id: string; blocks: Section[] }[] = []
+    // Blocks with no chapter above them — a checklist dropped onto an ordinary
+    // page or post — form an untitled run, drawn without the chapter column.
+    const out: { section: Section | null; id: string; blocks: Section[] }[] = []
     for (const section of sections) {
       if (section.type === 'guide_chapter') out.push({ section, id: chapterAnchor(section), blocks: [] })
-      else if (out.length > 0 && GUIDE_BLOCK_TYPES.has(section.type)) out[out.length - 1].blocks.push(section)
+      else if (GUIDE_BLOCK_TYPES.has(section.type)) {
+        if (out.length === 0) out.push({ section: null, id: `blocks-${section.id}`, blocks: [] })
+        out[out.length - 1].blocks.push(section)
+      }
     }
     return out
   }, [sections])
 
-  const ids = useMemo(() => chapters.map((c) => c.id), [chapters])
+  const titled = useMemo(() => chapters.filter((c) => c.section), [chapters])
+  const ids = useMemo(() => titled.map((c) => c.id), [titled])
   const active = useActiveSection(ids)
-  const nav = useMemo(() => chapters.map((c) => ({ id: c.id, title: text(c.section.content, 'title') })), [chapters])
+  const nav = useMemo(() => titled.map((c) => ({ id: c.id, title: text(c.section!.content, 'title') })), [titled])
 
   const allBlocks = useMemo(() => chapters.flatMap((c) => c.blocks), [chapters])
   const resolved = useBlocks(allBlocks)
@@ -270,11 +276,26 @@ export function GuideChapters({ sections, guideSlug }: { sections: Section[]; gu
     <>
       {/* Chapter index: a sticky strip on desktop, a floating island on a
           phone. See ChapterNav for why they are not the same control. */}
-      <ChapterNav chapters={nav} active={active} />
+      {nav.length > 1 && <ChapterNav chapters={nav} active={active} />}
 
       {/* The mobile scroll margin clears the floating island, which sits below
           the status-bar inset. */}
-      {chapters.map((chapter, i) => (
+      {chapters.map((chapter, i) =>
+        !chapter.section ? (
+          <section key={chapter.id} className="py-16 md:py-20">
+            <div className="shell">
+              <div className="mx-auto max-w-3xl space-y-12">
+                {chapter.blocks.map((section) => (
+                  <div key={section.id} data-section-id={section.id} className="space-y-12">
+                    {(byId.get(section.id) ?? []).map(({ block, key }) => (
+                      <GuideBlock key={key} block={block} storageKey={`guide:${guideSlug}:${chapter.id}:${key}`} />
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        ) : (
         <section
           key={chapter.section.id}
           id={chapter.id}
@@ -286,7 +307,7 @@ export function GuideChapters({ sections, guideSlug }: { sections: Section[]; gu
           <div className="shell">
             <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
               <div className="lg:col-span-4 lg:sticky lg:top-28 lg:self-start">
-                <Reveal className="label text-accent">Chapter {String(i + 1).padStart(2, '0')}</Reveal>
+                <Reveal className="label text-accent">Chapter {String(titled.indexOf(chapter) + 1).padStart(2, "0")}</Reveal>
                 <MaskText
                   as="h2"
                   text={text(chapter.section.content, 'title')}
@@ -313,7 +334,8 @@ export function GuideChapters({ sections, guideSlug }: { sections: Section[]; gu
             </div>
           </div>
         </section>
-      ))}
+        ),
+      )}
     </>
   )
 }

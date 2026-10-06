@@ -136,6 +136,24 @@ shows, search, sort, filter style and load-more on the listings, drop caps and
 text columns, accent colours, and more. Widgets added on top of the original
 sections live in `src/widgets/extra.tsx`.
 
+### Basics, and session sections anywhere
+
+The **Basics** group holds the plain building blocks: Rich text, Heading, Text
+beside photographs, Buttons, List, Columns and Custom code (embed code in a
+sealed frame).
+
+The session sections — masthead, What it actually is, pricing, prep guide,
+Sessions like yours, previous/next — work on any page or post. Each has a
+**Which session** field: the session the page belongs to, or one chosen by
+hand. What it actually is can also be written by hand, and Text beside
+photographs is the same layout with no session at all. In the dashboard preview
+a session section with nothing to show says so instead of disappearing.
+
+The guide blocks (checklist, countdown, times through the day, does and does
+not, notes, recommendations, locations…) work on any page too. Under a Chapter
+widget they group into numbered chapters as on a guide; on their own they sit
+in a plain reading column.
+
 ### Photographs
 
 Every image field stores a plain URL. What the `Photo` component needs to draw a

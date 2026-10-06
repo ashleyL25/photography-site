@@ -27,6 +27,9 @@ export type HostValue =
 
 export const HostContext = createContext<HostValue>({ kind: 'page' })
 
+/** True inside the dashboard's preview, where an empty widget explains itself instead of vanishing. */
+export const PreviewContext = createContext(false)
+
 export function useHost() {
   return useContext(HostContext)
 }

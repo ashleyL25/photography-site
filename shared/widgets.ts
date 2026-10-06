@@ -46,6 +46,10 @@ export type FieldType =
   | 'category'
   /** One of the brand palette names — see shared/palette.ts. */
   | 'swatch'
+  /** One session type, by id. Empty means the session of the page it sits on. */
+  | 'session'
+  /** One guide, by slug. */
+  | 'guide'
 
 export interface VisibleWhen {
   field: string
@@ -85,6 +89,7 @@ export interface FieldDef {
 export type WidgetHost = 'page' | 'post' | 'session' | 'album' | 'guide'
 
 export type WidgetCategory =
+  | 'Basics'
   | 'Opening'
   | 'Text'
   | 'Photos'
@@ -123,6 +128,27 @@ const eyebrow = (value = ''): FieldDef => ({
 })
 
 const heading = (value = ''): FieldDef => ({ name: 'heading', label: 'Heading', type: 'text', default: value })
+
+/**
+ * Where a session widget gets its session. On a session's own page it uses
+ * that session; anywhere else — or when somebody wants another one — it is
+ * picked here, so a session's pricing or overview can sit on any page or post.
+ */
+const SESSION_SOURCE = (extra: readonly { value: string; label: string }[] = []): FieldDef[] => [
+  {
+    name: 'source',
+    label: 'Which session',
+    type: 'choice',
+    default: 'host',
+    options: [
+      { value: 'host', label: 'The session this page belongs to' },
+      { value: 'pick', label: 'Choose a session' },
+      ...extra,
+    ],
+    help: 'On a page that is not a session’s own, choose one — otherwise there is nothing to show.',
+  },
+  { name: 'session', label: 'Session', type: 'session', default: '', visibleWhen: { field: 'source', equals: ['pick'] } },
+]
 
 const image = (name: string, label: string, value = ''): FieldDef => ({
   name,
@@ -607,6 +633,132 @@ export const STYLE_FIELDS: readonly FieldDef[] = [
  * ------------------------------------------------------------------ */
 
 const BASE_WIDGETS: readonly WidgetDef[] = [
+  /* ============================================================ Basics */
+  {
+    type: 'rich_text',
+    label: 'Rich text',
+    description: 'Formatted text — paragraphs, headings, lists, links, bold and italic. The everyday building block.',
+    icon: 'text',
+    category: 'Basics',
+    hosts: ALL,
+    fields: [
+      eyebrow(),
+      heading(),
+      { name: 'body', label: 'Text', type: 'richtext', default: '', wide: true },
+      BUTTONS([]),
+      { name: 'drop_cap', label: 'Drop cap on the first paragraph', type: 'boolean', default: false },
+      { name: 'text_columns', label: 'Text columns', type: 'choice', default: '1', options: [{ value: '1', label: 'One' }, { value: '2', label: 'Two' }, { value: '3', label: 'Three' }] },
+      { name: 'size', label: 'Text size', type: 'choice', default: 'md', options: [{ value: 'sm', label: 'Small' }, { value: 'md', label: 'Normal' }, { value: 'lg', label: 'Large' }] },
+    ],
+  },
+  {
+    type: 'heading_block',
+    label: 'Heading',
+    description: 'Just a heading, with an eyebrow above it and a line beneath if you want one.',
+    icon: 'header',
+    category: 'Basics',
+    hosts: ALL,
+    fields: [
+      eyebrow(),
+      heading('A heading'),
+      { name: 'subheading', label: 'Line beneath', type: 'textarea', default: '' },
+      { name: 'rule', label: 'Hairline under it', type: 'boolean', default: false },
+    ],
+  },
+  {
+    type: 'text_photos',
+    label: 'Text beside photographs',
+    description: 'Text and a ticked list beside an arched photograph with smaller ones underneath — the layout of a session’s “What it actually is”, for any page or post.',
+    icon: 'mediaText',
+    category: 'Basics',
+    hosts: ALL,
+    fields: [
+      eyebrow('What it actually is'),
+      heading(),
+      { name: 'body', label: 'Text', type: 'richtext', default: '', wide: true },
+      { name: 'points', label: 'Ticked list under it', type: 'lines', default: [], help: 'One per line. Leave empty for none.' },
+      image('photo', 'Main photograph'),
+      alt('photo_alt'),
+      { name: 'photos', label: 'Smaller photographs underneath', type: 'images', default: [], wide: true, help: 'Two or three read best.' },
+      { name: 'image_side', label: 'Photographs on the', type: 'choice', default: 'right', options: [{ value: 'left', label: 'Left' }, { value: 'right', label: 'Right' }] },
+      { name: 'shape', label: 'Main photograph shape', type: 'choice', default: 'arch', options: [{ value: 'arch', label: 'Arched top' }, { value: 'portrait', label: 'Portrait' }, { value: 'square', label: 'Square' }, { value: 'landscape', label: 'Landscape' }] },
+      { name: 'small_count', label: 'Smaller photographs', type: 'choice', default: '2', options: [{ value: '0', label: 'None' }, { value: '2', label: 'Two' }, { value: '3', label: 'Three' }] },
+      { name: 'show_points', label: 'Show the ticked list', type: 'boolean', default: true },
+      BUTTONS([]),
+    ],
+  },
+  {
+    type: 'buttons_row',
+    label: 'Buttons',
+    description: 'One to three buttons on their own.',
+    icon: 'cta',
+    category: 'Basics',
+    hosts: ALL,
+    fields: [
+      BUTTONS([{ label: 'Start an inquiry', href: '/contact', style: 'primary' }]),
+    ],
+  },
+  {
+    type: 'list_block',
+    label: 'List',
+    description: 'A list of short lines — ticked, numbered or plain — in one or more columns.',
+    icon: 'list',
+    category: 'Basics',
+    hosts: ALL,
+    fields: [
+      eyebrow(),
+      heading(),
+      { name: 'items', label: 'Lines', type: 'lines', default: [], wide: true, help: 'One per line.' },
+      { name: 'marker', label: 'Marker', type: 'choice', default: 'tick', options: [{ value: 'tick', label: 'Tick' }, { value: 'number', label: 'Number' }, { value: 'dot', label: 'Dot' }, { value: 'none', label: 'None' }] },
+      { name: 'columns', label: 'Columns', type: 'choice', default: '1', options: [{ value: '1', label: 'One' }, { value: '2', label: 'Two' }, { value: '3', label: 'Three' }] },
+      { name: 'ruled', label: 'Hairline between lines', type: 'boolean', default: true },
+    ],
+  },
+  {
+    type: 'columns_block',
+    label: 'Columns',
+    description: 'Two to four columns side by side, each with an optional photograph, heading, text and link.',
+    icon: 'columns',
+    category: 'Basics',
+    hosts: ALL,
+    fields: [
+      eyebrow(),
+      heading(),
+      {
+        name: 'items',
+        label: 'Columns',
+        type: 'repeater',
+        itemLabel: 'Column',
+        maxItems: 4,
+        default: [],
+        children: [
+          { name: 'image', label: 'Photograph', type: 'image', default: '' },
+          { name: 'title', label: 'Heading', type: 'text', default: '' },
+          { name: 'body', label: 'Text', type: 'richtext', default: '' },
+          { name: 'href', label: 'Link', type: 'link', default: '' },
+          { name: 'link_label', label: 'Link label', type: 'text', default: '' },
+        ],
+      },
+      { name: 'ratio', label: 'Photograph shape', type: 'choice', default: '4/5', options: [{ value: '4/5', label: 'Portrait — 4:5' }, { value: '1/1', label: 'Square' }, { value: '3/2', label: 'Landscape — 3:2' }, { value: 'arch', label: 'Arched top' }] },
+      { name: 'divided', label: 'Hairlines between columns', type: 'boolean', default: false },
+    ],
+  },
+  {
+    type: 'embed_code',
+    label: 'Custom code',
+    description: 'Paste embed code — a booking calendar, a form, an Instagram post, a playlist. It runs in a sealed frame.',
+    icon: 'embed',
+    category: 'Basics',
+    hosts: ALL,
+    fields: [
+      eyebrow(),
+      heading(),
+      { name: 'html', label: 'Embed code', type: 'textarea', default: '', wide: true, help: 'Only from somewhere you trust.' },
+      { name: 'height', label: 'Height', type: 'number', default: 480, min: 120, max: 1600, step: 20, suffix: 'px' },
+      { name: 'width', label: 'Width', type: 'choice', default: 'medium', options: [{ value: 'narrow', label: 'Narrow' }, { value: 'medium', label: 'Medium' }, { value: 'wide', label: 'Page width' }] },
+    ],
+  },
+
   /* =========================================================== Opening */
   {
     type: 'home_hero',
@@ -659,8 +811,10 @@ const BASE_WIDGETS: readonly WidgetDef[] = [
     description: 'The session’s title, summary, starting price and timing over its masthead photograph. Filled in from the session itself.',
     icon: 'header',
     category: 'Opening',
-    hosts: ['session'],
+    hosts: ALL,
     fields: [
+      ...SESSION_SOURCE(),
+
       {
         name: 'eyebrow',
         label: 'Eyebrow',
@@ -1267,11 +1421,25 @@ const BASE_WIDGETS: readonly WidgetDef[] = [
   {
     type: 'session_overview',
     label: 'What it actually is',
-    description: 'The session’s long copy and the list of what it includes, beside its arched photograph and two smaller ones.',
+    description: 'Long copy and a ticked list beside an arched photograph and smaller ones — from a session, or written here.',
     icon: 'mediaText',
     category: 'Sessions',
-    hosts: ['session'],
-    fields: [eyebrow('What it actually is')],
+    hosts: ALL,
+    fields: [
+      ...SESSION_SOURCE([{ value: 'custom', label: 'Write my own' }]),
+      eyebrow('What it actually is'),
+      heading(),
+      { name: 'body', label: 'Text', type: 'richtext', default: '', wide: true, visibleWhen: { field: 'source', equals: ['custom'] } },
+      { name: 'points', label: 'Ticked list under it', type: 'lines', default: [], help: 'One per line. Leave empty for none.', visibleWhen: { field: 'source', equals: ['custom'] } },
+      { ...image('photo', 'Main photograph'), visibleWhen: { field: 'source', equals: ['custom'] } },
+      { ...alt('photo_alt'), visibleWhen: { field: 'source', equals: ['custom'] } },
+      { name: 'photos', label: 'Smaller photographs underneath', type: 'images', default: [], wide: true, help: 'Two or three read best.', visibleWhen: { field: 'source', equals: ['custom'] } },
+      { name: 'image_side', label: 'Photographs on the', type: 'choice', default: 'right', options: [{ value: 'left', label: 'Left' }, { value: 'right', label: 'Right' }] },
+      { name: 'shape', label: 'Main photograph shape', type: 'choice', default: 'arch', options: [{ value: 'arch', label: 'Arched top' }, { value: 'portrait', label: 'Portrait' }, { value: 'square', label: 'Square' }, { value: 'landscape', label: 'Landscape' }] },
+      { name: 'small_count', label: 'Smaller photographs', type: 'choice', default: '2', options: [{ value: '0', label: 'None' }, { value: '2', label: 'Two' }, { value: '3', label: 'Three' }] },
+      { name: 'show_points', label: 'Show the ticked list', type: 'boolean', default: true },
+      BUTTONS([]),
+    ],
   },
   {
     type: 'session_pricing',
@@ -1279,8 +1447,10 @@ const BASE_WIDGETS: readonly WidgetDef[] = [
     description: 'This session’s tiers, its editing note and everything included in every tier.',
     icon: 'pricing',
     category: 'Sessions',
-    hosts: ['session'],
+    hosts: ALL,
     fields: [
+      ...SESSION_SOURCE(),
+
       eyebrow('Investment'),
       heading('Three ways to do it'),
       { name: 'cta_label', label: 'Button on each tier', type: 'text', default: 'Inquire' },
@@ -1295,8 +1465,11 @@ const BASE_WIDGETS: readonly WidgetDef[] = [
     description: 'The guide connected to this session, with its at-a-glance table.',
     icon: 'guide',
     category: 'Sessions',
-    hosts: ['session'],
+    hosts: ALL,
     fields: [
+      ...SESSION_SOURCE([{ value: 'guide', label: 'Choose a guide directly' }]),
+      { name: 'guide', label: 'Guide', type: 'guide', default: '', visibleWhen: { field: 'source', equals: ['guide'] } },
+
       eyebrow('Before the session'),
       heading('Your prep guide'),
       { name: 'button_label', label: 'Button', type: 'text', default: 'Read the guide' },
@@ -1308,8 +1481,10 @@ const BASE_WIDGETS: readonly WidgetDef[] = [
     description: 'Albums from this session’s portfolio category.',
     icon: 'grid',
     category: 'Sessions',
-    hosts: ['session'],
+    hosts: ALL,
     fields: [
+      ...SESSION_SOURCE(),
+
       heading('Sessions like yours'),
       { name: 'link_label', label: 'Link label', type: 'text', default: 'See them all' },
       { name: 'limit', label: 'How many', type: 'number', default: 3, min: 1, max: 12 },
@@ -1321,8 +1496,10 @@ const BASE_WIDGETS: readonly WidgetDef[] = [
     description: 'Links through to the sessions either side of this one.',
     icon: 'divider',
     category: 'Sessions',
-    hosts: ['session'],
+    hosts: ALL,
     fields: [
+      ...SESSION_SOURCE(),
+
       { name: 'previous_label', label: 'Previous', type: 'text', default: 'Previous' },
       { name: 'next_label', label: 'Next', type: 'text', default: 'Next' },
     ],
@@ -1480,7 +1657,7 @@ const BASE_WIDGETS: readonly WidgetDef[] = [
     description: 'Starts a new chapter. Every block after it, up to the next chapter, belongs to it — and the chapter index is built from these.',
     icon: 'header',
     category: 'Guide',
-    hosts: ['guide'],
+    hosts: ALL,
     fields: [
       { name: 'title', label: 'Chapter title', type: 'text', default: 'New chapter' },
       { name: 'lead', label: 'One line under it', type: 'textarea', default: '' },
@@ -1493,7 +1670,7 @@ const BASE_WIDGETS: readonly WidgetDef[] = [
     description: 'Body copy inside a chapter.',
     icon: 'text',
     category: 'Guide',
-    hosts: ['guide'],
+    hosts: ALL,
     fields: [{ name: 'body', label: 'Body', type: 'richtext', default: '', wide: true }],
   },
   {
@@ -1502,7 +1679,7 @@ const BASE_WIDGETS: readonly WidgetDef[] = [
     description: 'A run of times, each with a title and a line.',
     icon: 'timeline',
     category: 'Guide',
-    hosts: ['guide'],
+    hosts: ALL,
     fields: [
       {
         name: 'items',
@@ -1524,7 +1701,7 @@ const BASE_WIDGETS: readonly WidgetDef[] = [
     description: 'Numbered steps — two weeks out, the night before, the morning of.',
     icon: 'list',
     category: 'Guide',
-    hosts: ['guide'],
+    hosts: ALL,
     fields: [
       {
         name: 'items',
@@ -1545,7 +1722,7 @@ const BASE_WIDGETS: readonly WidgetDef[] = [
     description: 'Ticks that stay ticked on the reader’s own device, so a client can pack over two evenings.',
     icon: 'list',
     category: 'Guide',
-    hosts: ['guide'],
+    hosts: ALL,
     fields: [{ name: 'items', label: 'Items', type: 'lines', default: [], help: 'One per line.' }],
   },
   {
@@ -1554,7 +1731,7 @@ const BASE_WIDGETS: readonly WidgetDef[] = [
     description: 'Two to four short titled paragraphs, side by side.',
     icon: 'columns',
     category: 'Guide',
-    hosts: ['guide'],
+    hosts: ALL,
     fields: [
       {
         name: 'items',
@@ -1576,7 +1753,7 @@ const BASE_WIDGETS: readonly WidgetDef[] = [
     description: 'Two lists side by side — what works, and what fights the camera.',
     icon: 'columns',
     category: 'Guide',
-    hosts: ['guide'],
+    hosts: ALL,
     fields: [
       { name: 'yes_title', label: 'Left heading', type: 'text', default: 'What works' },
       { name: 'yes_items', label: 'Left list', type: 'lines', default: [], help: 'One per line.' },
@@ -1590,7 +1767,7 @@ const BASE_WIDGETS: readonly WidgetDef[] = [
     description: 'A single aside, set apart from the copy around it.',
     icon: 'quote',
     category: 'Guide',
-    hosts: ['guide'],
+    hosts: ALL,
     fields: [{ name: 'text', label: 'Note', type: 'textarea', default: '' }],
   },
   {
@@ -1599,7 +1776,7 @@ const BASE_WIDGETS: readonly WidgetDef[] = [
     description: 'Hair and makeup, or lunch stops, as cards — from the vendor lists in Settings, so a change there reaches every guide.',
     icon: 'grid',
     category: 'Guide',
-    hosts: ['guide'],
+    hosts: ALL,
     fields: [
       {
         name: 'list',
@@ -1619,7 +1796,7 @@ const BASE_WIDGETS: readonly WidgetDef[] = [
     description: 'The suggested locations as cards, each opening a slider of its photographs — from Settings → Recommendations.',
     icon: 'grid',
     category: 'Guide',
-    hosts: ['guide'],
+    hosts: ALL,
     fields: [],
   },
   {
@@ -1628,7 +1805,7 @@ const BASE_WIDGETS: readonly WidgetDef[] = [
     description: 'The location suggestions, grouped by what they look like — from Settings.',
     icon: 'grid',
     category: 'Guide',
-    hosts: ['guide'],
+    hosts: ALL,
     fields: [],
   },
   {
@@ -1637,7 +1814,7 @@ const BASE_WIDGETS: readonly WidgetDef[] = [
     description: 'The editing level this guide’s session gets, and why it sets the number of photographs — from the policy settings.',
     icon: 'columns',
     category: 'Guide',
-    hosts: ['guide'],
+    hosts: ALL,
     fields: [{ name: 'why_title', label: 'Second note’s title', type: 'text', default: 'Why the number of photographs varies' }],
   },
   {
@@ -1646,7 +1823,7 @@ const BASE_WIDGETS: readonly WidgetDef[] = [
     description: 'The weather policy in columns, from the policy settings.',
     icon: 'columns',
     category: 'Guide',
-    hosts: ['guide'],
+    hosts: ALL,
     fields: [
       { name: 'word', label: 'Call it a', type: 'text', default: 'session', help: '"…we move the session, free…"' },
       { name: 'show_reschedule', label: 'Add the reschedule rule after it', type: 'boolean', default: true },
@@ -2233,6 +2410,7 @@ export function widgetsFor(host: WidgetHost): WidgetDef[] {
 }
 
 const CATEGORY_ORDER: WidgetCategory[] = [
+  'Basics',
   'Opening',
   'Sessions',
   'Guide',

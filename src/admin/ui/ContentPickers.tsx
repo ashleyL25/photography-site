@@ -100,3 +100,29 @@ export function CategorySelect({ id, value, onChange }: { id?: string; value: st
     />
   )
 }
+
+/** One session type. Empty means the session the page belongs to. */
+export function SessionSelect({ id, value, onChange }: { id?: string; value: string; onChange: (next: string) => void }) {
+  const { sessions } = useSite()
+  return (
+    <Select
+      id={id}
+      value={value}
+      onChange={onChange}
+      options={[{ value: '', label: 'Choose a session…' }, ...sessions.map((s) => ({ value: s.id, label: s.title }))]}
+    />
+  )
+}
+
+/** One guide, by slug. */
+export function GuideSelect({ id, value, onChange }: { id?: string; value: string; onChange: (next: string) => void }) {
+  const { guides } = useSite()
+  return (
+    <Select
+      id={id}
+      value={value}
+      onChange={onChange}
+      options={[{ value: '', label: 'Choose a guide…' }, ...guides.map((g) => ({ value: g.slug, label: g.title }))]}
+    />
+  )
+}
