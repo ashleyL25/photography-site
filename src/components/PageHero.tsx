@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 import type { ReactNode } from 'react'
 import { Photo } from './Photo'
-import { MaskText, Reveal } from './motion'
+import { MaskText, Reveal, RichParagraphs } from './motion'
 
 /**
  * Compact masthead for interior pages: a scrimmed plate behind a heading,
@@ -23,6 +23,7 @@ export function PageHero({
   slowZoom = false,
   scrollCue = false,
   after,
+  rich = false,
 }: {
   eyebrow: string
   heading: string
@@ -41,6 +42,8 @@ export function PageHero({
   scrollCue?: boolean
   /** Rendered under the body — the buttons, for instance. */
   after?: ReactNode
+  /** The body is formatted text from the dashboard, not a plain line. */
+  rich?: boolean
 }) {
   const sized = height !== 'auto'
   const centred = align === 'center'
@@ -90,7 +93,14 @@ export function PageHero({
           className={clsx('display mt-8 max-w-4xl text-[clamp(2.8rem,8vw,6.5rem)] text-beige print:text-[2.4rem] print:text-ink', centred && 'mx-auto')}
         />
 
-        {body && (
+        {body && rich && (
+          <RichParagraphs
+            html={body}
+            start={0.15}
+            className={clsx('mt-8 max-w-xl space-y-4 leading-[1.85] text-beige/75 print:text-muted [&_a]:text-champagne [&_a]:underline [&_strong]:text-beige', centred && 'mx-auto')}
+          />
+        )}
+        {body && !rich && (
           <Reveal
             delay={0.15}
             as="p"

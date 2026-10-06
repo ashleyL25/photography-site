@@ -793,7 +793,7 @@ const BASE_WIDGETS: readonly WidgetDef[] = [
     fields: [
       eyebrow('Selected work'),
       { ...heading('The portfolio'), help: 'This is the page’s main heading, so there should be one per page.' },
-      { name: 'body', label: 'Intro', type: 'textarea', default: '' },
+      { name: 'body', label: 'Intro', type: 'richtext', default: '', wide: true },
       image('image', 'Photograph'),
       BUTTONS([]),
       { name: 'height', label: 'Height', type: 'choice', default: 'auto', options: [{ value: 'auto', label: 'As designed' }, { value: 'medium', label: 'Half the screen' }, { value: 'tall', label: 'Three quarters' }, { value: 'full', label: 'Full screen' }] },

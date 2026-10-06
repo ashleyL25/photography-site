@@ -176,6 +176,7 @@ export function PageHeroWidget({ content, styles }: WidgetProps) {
       eyebrow={text(content, 'eyebrow')}
       heading={text(content, 'heading')}
       body={text(content, 'body') || undefined}
+      rich
       image={text(content, 'image')}
       height={text(content, 'height') || 'auto'}
       align={text(content, 'align') || 'left'}
